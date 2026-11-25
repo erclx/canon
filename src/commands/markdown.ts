@@ -477,6 +477,7 @@ async function runAudit(
           heavyParagraphs: report.structure.heavyParagraphs,
           cadence: report.structure.cadence,
           renderedLines: report.renderedLines,
+          ceiling: report.ceiling,
           exempt: report.exempt,
         })),
       })}\n`,
