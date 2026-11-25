@@ -15,8 +15,9 @@ Do not output any text between steps and do not wait for user input. Tool permis
 
 Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again with the same arguments.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
 
-- Read the declared script names with `jq -r '.scripts | keys[]' package.json` as its own call, finished before naming any verify command, since a read chained to its run cannot stop it
-- Run `check:changed` when that read lists it and `check` when it does not, whichever one `CLAUDE.md` names, since an older seed names the full run and a target can lack the scoped one
+- Read the declared script names with `jq -r '.scripts // {} | keys[]' package.json` as its own call, finished before naming any verify command, since a read chained to its run cannot stop it
+- Run `check:changed` when that read lists it, and `check` when it lists `check` alone, whichever one `CLAUDE.md` names, since an older seed names the full run
+- A read that fails or lists neither name substitutes nothing, so run the command `CLAUDE.md` names as written
 - When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
 ### Bound each run
