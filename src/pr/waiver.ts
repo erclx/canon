@@ -23,7 +23,7 @@ const REEL_WAIVER_LINE = /^- \*\*Waived reel:\*\*\s*(\S.*)$/
 /** Counts the boxes `review-ui` left undriven rather than naming any, since numbers shift. */
 const UNDRIVEN_WAIVER_LINE = /^- \*\*Waived undriven:\*\* (\d+):\s*\S/
 
-const FENCE = /^\s*(```|~~~)/
+const FENCE = /^\s*(`{3,}|~{3,})(.*)$/
 
 /**
  * Every line of the review bodies outside a fenced block, in order, trailing
@@ -35,10 +35,11 @@ function unfencedLines(reviews: readonly ReviewRow[]): string[] {
   for (const review of reviews) {
     let fence: string | undefined
     for (const line of (review.body ?? '').split('\n')) {
-      const opener = FENCE.exec(line)?.[1]
-      if (opener !== undefined) {
-        if (fence === undefined) fence = opener
-        else if (opener === fence) fence = undefined
+      const [, run, info = ''] = FENCE.exec(line) ?? []
+      if (run !== undefined) {
+        if (fence === undefined) fence = run
+        // A shorter run, or one with an info string, is text inside the block.
+        else if (run.startsWith(fence) && info.trim() === '') fence = undefined
         continue
       }
       if (fence === undefined) lines.push(line.trimEnd())

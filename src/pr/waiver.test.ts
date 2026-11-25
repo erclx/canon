@@ -155,6 +155,41 @@ describe('readUndrivenWaivers', () => {
     expect(readUndrivenWaivers([review(body)])).toEqual([])
   })
 
+  it('never counts an undriven waiver after a shorter fence inside a longer one', () => {
+    const body = [
+      '````markdown',
+      '```text',
+      '- **Waived undriven:** 9: sample',
+      '```',
+      '- **Waived undriven:** 8: sample',
+      '````',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('never reads a fence line with an info string as closing a fence', () => {
+    const body = [
+      '```text',
+      '```json',
+      '- **Waived undriven:** 9: sample',
+      '```',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('reads an undriven waiver after a fence closed by a longer run', () => {
+    const body = [
+      '```text',
+      'sample',
+      '````',
+      '- **Waived undriven:** 2: local only',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([2])
+  })
+
   it('skips an undriven waiver with no count or no reason', () => {
     const body = [
       '- **Waived undriven:** local only boxes',

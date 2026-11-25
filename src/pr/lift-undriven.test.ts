@@ -49,7 +49,17 @@ describe('uiGate over undriven boxes', () => {
       reviews: [uiClosed([PARTLY_DRIVEN, WAIVED_NINE])],
     })
 
-    expect(gate).toEqual({ gate: 'ui', isOk: true })
+    expect(gate).toEqual({ gate: 'ui', isOk: true, undrivenWaived: 9 })
+  })
+
+  it('should refuse a waiver counting more boxes than were left undriven', async () => {
+    const gate = await read({
+      reviews: [
+        uiClosed([PARTLY_DRIVEN, '- **Waived undriven:** 10: local only']),
+      ],
+    })
+
+    expect(gate).toEqual(REFUSED)
   })
 
   it('should refuse a waiver whose count is stale', async () => {
@@ -131,7 +141,11 @@ describe('uiGate over undriven boxes', () => {
         changed: { isAncestor: true, paths: ['README.md'] },
       })
 
-      expect(gate).toMatchObject({ isOk: true, carriedFrom: MOVED })
+      expect(gate).toMatchObject({
+        isOk: true,
+        carriedFrom: MOVED,
+        undrivenWaived: 9,
+      })
     })
   })
 })
