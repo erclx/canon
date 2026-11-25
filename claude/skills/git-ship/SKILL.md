@@ -15,7 +15,8 @@ Do not output any text between steps and do not wait for user input. Tool permis
 
 Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again with the same arguments.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
 
-- Run `check:changed` in place of `check` where the project's `package.json` declares it, whichever one `CLAUDE.md` names, since an older seed still names the full run
+- Read the declared script names with `jq -r '.scripts | keys[]' package.json` as its own call, finished before naming any verify command, since a read chained to its run cannot stop it
+- Run `check:changed` when that read lists it and `check` when it does not, whichever one `CLAUDE.md` names, since an older seed names the full run and a target can lack the scoped one
 - When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
 ### Bound each run
@@ -23,6 +24,7 @@ Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the se
 Run each verify command under a time limit, so a run that never exits stops the chain instead of holding it. The limit is 20 minutes per command, unless `CLAUDE.md` states another duration beside its verify commands.
 
 - Wrap it as `timeout <limit> <command>`, or `gtimeout` where `timeout` is absent, putting a command with shell syntax inside `sh -c '<command>'`
+- Never pipe the bounded command, as into `| tail`, since a missing script or a 124 then exits as the last command does. Redirect the output to a file and read it after.
 - With neither wrapper on the machine, run the command unbounded and say so on one line. Never report a bound the run did not have.
 - Run it in the background where the limit outlasts a foreground shell call, and act on the wake
 - Read exit 124 as a hang rather than a failure, and stop: `❌ Verify hung: <command> ran past <limit>. Narrow the parallel work or raise the limit, then run /git-ship again with the same arguments.`
