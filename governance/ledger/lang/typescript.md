@@ -60,5 +60,6 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 - Reworded the `interface` bullet to the handbook's heuristic, and merged "`type` for unions, intersections, and utility types" into it as the point where `type` takes over.
 - Merged "do not use non-null assertions" into the narrowing bullet, since the handbook groups `!` with the type assertion it is.
 - Reworded the `@/` bullet to apply only where both tsconfig.json and the bundler map the alias, under the plan's question 2, whose suggestion stood.
+- Reworded the alias target from `src/` to the app's source folder, since a project whose app root is `web` has no `src/`.
 - Moved the `kebab-case` filename bullet under a `File names` heading, since it was the one casing bullet kept, and gave it the case-sensitivity reason.
 - Gave the `unknown` bullet the narrowing step `unknown` requires before use.
