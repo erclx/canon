@@ -45,6 +45,14 @@ Four rules govern how a session reads the table.
 - Count a new end to end test as a cost every later run pays. A suite grows by quality rather than by count, which is what keeps continuous integration fast.
 - Carry no numeric mix. The right shape follows the architecture, and a ratio across a codebase is a target nobody writing one test can act on.
 
+## Push on fast checks, and leave the suites to CI
+
+- Run on a push only what answers fast: the static checks and the tests tied to the change by name or import.
+- Leave each full suite to CI, on machines of its own. A repeat on the push costs the machine parallel sessions share, and a timeout under that load reads as a failed test.
+- Read a tied selection as a heuristic that misses tests. Its pass clears the push, and the suite's pass clears the merge.
+- Add a tied test when CI catches a break the push let through, so the next one fails before it leaves the machine.
+- Keep on the push any suite, or any platform a suite covers, that CI runs on no pull request, since nothing else runs it.
+
 ## Keep test code readable over clever
 
 - Prefer a descriptive, repeated arrange over a shared helper a reader has to open. A test is read when it fails, by someone who did not write it.

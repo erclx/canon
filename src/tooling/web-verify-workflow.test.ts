@@ -9,10 +9,18 @@ interface WorkflowStep {
   id?: string
   if?: string
   run?: string
-  with?: { key?: string }
+  env?: Record<string, string>
+  with?: { key?: string; name?: string }
 }
 
 interface WorkflowJob {
+  name?: string
+  if?: string
+  needs?: string | string[]
+  strategy?: {
+    'fail-fast'?: boolean
+    matrix?: { shardIndex?: number[]; shardTotal?: number[] }
+  }
   steps: WorkflowStep[]
 }
 
@@ -85,17 +93,104 @@ describe('web verify.yml unit-tests job', () => {
     )
   })
 
-  it('should share the e2e job cache key so the browser downloads once', () => {
+  it('should share the e2e shard cache key so the browser downloads once', () => {
     const unitKey = stepNamed(unitSteps(), 'Cache Playwright Browsers').with
       ?.key
     const e2eKey = stepNamed(
-      readJobs()['e2e-tests'].steps,
+      readJobs()['e2e-shards'].steps,
       'Cache Playwright Browsers',
     ).with?.key
 
     expect(unitKey).toBeDefined()
     expect(unitKey).toBe(e2eKey)
   })
+})
+
+describe('web verify.yml e2e-shards job', () => {
+  const shards = (): WorkflowJob => readJobs()['e2e-shards']
+
+  it('should wait on the build alone', () => {
+    expect(shards().needs).toBe('build-verify')
+  })
+
+  it('should let every shard finish after one fails', () => {
+    expect(shards().strategy?.['fail-fast']).toBe(false)
+  })
+
+  it('should run each shard of one total exactly once', () => {
+    const matrix = shards().strategy?.matrix
+    const [total = 0] = matrix?.shardTotal ?? []
+
+    expect(matrix?.shardTotal).toHaveLength(1)
+    expect(matrix?.shardIndex).toEqual(
+      Array.from({ length: total }, (_, index) => index + 1),
+    )
+  })
+
+  it('should pass the matrix shard to the suite', () => {
+    const step = stepNamed(shards().steps, 'Run E2E Tests')
+
+    expect(step.env?.SHARD).toBe(
+      '${{ matrix.shardIndex }}/${{ matrix.shardTotal }}',
+    )
+    expect(step.run).toContain('--shard="$SHARD"')
+  })
+
+  it('should list the unsharded suite before the shard, so an empty suite fails', () => {
+    const steps = shards().steps
+    const names = steps.map((step) => step.name)
+    const list = stepNamed(steps, 'Require Specs').run
+
+    expect(list).toBe('bun run test:e2e --list --project=chromium')
+    expect(names.indexOf('Require Specs')).toBeLessThan(
+      names.indexOf('Run E2E Tests'),
+    )
+  })
+
+  it('should name each report for its shard so two uploads never collide', () => {
+    const upload = stepNamed(shards().steps, 'Upload E2E Report')
+
+    expect(upload.if).toBe('failure()')
+    expect(upload.with?.name).toContain('${{ matrix.shardIndex }}')
+  })
+})
+
+describe('web verify.yml e2e-tests summary job', () => {
+  const summary = (): WorkflowJob => readJobs()['e2e-tests']
+
+  // Runs the shipped step under the shell the runner gives a `run:` step.
+  const report = (result: string): number | null => {
+    const step = stepNamed(summary().steps, 'Require Every Shard')
+    return spawnSync('bash', ['-e', '-c', step.run ?? ''], {
+      env: { ...process.env, SHARDS_RESULT: result },
+    }).status
+  }
+
+  it('should report under the name a target ruleset requires', () => {
+    expect(summary().name).toBe('🎭 E2E Tests')
+  })
+
+  it('should run whatever the shards did', () => {
+    expect(summary().needs).toBe('e2e-shards')
+    expect(summary().if).toBe('always()')
+  })
+
+  it('should read the aggregate shard result', () => {
+    const step = stepNamed(summary().steps, 'Require Every Shard')
+
+    expect(step.env?.SHARDS_RESULT).toBe('${{ needs.e2e-shards.result }}')
+  })
+
+  it('should pass when every shard succeeded', () => {
+    expect(report('success')).toBe(0)
+  })
+
+  it.each(['failure', 'cancelled', 'skipped', ''])(
+    'should fail when the shards read "%s"',
+    (result) => {
+      expect(report(result)).toBe(1)
+    },
+  )
 })
 
 describe('web verify.yml detect step', () => {

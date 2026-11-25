@@ -59,7 +59,24 @@ The platform rules above pick the platform. This section picks the image version
 - Use `needs` only when there is a data dependency (a job requires an artifact) or the job is prohibitively expensive relative to its gate.
 - Run static, unit, and build jobs in parallel once the gate is split.
 - Gate E2E on whichever job uploads the build artifact, since it consumes that artifact. That job is the folded check job in a new pipeline and the separate build job once the gate is split.
-- Gate release and deploy on E2E.
+- Gate release and deploy on the E2E summary job, since a shard answers for its slice alone.
+
+## Sharding
+
+One E2E machine holds every merge for the whole suite's time. A shard matrix spends more machines instead, and a ruleset then needs one check standing for all of them.
+
+- Split E2E into a matrix job behind the job that uploads the build artifact alone, with `fail-fast: false` so one red shard never hides another. Start at two shards.
+- Raise the count while a run log puts the slowest shard past about three minutes, since each shard repeats checkout, install, and the browser install.
+- Read what the runner splits first. Playwright hands out whole files unless `fullyParallel` is on and Vitest always does, so one long file sets its shard's time.
+- Keep the shard list and the total in step, since a total above the last index skips the specs past it and still passes.
+- List the unsharded suite ahead of the shard, since a runner may pass an empty shard and an empty suite then reads green.
+
+### The summary job
+
+A required check waits on one name, and a shard's name changes with the count.
+
+- Add one job that `needs` the shards, runs on `if: always()`, and fails unless `needs.<shards>.result` is `success`. GitHub lets a job a failed dependency skipped satisfy a required check.
+- Give it the name the ruleset already requires, and require no shard
 
 ## Artifacts
 
@@ -89,9 +106,15 @@ A workflow that pushes a regenerated file onto the pull request branch takes the
 - Keep `permissions` and secrets on the workflow step, with the script reading its token from `env`.
 - Open the script with `set -e` at least, since the runner gives a `run:` step `bash -e` and a script called directly gets no flags.
 
+## Comparison and hand-started workflows
+
+Read `${CLAUDE_SKILL_DIR}/references/comparison.md` before writing a workflow that compares two commits, such as a performance run. Read its proof section before shipping any workflow whose only trigger is `workflow_dispatch`, since GitHub runs none until the file is on the default branch.
+
 ## Template
 
 Load `${CLAUDE_SKILL_DIR}/references/workflows.md` for the base workflow template. Adapt it to the project's stack, test commands, and build output. Add or remove jobs as needed. The template already carries the folded shape, and the split beside it applies once the granularity rule above calls for it.
+
+Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external sources were adopted, which declined, and why.
 
 ## Validation
 
@@ -101,17 +124,24 @@ Before responding, verify:
 - The top-level `permissions` reads `contents: read`, and every write scope sits on a job.
 - All actions pinned to major version tags, no `@latest` or `@main`.
 - A new pipeline folds static, unit, and build into one job, and a gate a run log put past two minutes gives them no `needs` so they run in parallel.
-- Every name in a `needs` matches a job declared in the same file. E2E names the artifact producer, release and deploy name E2E.
+- Every name in a `needs` matches a job declared in the same file. The E2E shards name the artifact producer, the summary job names the shards, and release and deploy name the summary job.
 
 ### Artifacts, names, and deploys
 
 Before responding, also verify:
 
-- Artifacts upload on `if: failure()` only with `retention-days: 7`.
+- Artifacts upload on `if: failure()` only with `retention-days: 7`, under a name carrying the shard where shards upload.
 - Job names use emoji + title format.
 - Every job runs on `ubuntu-latest`, except one that targets a platform the project states and runs a layer that differs by platform, or a browser job pinned under the runner image pin rules.
 - Deploy, publish, and release jobs carry a placeholder step and a named handoff, never a guessed deploy command.
 - Bun projects use `oven-sh/setup-bun@v2` with `bun install --frozen-lockfile`.
+
+### Shards
+
+Before responding, also verify:
+
+- The summary job runs on `if: always()`, passes on `success` alone, and is the one E2E name a ruleset requires.
+- The shard list runs from one to the total, with no gap.
 
 ### Pinned runners
 

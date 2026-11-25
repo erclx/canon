@@ -9,23 +9,23 @@ The field is browser test automation, and the authority is the Playwright docume
 
 ## Selecting a run
 
-| Bullet                               | Source                                                                                                                                                                                                                 | Read       |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Narrow by path or name, never engine | House choice: a run narrowed to one engine passes while another engine fails, and the gap surfaces only in CI                                                                                                          | 2026-10-18 |
-| One test by name                     | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): `-g` will "Only run tests matching this regular expression"                                                       | 2026-10-18 |
-| One surface by path                  | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): "Run a single test file" by passing its path                                                                      | 2026-10-18 |
-| `--only-changed`                     | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): "Only run test files that have been changed between 'HEAD' and 'ref'"                                             | 2026-10-18 |
-| Whole suite before push              | House choice: a narrowed run skips the specs a change broke without touching, which the push would hand to CI                                                                                                          | 2026-10-18 |
-| `--project` only to reproduce        | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): `--project` will "Only run tests from the specified list of projects", where the default is to "run all projects" | 2026-10-18 |
-| No one-engine script                 | House choice: a script pinning one engine becomes the run everyone types, which is the engine narrowing the first bullet bans                                                                                          | 2026-10-18 |
+| Bullet                                   | Source                                                                                                                                                                                                                                                                                     | Read       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| Narrow by path or name, never engine     | House choice: a run narrowed to one engine passes while another engine fails, and the gap surfaces only in CI                                                                                                                                                                              | 2026-11-25 |
+| One test by name                         | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): `-g` will "Only run tests matching this regular expression"                                                                                                                           | 2026-10-18 |
+| One surface by path                      | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): "Run a single test file" by passing its path                                                                                                                                          | 2026-10-18 |
+| `--only-changed`, bare and with a ref    | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): "Only run test files that have been changed between 'HEAD' and 'ref'. Defaults to running all uncommitted changes", so a bare run before a push selects nothing on a committed branch | 2026-11-25 |
+| Suite to CI, engines it leaves out local | Routing to `canon:test-craft`, which carries the sourced split. House choice on the engines: a CI job passing one `--project` gates that engine alone, so without a push run the others are tested nowhere                                                                                 | 2026-11-25 |
+| `--project` in two cases                 | [Command line](https://raw.githubusercontent.com/microsoft/playwright/main/docs/src/test-cli-js.md): `--project` will "Only run tests from the specified list of projects", where the default is to "run all projects"                                                                     | 2026-11-25 |
+| No one-engine script                     | House choice: a script pinning one engine becomes the run everyone types, which is the engine narrowing the first bullet bans                                                                                                                                                              | 2026-10-18 |
 
 ## Instruments
 
-| Bullet                  | Source                                                                                                                                                                                                      | Read       |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| A script, not the suite | House choice: a suite run answers a question about the page only through assertions written for another question, and costs the whole run                                                                   | 2026-10-18 |
-| No `fullyParallel`      | [Parallelism](https://playwright.dev/docs/test-parallel): by default "Tests in a single file are run in order, in the same worker process", and parallel tests "cannot share any state or global variables" | 2026-10-18 |
-| Pointer to `ui-craft`   | House choice: a pointer to the skill that owns capture scope, claiming no practice of its own                                                                                                               | 2026-10-18 |
+| Bullet                                | Source                                                                                                                                                                                                                                                                                                    | Read       |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| A script, not the suite               | House choice: a suite run answers a question about the page only through assertions written for another question, and costs the whole run                                                                                                                                                                 | 2026-10-18 |
+| `fullyParallel` where tests own state | [Sharding](https://playwright.dev/docs/test-sharding): "it is recommended to use fullyParallel: true when aiming for balanced distribution across shards". [Parallelism](https://playwright.dev/docs/test-parallel) sets the condition, since parallel tests "cannot share any state or global variables" | 2026-11-25 |
+| Pointer to `ui-craft`                 | House choice: a pointer to the skill that owns capture scope, claiming no practice of its own                                                                                                                                                                                                             | 2026-10-18 |
 
 ## Declined
 
@@ -44,3 +44,9 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 ### Merged or reworded
 
 - Named the Playwright config in the `fullyParallel` bullet rather than the `playwright.config.ts` filename, since a target may write the config in JavaScript.
+
+### Overtaken by CI
+
+- Replaced the whole suite before a push with the changed specs. It repeated what CI runs on every pull request, and timeouts on a loaded machine read as failures.
+- Cut the sentence naming a CI matrix of one engine per leg. A shipped workflow gating one engine has no such matrix, so the rule now keys on what CI runs.
+- Replaced the ban on `fullyParallel`. It held a sharded suite at file granularity even where each test owns its state, and Playwright recommends the setting for balanced shards.

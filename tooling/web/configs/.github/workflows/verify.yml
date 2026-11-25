@@ -122,11 +122,17 @@ jobs:
           path: dist/
           retention-days: 1
 
-  e2e-tests:
-    name: 🎭 E2E Tests
+  e2e-shards:
+    name: 🎭 E2E Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [static-checks, unit-tests, build-verify]
+    needs: build-verify
+    strategy:
+      fail-fast: false
+      matrix:
+        # Raise both lines together, since a total above the last index skips the specs past it.
+        shardIndex: [1, 2]
+        shardTotal: [2]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -162,15 +168,35 @@ jobs:
         timeout-minutes: 5
         run: bunx playwright install chromium
 
+      - name: Require Specs
+        # A sharded run over an empty suite exits 0 on some Playwright releases, and the list never does.
+        run: bun run test:e2e --list --project=chromium
+
       - name: Run E2E Tests
         env:
           DIST_PREBUILT: 'true'
-        run: bun run test:e2e --project=chromium
+          SHARD: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        run: bun run test:e2e --project=chromium --shard="$SHARD"
 
       - name: Upload E2E Report
         uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shardIndex }}
           path: playwright-report/
           retention-days: 7
+
+  e2e-tests:
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: e2e-shards
+    # GitHub lets a job skipped by a failed dependency satisfy a required check, so this one always runs and reads the result itself.
+    if: always()
+    steps:
+      - name: Require Every Shard
+        env:
+          SHARDS_RESULT: ${{ needs.e2e-shards.result }}
+        run: |
+          echo "e2e-shards: $SHARDS_RESULT"
+          test "$SHARDS_RESULT" = success

@@ -40,6 +40,12 @@ The opening question and final filter come from `obra/superpowers@5bf4e78`, `ski
 
 From `addyosmani/agent-skills@c004a74`, `skills/test-driven-development/SKILL.md`, which orders real, fake, stub, then mock, and prefers descriptive test bodies over shared helpers. Adopted in `unit.md`.
 
+### A fast push and CI-owned suites
+
+Fowler's Continuous Integration splits a fast commit build from slower later stages, and Playwright calls its changed-file selection a heuristic the full suite has to follow. Adopted in the body with the commit build read as the push, since a parallel session's own machine is the one a repeat costs.
+
+Fowler's ten minute guideline was left out, since a number fits one project's hardware.
+
 ### Kent Beck's desiderata
 
 The twelve properties at testdesiderata.com trade against each other and serve as background. "Behavioral" and "structure-insensitive" together are the whole of "test behavior, not implementation", which is why the body states that pair as asserting through the public surface.

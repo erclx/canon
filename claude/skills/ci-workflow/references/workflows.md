@@ -8,7 +8,9 @@
 
 ## Base template
 
-Copy this base template and adapt it to the project's stack, test commands, and build output. It carries the shape a new pipeline starts in, with the checks that share setup in one job, per the granularity rule in the skill body. `e2e` and anything gated on it stay separate jobs at either size.
+Copy this base template and adapt it to the project's stack, test commands, and build output. It carries the shape a new pipeline starts in, with the checks that share setup in one job, per the granularity rule in the skill body.
+
+The shards, the `e2e` summary job, and anything gated on it stay separate jobs at either size, and a ruleset requires the summary job's name.
 
 ```yaml
 name: CI
@@ -41,10 +43,15 @@ jobs:
           name: build-output
           path: dist/
 
-  e2e:
-    name: '🎭 E2E Tests'
+  e2e-shards:
+    name: '🎭 E2E Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}'
     needs: checks
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -55,18 +62,32 @@ jobs:
         with:
           name: build-output
           path: dist/
-      - run: bun run test:e2e
+      - run: bun run test:e2e --list
+      - run: bun run test:e2e --shard="$SHARD"
+        env:
+          SHARD: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: e2e-results
+          name: e2e-results-${{ matrix.shardIndex }}
           path: test-results/
           retention-days: 7
+
+  e2e:
+    name: '🎭 E2E Tests'
+    needs: e2e-shards
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every shard
+        env:
+          SHARDS_RESULT: ${{ needs.e2e-shards.result }}
+        run: test "$SHARDS_RESULT" = success
 ```
 
 ## Splitting the check job
 
-Apply this once a run log puts the gate past roughly two minutes, never before. Each job below repays checkout, dependency install, and toolchain setup before it reaches a stage, which is the cost the duration has to cover. Replace the `checks` job above with these three and point `e2e` at `needs: build`.
+Apply this once a run log puts the gate past roughly two minutes, never before. Each job below repays checkout, dependency install, and toolchain setup before it reaches a stage, which is the cost the duration has to cover. Replace the `checks` job above with these three and point `e2e-shards` at `needs: build`.
 
 ```yaml
 jobs:

@@ -43,6 +43,14 @@ A site honoring the reduced preference then has nothing to wait out in any test 
 - Capture a trace on the first retry rather than a video on every run ([best practices](https://playwright.dev/docs/best-practices)).
 - Count the cost before adding a test: its runtime, times every engine in the matrix, times every push. That product is what the gate charges each later change.
 
+### Sharding across machines
+
+A shard is one slice of the suite on its own machine, and how evenly the slices cut decides what sharding saves.
+
+- Shard a long suite across CI machines, where the `ci-workflow` skill shapes the jobs and sets the count.
+- Turn on `fullyParallel` only where every test owns its state, such as its own server or data folder for a spec that writes ([sharding](https://playwright.dev/docs/test-sharding)).
+- Keep spec files small and evenly sized while `fullyParallel` is off, since a shard then takes whole files and one long file sets its time.
+
 ## Two worked failures
 
 Both failures were fixed by moving the assertion down a layer rather than by tuning the browser run.
