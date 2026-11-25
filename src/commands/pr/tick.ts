@@ -12,7 +12,7 @@ import {
   readUnmergedCommits,
 } from '@/pr/lift'
 import { readUiCarry } from '@/pr/carry'
-import { resolveUiScope } from '@/pr/review-scope'
+import { coversHead, resolveUiScope } from '@/pr/review-scope'
 import {
   countTicksAtHead,
   type TickRefusal,
@@ -286,17 +286,23 @@ async function runTick(
       },
     )
   }
-  const counts = verdict.counts
-  if (counts !== undefined && counts.passed !== ticked) {
+  const isCounted =
+    verdict.counts !== undefined &&
+    verdict.commit !== undefined &&
+    (coversHead(verdict.commit, reading.tip) ||
+      (carriedFrom !== undefined &&
+        (coversHead(verdict.commit, carriedFrom) ||
+          coversHead(carriedFrom, verdict.commit))))
+  if (isCounted && verdict.counts.passed !== ticked) {
     return refuseWith(
       'count-mismatch',
       TICK_REFUSALS['count-mismatch'],
       emitJson,
       root,
-      { passed: counts.passed, ticked },
+      { passed: verdict.counts.passed, ticked },
     )
   }
-  const countCheck = counts === undefined ? 'unchecked' : 'matched'
+  const countCheck = isCounted ? 'matched' : 'unchecked'
 
   if (result.body !== marked.body) {
     const patched = await gh(root, [
