@@ -1,0 +1,11 @@
+purpose = "A bare canon:session-worktree call for a toolkit sync, beside two unrelated plans, enters the dated sync worktree rather than asking which plan."
+
+[[content]]
+path = ".git/worktrees/*/HEAD"
+pattern = '^ref: refs/heads/chore/canon-sync-\d{8}(-\d{4})?$'
+why = "The worktree holds the standard toolkit sync branch, with no plan's name or feat type."
+
+[[content]]
+path = ".git/HEAD"
+pattern = '^ref: refs/heads/main$'
+why = "The shared checkout stayed on main."

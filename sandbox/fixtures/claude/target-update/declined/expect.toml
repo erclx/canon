@@ -1,4 +1,4 @@
-purpose = "/canon:target-update on a target one release behind, with the worktree declined, creates chore/update-canon in the checkout and commits the sync there."
+purpose = "/canon:target-update on a target one release behind, with the worktree declined, creates the dated chore/canon-sync branch in the checkout and commits the sync there."
 
 paths = [
   { path = ".git/HEAD", why = "The checkout's head, which moved onto the new branch." },
@@ -17,11 +17,11 @@ manual = [
 
 [[content]]
 path = ".git/HEAD"
-pattern = '^ref: refs/heads/chore/update-canon$'
+pattern = '^ref: refs/heads/chore/canon-sync-\d{8}(-\d{4})?$'
 why = "The checkout moved onto the branch the skill created."
 
 [[content]]
-path = ".git/logs/refs/heads/chore/update-canon"
+path = ".git/logs/refs/heads/chore/canon-sync-*"
 pattern = 'commit'
 why = "A commit landed on that branch."
 

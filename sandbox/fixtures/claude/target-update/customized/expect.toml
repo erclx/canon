@@ -21,6 +21,11 @@ pattern = '^ref: refs/heads/main$'
 why = "The shared checkout stayed on main."
 
 [[content]]
+path = ".git/worktrees/*/HEAD"
+pattern = '^ref: refs/heads/chore/canon-sync-\d{8}(-\d{4})?$'
+why = "The linked worktree holds the standard toolkit sync branch."
+
+[[content]]
 path = ".git/worktrees/*/logs/HEAD"
 pattern = 'commit'
 why = "A commit landed in the linked worktree."
