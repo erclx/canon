@@ -38,7 +38,8 @@ Both test configs differ from the other web stacks.
 
 - `vitest.config.ts` is a plain `defineConfig`, since Next has no Vite config to merge from.
 - It sets jsdom, globals, the setup file, `passWithNoTests: true`, v8 coverage, and `.next/**` in test excludes.
-- `playwright.config.ts` runs all browsers, with `webServer` running `bun run build && bun run preview` on port `3000` plus `WORKTREE_PORT_OFFSET` and `reuseExistingServer: false`.
+- `playwright.config.ts` declares Chromium alone, the engine the seeded workflow runs.
+- Its `webServer` runs `bun run build && bun run preview` on port `3000` plus `WORKTREE_PORT_OFFSET` and `reuseExistingServer: false`.
 - `DIST_PREBUILT` drops the `build` half, matching the astro stack's flag.
 
 ### Lint config

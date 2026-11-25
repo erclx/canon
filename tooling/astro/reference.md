@@ -37,7 +37,8 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 
 ## Playwright
 
-- `playwright.config.ts` runs all browsers, with `webServer` running `bun run build && bun run preview` on port `4321` plus `WORKTREE_PORT_OFFSET` and `reuseExistingServer: false`
+- `playwright.config.ts` declares Chromium alone, the engine the seeded workflow runs
+- Its `webServer` runs `bun run build && bun run preview` on port `4321` plus `WORKTREE_PORT_OFFSET` and `reuseExistingServer: false`
 - Test the built `dist/`, since Astro's dev and production gap is wide across MDX, island hydration, and asset optimization
 - Set `DIST_PREBUILT` to drop the `build` half, running `bun run preview` alone against a `dist/` a prior CI job produced
 
