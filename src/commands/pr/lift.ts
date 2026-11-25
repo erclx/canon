@@ -135,6 +135,13 @@ export function registerLift(pr: Command): void {
         "            one's skip as `reelSkip`, the head its trailing reel was",
         '            filmed at as `reelHead`, a waiver that settled a width as',
         '            `reelWaived`, and a waiver it ignored as `reelWaiverRefused`',
+        '  measurement  no row of the `## Outcome` table reads `pending` in its',
+        '            Result column, whatever the title. A pending row holds the',
+        '            merge until it is filled or written `not measured` with a',
+        '            reason, and refuses `measurement-pending` on a draft and a',
+        '            ready pull request alike, never sending a ready one back to',
+        '            draft. The record lists each as `pending` with its run link',
+        "            and that run's state, left off when the read fails",
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every required check run on the tip passed, waited on up to --wait',
         '',
@@ -177,6 +184,7 @@ export function registerLift(pr: Command): void {
         '  pull-closed, review-missing, review-open, review-unmarked,',
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
         '  ui-undriven, evidence-owed, painted-uncaptured, reel-unsettled,',
+        '  measurement-pending,',
         '  standing-stale, standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-stalled,',
         '  ci-timeout, head-moved, ready-withdrawn, gh-failed, rate-limited',
@@ -309,6 +317,49 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
   }
 }
 
+const RUN_PATH = /^https:\/\/github\.com\/([^/]+\/[^/]+)\/actions\/runs\/(\d+)$/
+
+/** The run's conclusion, or its status while it goes, undefined when the read fails. */
+async function readRunState(
+  root: string,
+  run: string,
+): Promise<string | undefined> {
+  const match = RUN_PATH.exec(run)
+  if (match === null) return undefined
+
+  const stdout = await gh(root, [
+    'api',
+    `repos/${match[1]}/actions/runs/${match[2]}`,
+  ])
+  if (stdout === null) return undefined
+  try {
+    const row = JSON.parse(stdout) as {
+      status?: string
+      conclusion?: string | null
+    }
+    return row.conclusion ?? row.status ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Adds each pending row's run state, leaving a row whose read fails listed without one. */
+async function withRunStates(
+  root: string,
+  record: LiftRecord,
+): Promise<LiftRecord> {
+  if (record.pending === undefined) return record
+
+  const pending = await Promise.all(
+    record.pending.map(async (row) => {
+      const state =
+        row.run === undefined ? undefined : await readRunState(root, row.run)
+      return state === undefined ? row : { ...row, state }
+    }),
+  )
+  return { ...record, pending }
+}
+
 /**
  * The `canon pr lift <number> --check` reading, taken in-process for a caller
  * reading many pull requests. It never marks or redrafts, and answers
@@ -371,7 +422,7 @@ async function runLift(
     waitSeconds,
     painted: loadPaintedPatterns(root),
   })
-  const record = withRateLimit(lifted)
+  const record = withRateLimit(await withRunStates(root, lifted))
 
   logStep(record.reason)
   logInfo(
@@ -389,6 +440,11 @@ async function runLift(
   )
   for (const gate of record.gates) {
     if (!gate.isOk) logWarn(`${gate.gate}: ${gate.reason ?? 'not clear'}`)
+  }
+  for (const row of record.pending ?? []) {
+    logWarn(
+      `pending: ${row.row}, ${row.run ?? 'no run linked'}${row.state === undefined ? '' : `, run ${row.state}`}`,
+    )
   }
   warnAdvisory(record.advisory)
   warnRunning(record.running)

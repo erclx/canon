@@ -55,6 +55,7 @@ case "$*" in
   [ -f "$fx/status.json" ] && cat "$fx/status.json" || echo '{"total_count":0,"statuses":[]}'
   ;;
 *"/actions/runs/"*"/jobs"*) [ -f "$fx/jobs.json" ] && cat "$fx/jobs.json" || exit 1 ;;
+*"/actions/runs/"[0-9]*) [ -f "$fx/run.json" ] && cat "$fx/run.json" || exit 1 ;;
 *"/actions/runs?"*) [ -f "$fx/runs.json" ] && cat "$fx/runs.json" || exit 1 ;;
 *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
 "api rate_limit") [ -f "$fx/rate-limited" ] && cat "$fx/rate-limited" || exit 1 ;;
