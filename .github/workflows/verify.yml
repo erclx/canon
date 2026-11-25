@@ -144,10 +144,11 @@ jobs:
       - name: Unit Tests
         run: bun run test
 
-  # The only job that runs *.e2e.test.ts. It proves the browser and FFmpeg
-  # landed before the suites, so a missing tool reddens it. Not required.
-  e2e-suites:
-    name: 🎬 E2E Suites
+  # The only job that runs *.e2e.test.ts, one leg per group in
+  # scripts/ci/e2e-groups.ts. Each leg proves the browser and FFmpeg landed
+  # before its suites, so a missing tool reddens it.
+  e2e-groups:
+    name: 🎬 E2E ${{ matrix.group }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: changes
@@ -159,6 +160,11 @@ jobs:
       needs.changes.result == 'success' &&
       (needs.changes.outputs.code == 'false' ||
       needs.changes.outputs.e2e == 'false'))
+    strategy:
+      # One failed group must not hide another group's result
+      fail-fast: false
+      matrix:
+        group: [timed, reel, motion, slow]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -168,12 +174,24 @@ jobs:
         with:
           bun-version: latest
 
+      # Scope is empty on a push, on a trigger, and on a failed scope read,
+      # which all run the whole group. Files is empty when the scope reaches
+      # none of the group, so every later step skips and the leg passes.
+      - name: Read Group
+        id: group
+        env:
+          GROUP: ${{ matrix.group }}
+          SCOPE: ${{ needs.changes.outputs.full != 'true' && needs.changes.outputs.files || '' }}
+        run: bun scripts/ci/e2e-groups.ts "$GROUP" $SCOPE
+
       - name: Install Dependencies
+        if: steps.group.outputs.files != ''
         run: bun install --frozen-lockfile
 
       # The runner image lists no FFmpeg. A stalled mirror connection hangs
       # rather than fails, so the step bound turns a hang into a red step.
       - name: Install FFmpeg
+        if: steps.group.outputs.files != ''
         timeout-minutes: 5
         run: |
           bash scripts/ci/prefer-archive-mirror.sh
@@ -182,6 +200,7 @@ jobs:
       # Its own key, since the capture job's cache holds no agent CLI revision
       # and a hit on it would skip the install below
       - name: Cache Playwright Browsers
+        if: steps.group.outputs.files != ''
         id: playwright-cache
         uses: actions/cache@v6
         with:
@@ -190,18 +209,23 @@ jobs:
 
       # Lands the chromium and headless shell revisions playwright-core reads
       - name: Install Playwright Browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: >-
+          steps.group.outputs.files != '' &&
+          steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5
         run: bunx playwright install chromium
 
       # The swipe suite launches the pinned agent CLI's Chromium, whose
       # revision differs from the engine's
       - name: Install Agent CLI Browser
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: >-
+          steps.group.outputs.files != '' &&
+          steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5
         run: bun src/cli.ts browser install-browser chromium
 
       - name: Verify Tools Present
+        if: steps.group.outputs.files != ''
         run: |
           scripts/ci/check-browsers.sh chromium chromium_headless_shell
           scripts/ci/check-e2e-tools.sh "$(bun -e "import { CHROMIUM_REVISION } from './src/browser/agent-cli'; console.log(CHROMIUM_REVISION)")"
@@ -210,16 +234,35 @@ jobs:
       # spawns with its sandbox on. Playwright's launches turn the sandbox off,
       # so only the take suites need this.
       - name: Allow Unprivileged User Namespaces
+        if: steps.group.outputs.files != ''
         timeout-minutes: 1
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # Files is empty on a push, on a trigger, and on a failed scope read,
-      # which all run the full suite
       - name: Run E2E Suites
+        if: steps.group.outputs.files != ''
         timeout-minutes: 15
         env:
-          FILES: ${{ needs.changes.outputs.full != 'true' && needs.changes.outputs.files || '' }}
+          FILES: ${{ steps.group.outputs.files }}
         run: bun run test:e2e $FILES
+
+  # One check over every group, so a ruleset can require one name. It always
+  # runs, since a skipped required check reports success. A skipped matrix
+  # passes only where the scope reached no suite, so a cancelled run fails.
+  e2e-suites:
+    name: 🎬 E2E Suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [changes, e2e-groups]
+    if: always() && github.event_name != 'schedule'
+    steps:
+      - name: Require Every Group
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          SUITES: ${{ needs.e2e-groups.result }}
+          REACHED: ${{ needs.changes.outputs.code != 'false' && needs.changes.outputs.e2e != 'false' }}
+        run: |
+          echo "changes $CHANGES, groups $SUITES, suites reached $REACHED"
+          [[ "$CHANGES/$SUITES/$REACHED" =~ ^((success|skipped)/success/true|success/skipped/false)$ ]]
 
   dependency-advisories:
     name: 📦 Dependency Advisories
