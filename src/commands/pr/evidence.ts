@@ -345,9 +345,10 @@ export function registerEvidence(pr: Command): void {
         'compare GitHub cut at 300 files counts as served. Across a rebase or',
         "a merge only the branch's own diff counts, read at the built head and",
         "the tip against each one's merge base, so a served path the base alone",
-        'changed owes nothing. A run listing or compare that fails, or a built',
-        'head the remote no longer holds, refuses as gh-failed rather than',
-        'reading settled.',
+        'changed owes nothing, and one both sides changed under a merge owes a',
+        'preview however cleanly it merged. A run listing or compare that',
+        'fails, or a built head the remote no longer holds, refuses as',
+        'gh-failed rather than reading settled.',
         'The record carries `owed` and the same marked fields, plus',
         '`reelSkip`, the text after **No reel:** on the marked comment, present',
         'only when that line is posted, and `reelSkips`, each **No reel at',
@@ -612,8 +613,8 @@ async function fetchMissing(
 
 /**
  * Whether the branch changed a served path since the built head, undefined when
- * a read failed. Across a rebase or a merge only the branch's own diff counts,
- * so the base's commits never owe a preview.
+ * a read failed. Across a rebase or a merge only a path the branch wrote counts,
+ * so a path the base alone changed never owes a preview.
  */
 async function readServedSince(
   root: string,
@@ -647,10 +648,13 @@ async function readServedSince(
   const own = await readRebasedPaths(git, resolved.tip, built, tip)
   if (own === undefined) return undefined
 
+  // Read past the patch compare, which a clean merge of a shared path can leave equal.
+  const bothWrote = changed.paths.filter((path) => own.ownPaths.includes(path))
+  const moved = [...own.differingPaths, ...bothWrote]
   // A path git quotes matches no served glob, so it counts as served.
   return (
-    own.differingPaths.some((path) => path.startsWith('"')) ||
-    (own.differingPaths.length > 0 && servesChange(filter, own.differingPaths))
+    moved.some((path) => path.startsWith('"')) ||
+    (moved.length > 0 && servesChange(filter, moved))
   )
 }
 
