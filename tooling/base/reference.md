@@ -50,7 +50,7 @@ The root run calls each nested runner after its own stages, so one `bun run chec
 
 A changed run reads each nested root against the change too.
 
-- It skips a nested root with no changed, added, or deleted path under it and prints its folder, and runs a touched one whole.
+- With a trunk base, it skips a nested root with no changed, added, or deleted path under it and prints its folder, and runs a touched one whole.
 - A root change a nested root imports waits for a full `check`, which is the cost of the skip.
 - It stops a touched root with its own lockfile and no `node_modules`, naming the folder and `bun install`. A workspace member has no lockfile, so it never stops.
 

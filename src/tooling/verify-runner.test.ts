@@ -1290,9 +1290,13 @@ describe('changed mode in a nested root', () => {
     })
 
     it('should run only the touched one where one folder prefixes another', () => {
-      writeSource('web-admin/package.json', '{"scripts":{"test:run":"true"}}')
-      writeSource('web-admin/scripts/verify.json', '{"require":["test:run"]}')
-      copyFileSync(RUNNER, join(fixture, 'web-admin/scripts/verify.ts'))
+      // A root that runs when it should not fails the run, and web-admin passes.
+      for (const dir of ['web', 'web-admin']) {
+        const body = dir === 'web' ? 'exit 1' : 'true'
+        writeSource(`${dir}/package.json`, `{"scripts":{"test:run":"${body}"}}`)
+        writeSource(`${dir}/scripts/verify.json`, '{"require":["test:run"]}')
+        copyFileSync(RUNNER, join(fixture, `${dir}/scripts/verify.ts`))
+      }
       settle()
       writeSource('web-admin/page.ts', 'edited')
 
@@ -1300,7 +1304,8 @@ describe('changed mode in a nested root', () => {
 
       expect(result.status).toBe(0)
       expect(result.stdout).toContain('Nested root web-admin passed')
-      expect(result.stdout).toContain('Skipped: nested root service')
+      expect(result.stdout).toContain('Skipped: nested root web,')
+      expect(result.stdout).not.toContain('Nested root web\n')
     })
 
     it('should run every nested root in a full run', () => {
@@ -1317,7 +1322,7 @@ describe('changed mode in a nested root', () => {
       expect(runChanged().stdout).toContain('service failed')
     })
 
-    it('should still fail naming the runner when a skipped root is gone', () => {
+    it('should still fail naming the runner when the runner of a touched root is gone', () => {
       rmSync(join(fixture, 'service/scripts/verify.ts'))
 
       const result = runChanged()
@@ -1326,17 +1331,32 @@ describe('changed mode in a nested root', () => {
       expect(result.stdout).toContain('No service/scripts/verify.ts here')
     })
 
-    it('should skip it from a subfolder reading paths below the root', () => {
-      writeSource('src/root.ts', 'edited')
-      writeSource('service/inner/scripts/verify.json', '{}')
-      copyFileSync(RUNNER, join(fixture, 'service/inner/scripts/verify.ts'))
-      writeSource('service/inner/package.json', '{"scripts":{}}')
-      settle()
-      writeSource('service/cart.ts', 'edited')
+    describe('from a subfolder', () => {
+      beforeEach(() => {
+        writeSource('service/package.json', '{"scripts":{"test:run":"true"}}')
+        writeSource('service/inner/scripts/verify.json', '{}')
+        copyFileSync(RUNNER, join(fixture, 'service/inner/scripts/verify.ts'))
+        writeSource('service/inner/package.json', '{"scripts":{}}')
+        settle()
+      })
 
-      const result = runChangedIn('service')
+      it('should run a root touched below the repository root', () => {
+        writeSource('service/inner/x.ts', 'edited')
 
-      expect(result.stdout).not.toContain('Nested root inner')
+        const result = runChangedIn('service')
+
+        expect(result.status).toBe(0)
+        expect(result.stdout).toContain('Nested root inner passed')
+      })
+
+      it('should skip a root untouched below the repository root', () => {
+        writeSource('service/cart.ts', 'edited')
+
+        const result = runChangedIn('service')
+
+        expect(result.status).toBe(0)
+        expect(result.stdout).toContain('Skipped: nested root inner')
+      })
     })
 
     it('should run a nested root with local commits on the trunk checkout', () => {
