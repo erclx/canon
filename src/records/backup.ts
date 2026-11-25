@@ -524,10 +524,9 @@ async function undoCommit(
 }
 
 /**
- * Stages, commits when anything changed, and pushes. The payload guard runs
- * before the stage, leaving an oversized file out and refusing on a credential.
- * The push runs even with no new commit to reach an older one, and a commit
- * this call made is undone when the push fails.
+ * The payload guard runs before the stage, leaving an oversized file out and
+ * refusing on a credential. The push runs even with no new commit to reach an
+ * older one, and a commit this call made is undone when the push fails.
  */
 export async function pushRecords(
   root: string,
