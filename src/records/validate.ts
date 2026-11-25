@@ -415,7 +415,9 @@ function citedPath(span: string, pathExists: PathExists): string | undefined {
     .replace(/\/$/, '')
   const [first] = path.split('/')
 
-  if (path.includes('/')) return pathExists(first) ? path : undefined
+  if (path.includes('/')) {
+    return first !== '' && pathExists(first) ? path : undefined
+  }
 
   const extension = path.split('.').at(-1)?.toLowerCase() ?? ''
   return path.includes('.') && FILE_EXTENSIONS.has(extension) ? path : undefined

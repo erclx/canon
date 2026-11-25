@@ -725,7 +725,7 @@ describe('checkPlan', () => {
   })
 
   describe('Evidence', () => {
-    const PRESENT = new Set(['src', 'src/real.ts', 'src/dir'])
+    const PRESENT = new Set(['', 'src', 'src/real.ts', 'src/dir'])
     const exists = (rel: string) => PRESENT.has(rel)
 
     function evidenceKinds(line: string): FindingKind[] {
@@ -810,6 +810,7 @@ describe('checkPlan', () => {
       ['a URL', '`https://example.com/a.md`'],
       ['a slash command', '`/session-worktree`'],
       ['a plugin slash command', '`/canon:plan-feature`'],
+      ['an absolute path', '`/src/real.ts`'],
       ['a flag', '`--root=src/x`'],
       ['a remote branch', '`origin/main`'],
       ['a ref', '`refs/heads/main`'],
