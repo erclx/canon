@@ -431,6 +431,49 @@ describe('merge reading the base standing', () => {
     expect(puts).toEqual([])
   })
 
+  it('should name the release-please bot kind on a stale release pull request', async () => {
+    const { api } = harness({
+      pull: {
+        branch: 'release-please--branches--main--components--canon',
+        body: RELEASE_BODY,
+      },
+      standing: { standing: 'stale', moved: ['package.json'] },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({
+      reason: 'standing-stale',
+      bot: 'release-please',
+    })
+  })
+
+  it('should name the dependabot bot kind on a stale Dependabot pull request', async () => {
+    const { api } = harness({
+      pull: {
+        branch: 'dependabot/npm_and_yarn/vitest-4.0.0',
+        body: 'Bumps vitest from 3.0.0 to 4.0.0.\n',
+        isBotAuthor: true,
+      },
+      standing: { standing: 'stale', moved: ['package.json'] },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({ reason: 'standing-stale', bot: 'dependabot' })
+  })
+
+  it('should name no bot kind on a stale ordinary pull request', async () => {
+    const { api } = harness({
+      standing: { standing: 'stale', moved: ['src/a.ts'] },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record.reason).toBe('standing-stale')
+    expect(record.bot).toBeUndefined()
+  })
+
   it.each<[string, BaseReading, string]>([
     ['a conflicted base', { standing: 'conflict' }, 'standing-conflict'],
     ['a base nobody could read', { standing: 'unknown' }, 'standing-unknown'],
