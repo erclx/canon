@@ -21,6 +21,7 @@ packages = [
 
 [scripts.override]
 "check" = "bun scripts/verify.ts"
+"check:changed" = "bun scripts/verify.ts --changed"
 "check:format" = "oxfmt --check ."
 "format" = "oxfmt ."
 

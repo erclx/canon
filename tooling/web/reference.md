@@ -99,8 +99,9 @@ Run it from the project root, checked against shadcn `4.23.0` on 2026-11-22.
 
 - Expect `scripts/verify.json` to require `typecheck`, `lint`, `test:run`, and `build`, which base's `scripts/verify.ts` runs in its fixed order
 - That order is typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, the canon checks stage, the card exclusion check, then the head tag check
-- Expect the card stage to run `scripts/check-card-exclusion.sh` whenever that file is installed, so a project with no card route runs one less stage with no override
-- Expect the head tag stage to run `scripts/check-head-meta.sh` the same way, whenever that file is installed
+- Expect `test:changed` to take the tied test files as Vitest filters from base's changed mode, so a Playwright spec among them matches nothing and passes
+- Expect a full run to call `scripts/check-card-exclusion.sh` and `scripts/check-head-meta.sh` where each is installed, so a project without one runs one less stage with no override
+- Expect a scoped push to call neither, and the build job in `verify.yml` to call each where it is installed
 
 ## CI docs (extend)
 
@@ -120,13 +121,19 @@ Run it from the project root, checked against shadcn `4.23.0` on 2026-11-22.
 - Extend the `## Scripts` table in the `development` context entry under `canon/context/` with every web script
 - Expect each framework stack to add its `dev`, `build`, `preview`, and `typecheck` rows
 
+| Command                 | Purpose                            |
+| ----------------------- | ---------------------------------- |
+| `bun run lint`          | Run oxlint, no warnings allowed.   |
+| `bun run lint:fix`      | Auto-fix oxlint issues.            |
+| `bun run test`          | Run Vitest in watch mode.          |
+| `bun run test:run`      | Run Vitest once, verbose.          |
+| `bun run test:changed`  | Run the Vitest files it is passed. |
+| `bun run test:coverage` | Run Vitest with coverage.          |
+
+The browser rows follow.
+
 | Command                     | Purpose                                 |
 | --------------------------- | --------------------------------------- |
-| `bun run lint`              | Run oxlint, no warnings allowed.        |
-| `bun run lint:fix`          | Auto-fix oxlint issues.                 |
-| `bun run test`              | Run Vitest in watch mode.               |
-| `bun run test:run`          | Run Vitest once, verbose.               |
-| `bun run test:coverage`     | Run Vitest with coverage.               |
 | `bun run test:e2e`          | Run Playwright E2E tests.               |
 | `bun run test:e2e:changed`  | Run specs the diff's import graph hits. |
 | `bun run screenshot`        | Build, preview, capture screenshots.    |

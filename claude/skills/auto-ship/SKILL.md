@@ -82,7 +82,7 @@ When the plan's `**Constraints:**` carry a `Fans in` bullet, this run is a fan-i
 
 ## Step 3: verify
 
-Run the verify commands defined in `CLAUDE.md` (lint, typecheck, tests), each under the time limit `canon:git-ship` states in `### Bound each run`, so this step and the Step 6 gate share one bound. On failure:
+Run the verify commands `canon:git-ship` names under `## Verify`, each under the time limit it states in `### Bound each run`, so this step and the Step 6 gate share one command and one bound. On failure:
 
 - Make **one** fix attempt per distinct failing stage, targeting its reported errors
 - Re-run the gate after each fix, so a stage the fix broke surfaces

@@ -46,5 +46,6 @@ canon tooling sync python ./backend --skip base --write
 
 `bun run check` at the root runs each subtree's phases once git tracks the subtree, so stage it after the sync. A sync into a subfolder withholds `.github/`, so put the subtree's toolchain setup in a workflow file of your own at the root, since the web stack's `verify.yml` is rewritten on sync.
 
+- A push is scoped only in a web project at the repository root, so a subtree runs its full check on every push, build included
 - A subtree with no `package.json` gets a minimal one holding the folder's name, version `0.0.0`, and `type: module`, then the install runs into it
 - An existing file is never rewritten, and one that is not valid JSON ends the sync on `package.json is not valid JSON: fix it in <path>, then sync again`

@@ -15,7 +15,8 @@ Do not output any text between steps and do not wait for user input. Tool permis
 
 Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again with the same arguments.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
 
-When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
+- Run `check:changed` in place of `check` where the project's `package.json` declares it, whichever one `CLAUDE.md` names, since an older seed still names the full run
+- When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
 ### Bound each run
 
@@ -30,7 +31,7 @@ A suite exiting 124 by itself reads as a hang too, which is why the stop names t
 
 ### Why verify runs first
 
-Verify runs ahead of the sync skills so a stop leaves the tree exactly as the user left it. Re-running a suite the caller already ran costs one command.
+Verify runs ahead of the sync skills so a stop leaves the tree exactly as the user left it. Re-running a gate the caller already ran costs one command, which `check:changed` skips on content it already passed.
 
 The path it closes has no other guard. `auto-ship` verifies at its own Step 3 and hands three of its stop points back here, so a hand fix after one of those would otherwise reach the remote with nothing re-run.
 

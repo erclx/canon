@@ -5,10 +5,17 @@ import { spawnSync } from 'node:child_process'
 import {
   accessSync,
   constants,
+  copyFileSync,
   existsSync,
+  mkdtempSync,
   readFileSync,
   realpathSync,
+  rmSync,
+  statSync,
+  utimesSync,
+  writeFileSync,
 } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { delimiter, dirname, join } from 'node:path'
 
 interface Tool {
@@ -90,6 +97,12 @@ const BASE_PHASES = new Set(['check:format'])
 // folder that never synced the add-on skips the phase rather than failing it.
 const ADD_ON_PHASES = new Map([['check:shell', 'shell']])
 
+// CI runs these whole, so changed mode leaves them out and runs the tied tests.
+const CI_PHASES = new Set(['test:run', 'build'])
+const TIED_TESTS = 'test:changed'
+// Past this a change is a sweep, and its run is the suite CI runs anyway.
+const MAX_TIED_TESTS = 40
+
 const PHASE_LIST = 'scripts/verify.json'
 const CARD_EXCLUSION = 'scripts/check-card-exclusion.sh'
 const HEAD_META = 'scripts/check-head-meta.sh'
@@ -100,8 +113,12 @@ const WHITE = '\x1b[1;37m'
 const GREY = '\x1b[0;90m'
 const NC = '\x1b[0m'
 
+const USAGE = 'Usage: bun scripts/verify.ts [--changed [--force]]'
+
 const isNested = (process.env.VERIFY_NESTED || 'false') !== 'false'
 let hasStepped = false
+// False once a check skipped for a reason no pass key holds.
+let isMeasured = true
 
 class VerifyFailure extends Error {}
 
@@ -168,8 +185,12 @@ function capture(
   return { code: result.status ?? 1, output: result.stdout ?? '' }
 }
 
-function runCheck(command: string, failed: string): void {
-  const { code, output } = capture(command)
+function runCheck(
+  command: string,
+  failed: string,
+  args: readonly string[] = [],
+): void {
+  const { code, output } = capture(command, args)
   pipeOutput(output)
   if (code !== 0) fail(failed)
 }
@@ -321,16 +342,20 @@ function skipNoCanon(): void {
   logSkip(`Skipped: no canon binary on PATH. ${INSTALL_HINT}`)
 }
 
+// The root reads this phrase off a nested run's output, its one channel.
+const UNMEASURED = 'measured nothing'
+
 // Exit 1 is a refusal that measured nothing, and through bunx a failed fetch
 // too. Locally that skips. Under CI the stage fails, since a skip there is
 // the gate passing on nothing.
 function refused(reason: string, output: string): void {
   if (!isCi) {
-    logSkip(`Skipped: ${reason}, and measured nothing.`)
+    isMeasured = false
+    logSkip(`Skipped: ${reason}, and ${UNMEASURED}.`)
     return
   }
   pipeOutput(output)
-  fail(`${reason}, and measured nothing. Under CI that fails the stage`)
+  fail(`${reason}, and ${UNMEASURED}. Under CI that fails the stage`)
 }
 
 interface GateStage {
@@ -426,7 +451,8 @@ function checkCanonGate(): void {
     if (stage.status === 'passed') logInfo(stage.label)
     else if (stage.status === 'skipped') logSkip(`${stage.label}: skipped`)
     else if (stage.status === 'unmeasured') {
-      logSkip(`${stage.label}: measured nothing`)
+      isMeasured = false
+      logSkip(`${stage.label}: ${UNMEASURED}`)
     } else if (stage.status === 'failed') {
       if (stage.output !== undefined) pipeOutput(stage.output)
       fail(
@@ -442,19 +468,180 @@ function checkCanonGate(): void {
   }
 }
 
+// A hook exports these, and each would point a call at the hook's repository
+// and root rather than at the folder it runs in.
+const HOOK_GIT_ENV = new Set([
+  'GIT_DIR',
+  'GIT_WORK_TREE',
+  'GIT_INDEX_FILE',
+  'GIT_PREFIX',
+  'GIT_COMMON_DIR',
+  'GIT_OBJECT_DIRECTORY',
+])
+
+// Undefined where the call failed, since each caller decides what that means.
+function git(
+  args: readonly string[],
+  env: Readonly<Record<string, string>> = {},
+): string | undefined {
+  const inherited = Object.entries(process.env).filter(
+    ([name]) => !HOOK_GIT_ENV.has(name),
+  )
+  const result = spawnSync('git', args, {
+    encoding: 'utf8',
+    env: { ...Object.fromEntries(inherited), ...env },
+    maxBuffer: 256 * 1024 * 1024,
+  })
+  return result.status === 0 ? result.stdout : undefined
+}
+
+function splitPaths(output: string): string[] {
+  return output.split('\0').filter((path) => path !== '')
+}
+
+const TRUNKS = ['origin/main', 'origin/master']
+
+// The one trunk the web workflow starts on, and a pull request is what starts it.
+const CI_TRUNK = 'main'
+
+type Trunk =
+  | { readonly kind: 'base'; readonly ref: string; readonly base: string }
+  | { readonly kind: 'unpushed' }
+  | { readonly kind: 'none'; readonly hint: string }
+
+function readTrunk(): Trunk {
+  const named = git(['rev-parse', '--abbrev-ref', 'origin/HEAD'])?.trim()
+  const ref = [named ?? 'origin/HEAD', ...TRUNKS].find(
+    (name) =>
+      git([
+        'rev-parse',
+        '--verify',
+        '--quiet',
+        `refs/remotes/${name}^{commit}`,
+      ]) !== undefined,
+  )
+  if (ref !== undefined) {
+    const base = git(['merge-base', 'HEAD', `refs/remotes/${ref}`])?.trim()
+    if (base !== undefined) return { kind: 'base', ref, base }
+    return {
+      kind: 'none',
+      hint: `No merge base with ${ref}. Run 'git fetch origin', adding --unshallow in a shallow clone`,
+    }
+  }
+  if (git(['remote', 'get-url', 'origin']) === undefined) {
+    return {
+      kind: 'none',
+      hint: "No remote is named origin. Name the one this project pushes to with 'git remote rename <name> origin'",
+    }
+  }
+  if (git(['for-each-ref', '--count=1', 'refs/remotes/origin']) === '') {
+    return { kind: 'unpushed' }
+  }
+  return {
+    kind: 'none',
+    hint: `None of ${TRUNKS.join(', ')} resolves. Run 'git fetch origin', then 'git remote set-head origin --auto' for a trunk under another name`,
+  }
+}
+
+// Why a changed run leaves nothing to CI, and undefined when it may. Only the
+// web phase list requires a build, and a sync into a subfolder ships no CI.
+function reasonUnscoped(
+  trunk: Trunk,
+  list: PhaseList,
+  declared: Set<string>,
+): string | undefined {
+  if (git(['rev-parse', '--show-prefix'])?.trim() !== '') {
+    return 'This folder is not the repository root'
+  }
+  if (!list.require.includes('build') || !declared.has(TIED_TESTS)) {
+    return `This is not a web project declaring ${TIED_TESTS}`
+  }
+  if (trunk.kind === 'unpushed') {
+    return 'origin holds no branch to compare with yet'
+  }
+  if (trunk.kind === 'none') {
+    fail(`Nothing says what changed. ${trunk.hint}`)
+  }
+  if (trunk.ref !== `origin/${CI_TRUNK}`) {
+    return `The trunk here is ${trunk.ref}, which no shipped workflow starts on`
+  }
+  if (git(['symbolic-ref', '--short', 'HEAD'])?.trim() === CI_TRUNK) {
+    return `${CI_TRUNK} is checked out, and a push to it starts no workflow`
+  }
+  return undefined
+}
+
+function listPaths(args: readonly string[]): string[] {
+  const listed = git(args)
+  if (listed === undefined) fail(`git ${args[0]} failed, so no test was tied`)
+  return splitPaths(listed)
+}
+
+const TEST_FILE = /(?:\.(?:test|spec)|_test)\.(?:[cm]?[jt]sx?|py|go)$/
+
+// The folder and the name up to its first dot, so a.module.css shares one with
+// a.test.tsx beside it.
+function subjectOf(path: string): string {
+  const dot = path.indexOf('.', path.lastIndexOf('/') + 2)
+  return dot === -1 ? path : path.slice(0, dot)
+}
+
+// Ties by name and follows no import, since a shared module's imports reach
+// most of a suite CI runs whole.
+function tieTests(
+  changed: readonly string[],
+  files: readonly string[],
+): string[] {
+  const paths = new Set(changed)
+  const subjects = new Set(changed.map(subjectOf))
+  return files.filter(
+    (file) =>
+      TEST_FILE.test(file) &&
+      (paths.has(file) || subjects.has(subjectOf(file).replace(/_test$/, ''))),
+  )
+}
+
+// Outside each nested root, whose own run takes its tests.
+function findTiedTests(base: string): string[] {
+  const untracked = ['--others', '--exclude-standard']
+  const nested = findNestedRoots()
+  const isOwn = (path: string): boolean =>
+    !nested.some((root) => path.startsWith(`${root}/`))
+
+  const changed = [
+    ...listPaths(['diff', '--name-only', '-z', '--no-renames', base]),
+    ...listPaths(['ls-files', '-z', ...untracked]),
+  ]
+  const present = listPaths(['ls-files', '-z', '--cached', ...untracked])
+  const files = new Set(present.filter((path) => existsSync(path)))
+  return tieTests(changed, [...files].filter(isOwn))
+}
+
+function runTiedTests(base: string): void {
+  logStep('Tied tests')
+  logSkip('Skipped: the full suites and the build, which CI runs')
+  const tests = findTiedTests(base)
+  if (tests.length === 0) {
+    logSkip('Skipped: no test is tied to the change')
+    return
+  }
+  if (tests.length > MAX_TIED_TESTS) {
+    logSkip(
+      `Skipped: ${tests.length} test files are tied to the change, past the ${MAX_TIED_TESTS} run here, so CI runs them`,
+    )
+    return
+  }
+  runCheck(`bun run ${TIED_TESTS} "$@"`, 'Tied tests failed', tests)
+  logInfo('Tied tests passed')
+}
+
 // Found from tracked files, since verify.json is golden and a list kept in it
 // is lost on sync. An untracked folder never runs, and a tracked one runs
 // whatever .gitignore says. Outside a git repository none are found.
 function findNestedRoots(): string[] {
-  const result = spawnSync(
-    'git',
-    ['ls-files', '-z', '--', ':(glob)**/scripts/verify.json'],
-    { encoding: 'utf8' },
-  )
-  if (result.status !== 0) return []
-  return (result.stdout ?? '')
-    .split('\0')
-    .filter((path) => path !== '' && path !== PHASE_LIST)
+  const listed = git(['ls-files', '-z', '--', ':(glob)**/scripts/verify.json'])
+  return splitPaths(listed ?? '')
+    .filter((path) => path !== PHASE_LIST)
     .map((path) => dirname(dirname(path)))
 }
 
@@ -472,7 +659,9 @@ function runNestedRoot(root: string): void {
     env: { ...process.env, VERIFY_NESTED: 'true' },
     maxBuffer: 256 * 1024 * 1024,
   })
-  pipeOutput(`${result.stdout ?? ''}${result.stderr ?? ''}`)
+  const output = `${result.stdout ?? ''}${result.stderr ?? ''}`
+  pipeOutput(output)
+  if (output.includes(UNMEASURED)) isMeasured = false
   if (result.error !== undefined) {
     fail(`Nested root ${root} could not start: ${result.error.message}`)
   }
@@ -480,7 +669,176 @@ function runNestedRoot(root: string): void {
   logInfo(`Nested root ${root} passed`)
 }
 
-function main(): void {
+type PassKey =
+  | { readonly kind: 'key'; readonly text: string }
+  | { readonly kind: 'none'; readonly reason: string }
+
+// Git reads a file again when its time is no older than the index's, so a copy
+// stamped now would hide an edit made in the second the index was written.
+function copyIndex(from: string, to: string): void {
+  copyFileSync(from, to)
+  const seconds = Math.floor(statSync(from).mtimeMs / 1000) - 1
+  utimesSync(to, seconds, seconds)
+}
+
+// The tree of every file git would track here, untracked ones included, and
+// undefined where git cannot hold the content, as in a nested repository.
+function writeTree(): string | undefined {
+  const real = git(['rev-parse', '--git-path', 'index'])?.trimEnd()
+  if (real === undefined) return undefined
+  const scratch = mkdtempSync(join(tmpdir(), 'verify-index-'))
+  const env = { GIT_INDEX_FILE: join(scratch, 'index') }
+  try {
+    if (existsSync(real)) copyIndex(real, env.GIT_INDEX_FILE)
+    if (git(['add', '--all'], env) === undefined) return undefined
+    const entries = git(['ls-files', '--stage', '--full-name', ':/'], env)
+    if (entries === undefined || /^160000 /m.test(entries)) return undefined
+    return git(['write-tree'], env)?.trim()
+  } finally {
+    rmSync(scratch, { force: true, recursive: true })
+  }
+}
+
+// Bun stands in as node where none is installed, and answers no --version there.
+const VERSION_ARGS = new Map([['node', [['-p', 'process.version']]]])
+
+// The whole output, since shellcheck prints its version on its second line.
+function readVersion(tool: string): string | undefined {
+  if (!onPath(tool)) return 'absent'
+  for (const args of VERSION_ARGS.get(tool) ?? [['--version'], ['version']]) {
+    const result = spawnSync(tool, args, {
+      encoding: 'utf8',
+      timeout: 30_000,
+    })
+    if (result.status === 0) return result.stdout.trim()
+  }
+  return undefined
+}
+
+// Every tool a run here reaches from outside the tree, in each nested root too.
+function listTools(): string[] {
+  const roots = ['.', ...findNestedRoots()]
+  const probed = roots.flatMap((root) => {
+    const list = asRecord(readJson(join(root, PHASE_LIST)))
+    const manifest = asRecord(readJson(join(root, 'package.json')))
+    const declared = new Set(Object.keys(asRecord(manifest.scripts)))
+    return [
+      ...asArray(list.tools).map((entry) => asRecord(entry).name),
+      ...PHASES.filter((phase) => declared.has(phase.script)).flatMap((phase) =>
+        (phase.tools ?? []).map((tool) => tool.name),
+      ),
+    ]
+  })
+  const named = probed.filter((name) => typeof name === 'string')
+  return [...new Set(['canon', 'bun', 'node', ...named])]
+}
+
+interface Basis {
+  readonly base: string
+  readonly isScoped: boolean
+}
+
+// What git tracks is a fact of its own, since a nested root and several gate
+// checks read tracked files and the tree holds untracked ones the same way.
+function readPassKey(basis: Basis): PassKey {
+  const tree = writeTree()
+  if (tree === undefined) {
+    return {
+      kind: 'none',
+      reason: 'git could not write this content as a tree',
+    }
+  }
+  const versions: [string, string][] = []
+  for (const tool of listTools()) {
+    const version = readVersion(tool)
+    if (version === undefined) {
+      return { kind: 'none', reason: `${tool} reported no version` }
+    }
+    versions.push([tool, version])
+  }
+  const folder = git(['rev-parse', '--show-prefix'])?.trim()
+  const untracked = git([
+    'ls-files',
+    '-z',
+    '--others',
+    '--exclude-standard',
+    ':/',
+  ])
+  return {
+    kind: 'key',
+    text: JSON.stringify({
+      tree,
+      untracked,
+      ...basis,
+      folder,
+      isCi,
+      versions,
+    }),
+  }
+}
+
+// In the git directory, so each linked worktree keeps its own and none is tracked.
+function passPath(): string | undefined {
+  const directory = git(['rev-parse', '--absolute-git-dir'])?.trimEnd()
+  return directory === undefined ? undefined : join(directory, 'canon-verify')
+}
+
+interface Pass {
+  readonly hasPassed: boolean
+  readonly keep: () => void
+}
+
+function logForgotten(reason: string): void {
+  logSkip(`This pass is not remembered, since ${reason}`)
+}
+
+// Drops the last pass unless it holds, so a run that fails leaves none.
+function openPass(basis: Basis, isForced: boolean): Pass {
+  const path = passPath()
+  const key = readPassKey(basis)
+  if (path === undefined) return { hasPassed: false, keep: () => {} }
+  const hasPassed =
+    !isForced &&
+    key.kind === 'key' &&
+    existsSync(path) &&
+    readFileSync(path, 'utf8') === key.text
+  if (!hasPassed) rmSync(path, { force: true })
+
+  return {
+    hasPassed,
+    keep: () => {
+      if (key.kind === 'none') {
+        logForgotten(key.reason)
+        return
+      }
+      if (!isMeasured) {
+        logForgotten(`a check ${UNMEASURED}`)
+        return
+      }
+      const after = readPassKey(basis)
+      if (after.kind === 'none' || after.text !== key.text) {
+        logForgotten('its content or a tool changed while it ran')
+        return
+      }
+      writeFileSync(path, key.text)
+    },
+  }
+}
+
+interface Flags {
+  readonly isChanged: boolean
+  readonly isForced: boolean
+}
+
+function readFlags(args: readonly string[]): Flags | undefined {
+  const isChanged = args.includes('--changed')
+  const isForced = args.includes('--force')
+  const isKnown = args.every((arg) => arg === '--changed' || arg === '--force')
+  if (!isKnown || (isForced && !isChanged)) return undefined
+  return { isChanged, isForced }
+}
+
+function main(flags: Flags): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
   checkTools(list.tools)
@@ -489,22 +847,46 @@ function main(): void {
   if (!isNested) print(`${GREY}┌${NC}`)
 
   const required = new Set(list.require)
+  const trunk = flags.isChanged ? readTrunk() : undefined
+  const unscoped =
+    trunk === undefined ? undefined : reasonUnscoped(trunk, list, declared)
+  if (unscoped !== undefined) logSkip(`${unscoped}, so every phase runs`)
+
+  const base = trunk?.kind === 'base' ? trunk.base : undefined
+  const scopedBase = unscoped === undefined ? base : undefined
+  const isScoped = scopedBase !== undefined
+
+  // A nested run discovers no root, so its pass would cover roots it never ran.
+  const pass =
+    base === undefined || isNested
+      ? undefined
+      : openPass({ base, isScoped }, flags.isForced)
+  if (pass?.hasPassed) {
+    logSkip(
+      'Skipped: this content already passed. Run with --force to check it again',
+    )
+    print(`${GREY}└${NC}`)
+    return
+  }
+
   for (const phase of PHASES) {
+    if (isScoped && CI_PHASES.has(phase.script)) continue
     runPhase(phase, required.has(phase.script), declared)
   }
+  if (scopedBase !== undefined) runTiedTests(scopedBase)
 
   logStep('Canon checks')
   checkCanonGate()
 
   // The card check reads the build, so it runs last, where its stack shipped it.
-  if (existsSync(CARD_EXCLUSION)) {
+  if (!isScoped && existsSync(CARD_EXCLUSION)) {
     logStep('Card exclusion')
     runCheck(`bash ${CARD_EXCLUSION}`, 'Card exclusion check failed')
     logInfo('Card exclusion passed')
   }
 
   // The head tag check reads the build too, where its stack shipped it.
-  if (existsSync(HEAD_META)) {
+  if (!isScoped && existsSync(HEAD_META)) {
     logStep('Head tags')
     runCheck(`bash ${HEAD_META}`, 'Head tag check failed')
     logInfo('Head tags passed')
@@ -515,15 +897,27 @@ function main(): void {
     for (const root of findNestedRoots()) runNestedRoot(root)
   }
 
+  pass?.keep()
+
   if (!isNested) {
     print(`${GREY}└${NC}\n`)
-    print(`${GREEN}✓ Verification passed${NC}`)
+    print(
+      flags.isChanged
+        ? `${GREEN}✓ Changed check passed${NC}`
+        : `${GREEN}✓ Verification passed${NC}`,
+    )
   }
 }
 
-try {
-  main()
-} catch (error) {
-  if (!(error instanceof VerifyFailure)) throw error
-  process.exitCode = 1
+const flags = readFlags(process.argv.slice(2))
+if (flags === undefined) {
+  process.stderr.write(`${USAGE}\n`)
+  process.exitCode = 2
+} else {
+  try {
+    main(flags)
+  } catch (error) {
+    if (!(error instanceof VerifyFailure)) throw error
+    process.exitCode = 1
+  }
 }

@@ -11,7 +11,7 @@
 
 ## Commands
 
-- Run `bun run check` to verify and `bun run format` to fix before committing. The pre-push hook runs `check`, which writes nothing.
+- Run `bun run check:changed` to verify before a push, the gate the pre-push hook runs, and `bun run check` for the full run by hand. Neither writes, so run `bun run format` to fix before committing.
 
 ## Key paths
 
