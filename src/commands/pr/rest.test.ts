@@ -530,6 +530,18 @@ describe('canon pr reads through REST alone', () => {
         expect(record).toMatchObject({ reason: 'clear', running: ['macOS'] })
       })
 
+      it('should read a partial status list as it did before when a set is required', async () => {
+        stageMacRunning()
+        writeFixture('status.json', {
+          total_count: 3,
+          statuses: [{ context: 'vercel', state: 'success' }],
+        })
+
+        const { record } = await runLift(['7', '--check'])
+
+        expect(record).toMatchObject({ reason: 'clear', running: ['macOS'] })
+      })
+
       // An unread status list could hide a pending context, so the record cannot read as settled.
       it('should name the unread commit statuses as running when that read fails', async () => {
         stageMacRunning()
@@ -554,6 +566,18 @@ describe('canon pr reads through REST alone', () => {
       const { record } = await runLift(['7', '--check'])
 
       expect(record).toMatchObject({ reason: 'ci-failing' })
+    })
+
+    it('should refuse ci-pending on a partial status list when the rules require nothing', async () => {
+      stageClearPull()
+      writeFixture('status.json', {
+        total_count: 3,
+        statuses: [{ context: 'vercel', state: 'success' }],
+      })
+
+      const { record } = await runLift(['7', '--check'])
+
+      expect(record).toMatchObject({ reason: 'ci-pending' })
     })
 
     it('should read the same failing state off the checks verb over that head', async () => {

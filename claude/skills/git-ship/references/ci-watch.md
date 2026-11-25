@@ -77,7 +77,8 @@ gh api "repos/{owner}/{repo}/commits/<tip>/check-runs?per_page=100" --jq '[.chec
 ```
 
 - A non-zero exit means the read was refused, so stop and report the refusal rather than reading it as a real failure
-- An empty print on a zero exit means at least one check or commit status really failed, so stop and report it with its URL. The failed-status read below names a status.
+- An empty print on a zero exit means a failed run was not only cancelled, or none failed, so run the failed-status read below, whose refusal stops the same way
+- A status printed there, or an empty print from both reads, means a check or status really failed, so stop and report it with its URL
 - Otherwise run `gh run rerun <id> --failed` once per printed id, then start the watch again from `### Watching CI`
 - Rerun once per ship. A second `failing` wake on the same cancelled runs stops and reports them as cancelled, naming each URL.
 
