@@ -1399,6 +1399,7 @@ export async function readBlockerClauses(
       joins ||
       (verb >= 0 &&
         stems.length === 0 &&
+        clause.search(BLOCKER_VERB) < 0 &&
         read(restore(clause.slice(verb))).length > 0)
     clauses.push({ clause: restore(clause), stems })
   }

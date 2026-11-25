@@ -17,7 +17,7 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 ## Planning
 
 - [Task](planning/v03.2-surge-alerts.md): the surge alert task with its origins, outcomes, and findings. Read against `claude/skills/task-board/references/tasks.md` at `af045565`.
-- [Board](planning/priority.md): Tidewell's board with the surge alert task in flight beside the rows waiting on it. Read against `claude/skills/task-board/references/board.md` at `c1512c44`.
+- [Board](planning/priority.md): Tidewell's board with the surge alert task in flight beside the rows waiting on it. Read against `claude/skills/task-board/references/board.md` at `9b64483c`.
 - [Feature plan](planning/feature-surge-alerts.md): the approved surge alert plan a worker builds from. Read against `claude/skills/plan-feature/references/plan.md` at `2b26db17`.
 
 ## Shipping
