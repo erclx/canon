@@ -471,18 +471,23 @@ async function markFloatingChrome(page: Page) {
 }
 
 /**
- * Whether an opaque element paints over this one's center, since a mask drawn
- * there lands across the cover. A center off-window reads uncovered, and the
- * target is made hittable for the test, since the hit test skips it otherwise.
+ * Whether an opaque element paints over this one at any of nine points, being
+ * the four corners inset by a pixel, the four edge midpoints, and the center,
+ * since a mask drawn there lands across the cover. A point off-window reads
+ * uncovered, and the target is made hittable for the test, since the hit test
+ * skips it otherwise.
  */
 async function isCovered(element: Locator): Promise<boolean> {
   return element.evaluate((target: HTMLElement | SVGElement) => {
     const box = target.getBoundingClientRect()
-    const x = box.left + box.width / 2
-    const y = box.top + box.height / 2
-    if (x < 0 || y < 0 || x >= window.innerWidth || y >= window.innerHeight) {
-      return false
-    }
+    const inset = Math.min(1, box.width / 2, box.height / 2)
+    const lefts = [
+      box.left + inset,
+      box.left + box.width / 2,
+      box.right - inset,
+    ]
+    const tops = [box.top + inset, box.top + box.height / 2, box.bottom - inset]
+    const points = lefts.flatMap((x) => tops.map((y) => ({ x, y })))
     const isOpaque = (node: Element) => {
       const style = getComputedStyle(node)
       if (style.visibility === 'hidden') return false
@@ -500,13 +505,23 @@ async function isCovered(element: Locator): Promise<boolean> {
     const priority = target.style.getPropertyPriority('pointer-events')
     target.style.setProperty('pointer-events', 'auto', 'important')
     try {
-      for (const hit of document.elementsFromPoint(x, y)) {
-        if (target === hit || target.contains(hit) || hit.contains(target)) {
+      return points.some(({ x, y }) => {
+        if (
+          x < 0 ||
+          y < 0 ||
+          x >= window.innerWidth ||
+          y >= window.innerHeight
+        ) {
           return false
         }
-        if (isOpaque(hit)) return true
-      }
-      return false
+        for (const hit of document.elementsFromPoint(x, y)) {
+          if (target === hit || target.contains(hit) || hit.contains(target)) {
+            return false
+          }
+          if (isOpaque(hit)) return true
+        }
+        return false
+      })
     } finally {
       target.style.setProperty('pointer-events', pointerEvents, priority)
     }

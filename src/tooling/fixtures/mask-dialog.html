@@ -9,7 +9,8 @@
         background: #fff;
       }
       .edited,
-      .below {
+      .below,
+      .partial {
         position: absolute;
         width: 200px;
         height: 40px;
@@ -26,6 +27,18 @@
       .below {
         left: 100px;
         top: 1800px;
+      }
+      .partial {
+        left: 100px;
+        top: 400px;
+      }
+      .menu {
+        position: absolute;
+        left: 250px;
+        top: 380px;
+        width: 100px;
+        height: 80px;
+        background: #fff;
       }
       .base {
         position: absolute;
@@ -63,13 +76,17 @@
     <span class="edited" id="under-panel"></span>
     <span class="edited" id="under-backdrop"></span>
     <span class="below"></span>
+    <span class="partial"></span>
+    <div class="menu"></div>
     <div class="base"></div>
     <span class="badge"></span>
     <div class="backdrop"></div>
     <div class="panel" role="dialog"></div>
     <script>
       if (location.search === '?closed') {
-        for (const node of document.querySelectorAll('.backdrop, .panel')) {
+        for (const node of document.querySelectorAll(
+          '.backdrop, .panel, .menu',
+        )) {
           node.remove()
         }
       }
