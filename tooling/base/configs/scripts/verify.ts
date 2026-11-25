@@ -540,22 +540,13 @@ function listPaths(args: readonly string[]): string[] {
   return splitPaths(listed)
 }
 
-const TEST_FILE =
-  /(?:\.(?:test|spec)|_test)\.(?:[cm]?[jt]sx?|py|go|php)$|(?:^|\/)test_[^/]+\.py$/
+const TEST_FILE = /(?:\.(?:test|spec)|_test)\.(?:[cm]?[jt]sx?|py|go)$/
 
-interface Subject {
-  readonly folder: string
-  readonly stem: string
-}
-
-// A stem runs to the first dot, so a.module.css shares one with a.test.tsx.
-function subjectOf(path: string): Subject {
-  const start = path.lastIndexOf('/') + 1
-  const dot = path.indexOf('.', start + 1)
-  return {
-    folder: path.slice(0, start),
-    stem: path.slice(start, dot === -1 ? undefined : dot),
-  }
+// The folder and the name up to its first dot, so a.module.css shares one with
+// a.test.tsx beside it.
+function subjectOf(path: string): string {
+  const dot = path.indexOf('.', path.lastIndexOf('/') + 2)
+  return dot === -1 ? path : path.slice(0, dot)
 }
 
 // Ties by name and follows no import, since a shared module's imports reach
@@ -565,18 +556,12 @@ function tieTests(
   files: readonly string[],
 ): string[] {
   const paths = new Set(changed)
-  const subjects = changed.map(subjectOf)
-  const stems = new Set(subjects.map(({ stem }) => stem))
-  const places = new Set(subjects.map(({ folder, stem }) => folder + stem))
-  return files.filter((file) => {
-    if (!TEST_FILE.test(file)) return false
-    const { folder, stem } = subjectOf(file)
-    return (
-      paths.has(file) ||
-      places.has(folder + stem.replace(/_test$/, '')) ||
-      (file.endsWith('.py') && stems.has(stem.replace(/^test_/, '')))
-    )
-  })
+  const subjects = new Set(changed.map(subjectOf))
+  return files.filter(
+    (file) =>
+      TEST_FILE.test(file) &&
+      (paths.has(file) || subjects.has(subjectOf(file).replace(/_test$/, ''))),
+  )
 }
 
 // Read below this folder alone and outside each nested root, whose own run
@@ -600,17 +585,12 @@ function findTiedTests(base: string): string[] {
   ]
   const present = listPaths(['ls-files', '-z', '--cached', ...untracked])
   const files = new Set(present.filter((path) => existsSync(path)))
-  return tieTests(changed.filter(isOwn), [...files].filter(isOwn))
+  return tieTests(changed, [...files].filter(isOwn))
 }
 
-function runTiedTests(base: string, declared: Set<string>): void {
+function runTiedTests(base: string): void {
   logStep('Tied tests')
-  if (!declared.has(TIED_TESTS)) {
-    logSkip(
-      `Skipped: ${TIED_TESTS} is not declared here, so the tests are left to CI`,
-    )
-    return
-  }
+  logSkip('Skipped: the full suites and the build, which CI runs')
   const tests = findTiedTests(base)
   if (tests.length === 0) {
     logSkip('Skipped: no test is tied to the change')
@@ -618,7 +598,7 @@ function runTiedTests(base: string, declared: Set<string>): void {
   }
   if (tests.length > MAX_TIED_TESTS) {
     logSkip(
-      `Skipped: ${tests.length} test files are tied to the change, past the ${MAX_TIED_TESTS} run here, so they are left to CI or to 'bun run check'`,
+      `Skipped: ${tests.length} test files are tied to the change, past the ${MAX_TIED_TESTS} run here, so CI runs them`,
     )
     return
   }
@@ -823,15 +803,19 @@ function main(flags: Flags): void {
 
   if (!isNested) print(`${GREY}┌${NC}`)
 
+  const required = new Set(list.require)
   const base = flags.isChanged ? resolveBase() : undefined
-  const isScoped = base !== undefined
-  if (flags.isChanged && !isScoped) {
+  // Declaring the script says CI runs what a scoped run leaves out.
+  const isScoped = base !== undefined && declared.has(TIED_TESTS)
+  if (flags.isChanged && base === undefined) {
     logSkip('origin holds no branch to compare with yet, so every phase runs')
+  } else if (flags.isChanged && !isScoped) {
+    logSkip(`${TIED_TESTS} is not declared here, so every phase runs`)
   }
 
   // A nested run keeps no pass, since the root's key covers its tree and tools.
   const pass =
-    isScoped && !isNested ? openPass(base, flags.isForced) : undefined
+    base !== undefined && !isNested ? openPass(base, flags.isForced) : undefined
   if (pass?.hasPassed) {
     logSkip(
       'Skipped: this content already passed. Run with --force to check it again',
@@ -840,12 +824,11 @@ function main(flags: Flags): void {
     return
   }
 
-  const required = new Set(list.require)
   for (const phase of PHASES) {
     if (isScoped && CI_PHASES.has(phase.script)) continue
     runPhase(phase, required.has(phase.script), declared)
   }
-  if (isScoped) runTiedTests(base, declared)
+  if (isScoped) runTiedTests(base)
 
   logStep('Canon checks')
   checkCanonGate()
@@ -866,7 +849,8 @@ function main(flags: Flags): void {
 
   // A nested run never discovers, so a subfolder's own subfolders run once.
   if (!isNested) {
-    for (const root of findNestedRoots()) runNestedRoot(root, isScoped)
+    for (const root of findNestedRoots())
+      runNestedRoot(root, base !== undefined)
   }
 
   pass?.keep()
@@ -874,9 +858,9 @@ function main(flags: Flags): void {
   if (!isNested) {
     print(`${GREY}└${NC}\n`)
     print(
-      isScoped
-        ? `${GREEN}✓ Scoped check passed.${NC} The full suites and the build did not run`
-        : `${GREEN}✓ Verification passed${NC}`,
+      base === undefined
+        ? `${GREEN}✓ Verification passed${NC}`
+        : `${GREEN}✓ Changed check passed${NC}`,
     )
   }
 }

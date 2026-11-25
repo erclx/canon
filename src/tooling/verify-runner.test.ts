@@ -851,17 +851,40 @@ describe('changed mode', () => {
     expect(runChanged().status).toBe(0)
   })
 
-  it('should skip the tests with a reason when test:changed is undeclared', () => {
-    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
+  it('should run the suite and the build when test:changed is undeclared', () => {
+    setUpChanged()
     writePackage(declare(STACK_SCRIPTS.web))
-    writeSource('src/cart.ts', 'edited')
 
     const result = runChanged()
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain(
-      'Skipped: test:changed is not declared here',
-    )
+    expect(result.stdout).toContain('Unit tests passed')
+    expect(result.stdout).toContain('Build passed')
+  })
+
+  it('should fail on a broken suite when test:changed is undeclared', () => {
+    setUpChanged()
+    writePackage({ ...declare(STACK_SCRIPTS.web), 'test:run': 'exit 1' })
+
+    expect(runChanged().status).toBe(1)
+  })
+
+  it('should name CI nowhere when test:changed is undeclared', () => {
+    setUpChanged()
+    writePackage(declare(STACK_SCRIPTS.web))
+
+    const result = runChanged()
+
+    expect(result.stdout).toContain('test:changed is not declared here')
+    expect(result.stdout).not.toContain('CI')
+  })
+
+  it('should read the build when test:changed is undeclared', () => {
+    setUpChanged()
+    writePackage(declare(STACK_SCRIPTS.web))
+    writeSource('scripts/check-head-meta.sh', 'exit 1\n')
+
+    expect(runChanged().status).toBe(1)
   })
 
   it('should say no test is tied when the change reaches none', () => {
@@ -874,12 +897,14 @@ describe('changed mode', () => {
     expect(readTests()).toEqual([])
   })
 
-  it('should close by naming what it did not run', () => {
+  it('should name what it left to CI', () => {
     setUpChanged()
 
     const result = runChanged()
 
-    expect(result.stdout).toContain('The full suites and the build did not run')
+    expect(result.stdout).toContain(
+      'Skipped: the full suites and the build, which CI runs',
+    )
     expect(result.stdout).not.toContain('Verification passed')
   })
 })
@@ -889,7 +914,6 @@ describe('the tie rule', () => {
     ['a .test. file beside its source', 'src/cart.ts', 'src/cart.test.ts'],
     ['a .spec. file beside its source', 'src/cart.tsx', 'src/cart.spec.tsx'],
     ['a _test file beside its source', 'pkg/cart.py', 'pkg/cart_test.py'],
-    ['a test_ file in another folder', 'app/tax.py', 'tests/test_tax.py'],
     ['a test beside a stylesheet', 'src/a.module.css', 'src/a.test.tsx'],
     ['a path a shell expands', 'app/(a)/$id x.ts', 'app/(a)/$id x.test.ts'],
   ])('should tie %s', (_case, source, test) => {
@@ -905,6 +929,7 @@ describe('the tie rule', () => {
     ['a same-named test in another folder', 'src/a.ts', 'lib/a.test.ts'],
     ['a test whose stem only starts the same', 'src/a.ts', 'src/ab.test.ts'],
     ['a snapshot', 'src/a.ts', 'src/a.test.ts.snap'],
+    ['a test_ file in another folder', 'app/tax.py', 'tests/test_tax.py'],
     ['a data file carrying a marker', 'src/a.ts', 'src/a.spec.yaml'],
   ])('should not tie %s', (_case, source, other) => {
     setUpChanged([source, other])
@@ -1126,15 +1151,13 @@ describe('changed mode in a nested root', () => {
     expect(readTests()).toEqual(['cart.test.ts'])
   })
 
-  it('should skip its tests when it declares no test:changed', () => {
+  it('should run its full suite when it declares no test:changed', () => {
     writeService({ 'test:run': 'exit 1' })
 
     const result = runChanged()
 
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain(
-      'Skipped: test:changed is not declared here',
-    )
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('service failed')
   })
 
   it('should read its own folder under a hook that exports GIT_DIR', () => {
@@ -1143,30 +1166,6 @@ describe('changed mode in a nested root', () => {
     const result = runChanged({ GIT_DIR: join(fixture, '.git') })
 
     expect(result.status).toBe(0)
-    expect(readTests()).toEqual([])
-  })
-
-  it('should tie none of its tests to a change at the root', () => {
-    writeService({ 'test:run': 'exit 1' })
-    writeSource('service/tests/test_tax.py')
-    commit()
-    pushTrunk()
-    writeSource('tax.py')
-
-    runChanged()
-
-    expect(readTests()).toEqual([])
-  })
-
-  it('should tie no test at the root to its own change', () => {
-    writeService({ 'test:run': 'exit 1' })
-    writeSource('tests/test_tax.py')
-    commit()
-    pushTrunk()
-    writeSource('service/tax.py')
-
-    runChanged()
-
     expect(readTests()).toEqual([])
   })
 
