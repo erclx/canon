@@ -18,11 +18,7 @@ export default defineConfig({
     // `contextOptions` is the spelling that works on every version.
     contextOptions: { reducedMotion: 'reduce' },
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'bun run dev',
     url: baseURL,

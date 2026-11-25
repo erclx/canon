@@ -2,7 +2,8 @@ import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { PlaywrightTestConfig as PlaywrightConfig } from '@playwright/test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 interface WorkflowStep {
   name?: string
@@ -178,6 +179,29 @@ describe('web verify.yml e2e-shards job', () => {
     expect(upload.if).toBe('failure()')
     expect(upload.with?.name).toContain('${{ matrix.shardIndex }}')
   })
+})
+
+describe('shipped Playwright configs', () => {
+  const stacks = ['astro', 'nextjs', 'vite-react']
+
+  const loadConfig = async (stack: string): Promise<PlaywrightConfig> => {
+    vi.resetModules()
+    const module = (await import(
+      `../../tooling/${stack}/configs/playwright.config.ts`
+    )) as { default: PlaywrightConfig }
+    return module.default
+  }
+
+  it.each(stacks)(
+    'should declare the one engine the workflow runs, the engine in %s',
+    async (stack) => {
+      const config = await loadConfig(stack)
+
+      expect(config.projects?.map((project) => project.name)).toEqual([
+        'chromium',
+      ])
+    },
+  )
 })
 
 describe('web verify.yml e2e-tests summary job', () => {
