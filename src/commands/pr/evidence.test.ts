@@ -1248,6 +1248,7 @@ describe('canon pr evidence --check', () => {
   describe('with a carried preview read against the tip', () => {
     const BUILT = 'da60d8794da60d8794da60d8794da60d8794da60'
     let tip: string
+    let forkPoint: string
 
     function writeCompared(lines: readonly string[]): void {
       writeFileSync(join(tempDir, 'compared.txt'), `${lines.join('\n')}\n`)
@@ -1262,6 +1263,7 @@ describe('canon pr evidence --check', () => {
       writeFileSync(join(tempDir, 'files.tsv'), 'modified\tweb/index.html\n')
       writeComment(markedCommentBody())
       tip = pushBranch()
+      forkPoint = execaSync('git', ['-C', repoRoot, 'rev-parse', 'main']).stdout
     })
 
     it('should settle a preview built at the tip and name the build', async () => {
@@ -1277,7 +1279,7 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should owe a preview built before a served path changed', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
       writeCompared(['complete', 'web/index.html', 'docs/guide.md'])
 
       const record = await runCheck()
@@ -1287,7 +1289,7 @@ describe('canon pr evidence --check', () => {
         owed: ['preview'],
         previewHead: {
           reason: 'stale',
-          built: BUILT,
+          built: forkPoint,
           tip,
           servedSinceBuilt: true,
         },
@@ -1295,7 +1297,7 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should settle a preview built before a push touching no served path', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
       writeCompared(['complete', 'assets/evidence/dark/hero.png', 'docs/a.md'])
 
       const record = await runCheck()
@@ -1307,7 +1309,7 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should owe a stale preview whose compare listing GitHub cut short', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
       writeCompared(['truncated'])
 
       const record = await runCheck()
@@ -1356,11 +1358,172 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should refuse as gh-failed when the changes since the build cannot be listed', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
 
       const record = await runCheck()
 
       expect(record).toMatchObject({ reason: 'gh-failed' })
+    })
+
+    it('should refuse as gh-failed when the remote no longer holds the built head', async () => {
+      writeRuns([{ headSha: BUILT }])
+      writeCompared(['complete', 'docs/a.md'])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({ reason: 'gh-failed' })
+    })
+
+    describe('across a rebase or a merge of the base', () => {
+      let built: string
+
+      function git(...args: string[]): string {
+        return String(
+          execaSync('git', ['-C', repoRoot, ...args], {
+            env: {
+              GIT_AUTHOR_NAME: 't',
+              GIT_AUTHOR_EMAIL: 't@t',
+              GIT_COMMITTER_NAME: 't',
+              GIT_COMMITTER_EMAIL: 't@t',
+            },
+          }).stdout,
+        )
+      }
+
+      /** Commits one file on `branch`, pushes it, and returns the commit. */
+      function push(branch: string, path: string, text: string): string {
+        git('checkout', '-q', branch)
+        mkdirSync(join(repoRoot, path, '..'), { recursive: true })
+        writeFileSync(join(repoRoot, path), text)
+        git('add', path)
+        git('commit', '-q', '-m', `edit ${path}`)
+        git('push', '-q', '-f', 'origin', branch)
+        return git('rev-parse', 'HEAD')
+      }
+
+      beforeEach(() => {
+        built = push('feat/x', 'web/index.html', 'branch\n')
+        push('main', 'web/main-only.html', 'main\n')
+        git('checkout', '-q', 'feat/x')
+        writeRuns([{ headSha: built }])
+      })
+
+      it('should settle a preview over a rebase that left the branch diff equal', async () => {
+        git('rebase', '-q', 'main')
+        git('push', '-q', '-f', 'origin', 'feat/x')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({
+          reason: 'settled',
+          previewHead: { reason: 'stale', built, servedSinceBuilt: false },
+        })
+      })
+
+      it('should settle a rebase beside a change to a path the deploy does not serve', async () => {
+        git('rebase', '-q', 'main')
+        push('feat/x', 'docs/later.md', 'later\n')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({
+          reason: 'settled',
+          previewHead: { servedSinceBuilt: false },
+        })
+      })
+
+      it('should owe a preview over a rebase that changed a served path', async () => {
+        git('rebase', '-q', 'main')
+        push('feat/x', 'web/index.html', 'rewritten\n')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({
+          reason: 'owed',
+          owed: ['preview'],
+          previewHead: { servedSinceBuilt: true },
+        })
+      })
+
+      it('should owe a preview over a rebase that dropped a served path', async () => {
+        git('checkout', '-q', '-B', 'feat/x', 'main')
+        push('feat/x', 'docs/later.md', 'later\n')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+      })
+
+      it('should owe a preview over a rebase that changed a served path git quotes', async () => {
+        git('rebase', '-q', 'main')
+        push('feat/x', 'web/caf\u00e9.html', 'new\n')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+      })
+
+      it('should settle an equal rebase under a deploy that serves every path', async () => {
+        writeFileSync(
+          join(repoRoot, '.github', 'workflows', 'deploy.yml'),
+          FENCED_DEPLOY,
+        )
+        git('rebase', '-q', 'main')
+        git('push', '-q', '-f', 'origin', 'feat/x')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({
+          reason: 'settled',
+          previewHead: { servedSinceBuilt: false },
+        })
+      })
+
+      it('should settle a preview over a clean merge of the base that touched a served path', async () => {
+        git('merge', '-q', '--no-edit', 'main')
+        git('push', '-q', 'origin', 'feat/x')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({
+          reason: 'settled',
+          previewHead: { servedSinceBuilt: false },
+        })
+      })
+
+      it('should owe a preview over a merge followed by a commit to a served path', async () => {
+        git('merge', '-q', '--no-edit', 'main')
+        push('feat/x', 'web/index.html', 'more\n')
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({ reason: 'owed', owed: ['preview'] })
+      })
+
+      it('should read the base off the remote when the local copy trails it', async () => {
+        push('main', 'web/second.html', 'second\n')
+        git('checkout', '-q', 'feat/x')
+        git('rebase', '-q', 'main')
+        git('push', '-q', '-f', 'origin', 'feat/x')
+        git('update-ref', 'refs/heads/main', forkPoint)
+        git('update-ref', 'refs/remotes/origin/main', forkPoint)
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({ reason: 'settled' })
+      })
+
+      it('should refuse as gh-failed when the base is gone from the remote', async () => {
+        git('rebase', '-q', 'main')
+        git('push', '-q', '-f', 'origin', 'feat/x')
+        const origin = join(tempDir, 'origin.git')
+        git('-C', origin, 'update-ref', '-d', 'refs/heads/main')
+        writeCompared(['complete', 'docs/a.md'])
+
+        const record = await runCheck()
+
+        expect(record).toMatchObject({ reason: 'gh-failed' })
+      })
     })
 
     it('should read no built head when the comment carries no hosted preview', async () => {
