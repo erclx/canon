@@ -55,9 +55,13 @@ Run it once, ahead of `canon gov sync` or `canon gov install`.
 
 ## Rename the skill citations, once
 
-Plugin skills took new names, and no old name keeps a pointer. [Skill renames](skill-names.md) lists each old name and its successor, the ones with none, and the held files to resync before the sweep.
+Plugin skills took new names, and no old name keeps a pointer. [Skill renames](skill-names.md) lists each old name and its successor, and the ones with none.
+
+Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack, naming a held hook with `--replace`.
 
 ```bash
+canon gov sync
+canon tooling sync <stack> . --write
 canon migrate skill-names --json
 canon migrate skill-names --write --json
 ```
