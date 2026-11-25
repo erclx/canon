@@ -207,6 +207,61 @@ describe('canon records validate plans', () => {
     ).toMatchObject([{ record: 'feature-a.md', subject: 'feature-whole' }])
   })
 
+  it('should exit 0 on a plan whose questions carry no Evidence line', async () => {
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-old.md'),
+      [
+        '# Feature: Old questions',
+        '',
+        '## Summary',
+        '',
+        '- The goal',
+        '',
+        '## Files to touch',
+        '',
+        '- `src/a.ts`: the change',
+        '',
+        '## Verification',
+        '',
+        '- It runs: `bun test`',
+        '',
+        '## Risks',
+        '',
+        'None identified.',
+        '',
+        '## Review focus',
+        '',
+        'None identified.',
+        '',
+        '## Questions',
+        '',
+        '1. Which check?',
+        '   - Suggested: a validate verb, since it reports',
+        '   - Answer:',
+        '',
+      ].join('\n'),
+    )
+
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    const parsed = JSON.parse(result.stdout) as {
+      findings: unknown[]
+      evidence: { kind: string; record: string }[]
+    }
+    expect(parsed.findings).toEqual([])
+    expect(parsed.evidence).toMatchObject([
+      { kind: 'evidence-missing', record: 'feature-old.md' },
+    ])
+  })
+
   it('should exit 0 on a plan missing structure criteria alone', async () => {
     await writeFile(
       join(root, '.canon', 'plans', 'feature-old.md'),

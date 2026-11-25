@@ -118,6 +118,11 @@ export interface ValidateReport {
   readonly findings: readonly Finding[]
   readonly structure: readonly StructureFinding[]
   /**
+   * Each plan question's Evidence line, carried by the plans kind alone. It
+   * never sets the exit, since every plan written before the line misses it.
+   */
+  readonly evidence?: readonly Finding[]
+  /**
    * Each session map's words against its cap, carried by the sessions kind
    * alone. It never sets the exit, since a map refused near a compaction loses
    * the reasoning it was written to save.
@@ -363,23 +368,57 @@ const SUGGESTED_PREFIX = '- Suggested:'
 const EVIDENCE_PREFIX = '- Evidence:'
 const ANSWER_PREFIX = '- Answer:'
 const EVIDENCE_NONE = /^none,\s*\S/i
-const LINE_SUFFIX = /:\d+(?:-\d+)?$/
-const FILE_EXTENSION = /\.[a-z][a-z0-9]*$/i
+const LOCATION_SUFFIX = /(?::\d+(?:-\d+)?)+$|#L\d+(?:-L?\d+)?$/
+const REVISION_PREFIX = /^[0-9a-f]{7,40}:/
+const FILE_EXTENSIONS = new Set([
+  'astro',
+  'cjs',
+  'css',
+  'go',
+  'html',
+  'js',
+  'json',
+  'jsx',
+  'lock',
+  'md',
+  'mjs',
+  'php',
+  'png',
+  'py',
+  'sh',
+  'svelte',
+  'svg',
+  'toml',
+  'ts',
+  'tsx',
+  'txt',
+  'vue',
+  'yaml',
+  'yml',
+])
 
 /** Answers whether a project-relative path exists, a file or a folder alike. */
 export type PathExists = (rel: string) => boolean
 
 /**
- * A span with a space, placeholder, glob, scheme, or alias is a command or a
- * pattern, so only its shape is checked, since running a command would write.
+ * A span reads as a path only when its first segment exists at the root, or a
+ * bare name carries a known extension, so a command, ref, symbol, or alias is
+ * checked for shape alone. Running a cited command would write.
  */
-function citedPath(span: string): string | undefined {
-  if (/[\s<>*]|:\/\/|^@/.test(span)) return undefined
+function citedPath(span: string, pathExists: PathExists): string | undefined {
+  if (/[\s<>*]/.test(span)) return undefined
 
-  const path = span.replace(LINE_SUFFIX, '').replace(/^\.\//, '')
-  if (!path.includes('/') && !FILE_EXTENSION.test(path)) return undefined
+  const path = span
+    .replace(REVISION_PREFIX, '')
+    .replace(LOCATION_SUFFIX, '')
+    .replace(/^\.\//, '')
+    .replace(/\/$/, '')
+  const [first] = path.split('/')
 
-  return path.replace(/\/$/, '')
+  if (path.includes('/')) return pathExists(first) ? path : undefined
+
+  const extension = path.split('.').at(-1)?.toLowerCase() ?? ''
+  return path.includes('.') && FILE_EXTENSIONS.has(extension) ? path : undefined
 }
 
 function checkEvidence(
@@ -406,7 +445,7 @@ function checkEvidence(
   if (!pathExists) return []
 
   return spans
-    .map(citedPath)
+    .map((span) => citedPath(span, pathExists))
     .filter((path): path is string => path !== undefined)
     .filter((path) => !pathExists(path))
     .map((path) =>
@@ -419,11 +458,25 @@ function checkEvidence(
     )
 }
 
-function checkQuestionContract(
+/**
+ * Reads each question's Evidence line apart from `checkPlan`, so a plan
+ * written before the line reports it without failing the exit or the examples
+ * gate. Left without `pathExists`, a cited path is checked for shape alone.
+ */
+export function checkPlanEvidence(
   name: string,
-  lines: string[],
+  text: string,
   pathExists?: PathExists,
 ): Finding[] {
+  const lines = splitPlanSections(text).get('Questions') ?? []
+  if (lines.some((line) => line.trim() === NONE_IDENTIFIED)) return []
+
+  return readQuestions(lines).flatMap((question) =>
+    checkEvidence(name, shorten(question.label), question.body, pathExists),
+  )
+}
+
+function checkQuestionContract(name: string, lines: string[]): Finding[] {
   if (lines.some((line) => line.trim() === NONE_IDENTIFIED)) return []
 
   const findings: Finding[] = []
@@ -456,8 +509,6 @@ function checkQuestionContract(
         ),
       )
     }
-
-    findings.push(...checkEvidence(name, subject, question.body, pathExists))
 
     if (
       suggested &&
@@ -606,7 +657,6 @@ export function checkPlan(
   counterpart?: CounterpartRoot,
   readDocument?: ReadDocument,
   callers?: CallersRoot,
-  pathExists?: PathExists,
 ): Finding[] {
   const findings: Finding[] = []
 
@@ -703,9 +753,7 @@ export function checkPlan(
     )
   }
 
-  findings.push(
-    ...checkQuestionContract(name, sections.get('Questions') ?? [], pathExists),
-  )
+  findings.push(...checkQuestionContract(name, sections.get('Questions') ?? []))
   findings.push(...checkSources(name, sections.get('Sources') ?? []))
   findings.push(...checkVerification(name, sections.get('Verification') ?? []))
   findings.push(
@@ -1079,12 +1127,14 @@ async function validateFiles(
   files: readonly string[],
   check: (name: string, text: string) => Finding[],
   report: (text: string) => StructureEntry[],
+  evidence?: (name: string, text: string) => Finding[],
 ): Promise<ValidateReport> {
   const perFile = await Promise.all(
     files.map(async (file) => {
       const text = await readFile(join(dir, file), 'utf8')
       return {
         findings: check(file, text),
+        evidence: evidence?.(file, text) ?? [],
         structure: report(text).map((entry) => ({
           ...entry,
           record: file,
@@ -1100,6 +1150,7 @@ async function validateFiles(
     records: files.length,
     findings: perFile.flatMap((one) => one.findings),
     structure: perFile.flatMap((one) => one.structure),
+    ...(evidence && { evidence: perFile.flatMap((one) => one.evidence) }),
   }
 }
 
@@ -1179,15 +1230,10 @@ export async function validateRecords(
       kind,
       names,
       (name, text) =>
-        checkPlan(
-          name,
-          text,
-          counterpart,
-          documentReader(root),
-          callers,
-          (rel) => existsSync(join(root, rel)),
-        ),
+        checkPlan(name, text, counterpart, documentReader(root), callers),
       planStructure,
+      (name, text) =>
+        checkPlanEvidence(name, text, (rel) => existsSync(join(root, rel))),
     )
   }
   if (kind === 'sessions') return validateSessionMaps(dir, names)

@@ -7,6 +7,7 @@ import { linesOutsideFences } from '@/markdown/scan'
 import {
   checkItems,
   checkPlan,
+  checkPlanEvidence,
   type Finding,
   type FindingKind,
   hasStagedBatches,
@@ -724,25 +725,25 @@ describe('checkPlan', () => {
   })
 
   describe('Evidence', () => {
-    const exists = (rel: string) => rel === 'src/real.ts' || rel === 'src/dir'
+    const PRESENT = new Set(['src', 'src/real.ts', 'src/dir'])
+    const exists = (rel: string) => PRESENT.has(rel)
 
     function evidenceKinds(line: string): FindingKind[] {
       return kinds(
-        checkPlan(
-          'feature-a-b.md',
-          withEvidence(line),
-          undefined,
-          undefined,
-          undefined,
-          exists,
-        ),
+        checkPlanEvidence('feature-a-b.md', withEvidence(line), exists),
       )
     }
+
+    it('should leave a missing Evidence line out of the plan findings', () => {
+      const body = conformingPlan().replace(`${EVIDENCE_LINE}\n`, '')
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
 
     it('should report a question carrying no Evidence line', () => {
       const body = conformingPlan().replace(`${EVIDENCE_LINE}\n`, '')
 
-      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+      expect(kinds(checkPlanEvidence('feature-a-b.md', body))).toEqual([
         'evidence-missing',
       ])
     })
@@ -765,70 +766,67 @@ describe('checkPlan', () => {
       expect(evidenceKinds('   - Evidence: none, preference')).toEqual([])
     })
 
-    it('should accept a cited path that resolves', () => {
-      expect(evidenceKinds('   - Evidence: `src/real.ts` reads it')).toEqual([])
+    it('should report nothing on a plan whose questions read None identified', () => {
+      const body = conformingPlan().replace(
+        [
+          '1. Which check reaches a gitignored folder?',
+          '   - Suggested: a validate verb, since it reports without writing',
+          EVIDENCE_LINE,
+          '   - Answer:',
+        ].join('\n'),
+        'None identified.',
+      )
+
+      expect(checkPlanEvidence('feature-a-b.md', body, exists)).toEqual([])
     })
 
-    it('should drop a trailing line number before resolving', () => {
-      expect(
-        evidenceKinds('   - Evidence: `src/real.ts:363` reads it'),
-      ).toEqual([])
+    it.each([
+      ['a cited path', '`src/real.ts` reads it'],
+      ['a line number', '`src/real.ts:363` reads it'],
+      ['a line range', '`src/real.ts:12-20` reads it'],
+      ['a line and column', '`src/real.ts:363:12` reads it'],
+      ['a line anchor', '`src/real.ts#L12` reads it'],
+      ['a revision prefix', '`e429d742:src/real.ts` reads it'],
+      ['a folder', '`src/dir/` holds it'],
+    ])('should resolve %s that exists', (_case, evidence) => {
+      expect(evidenceKinds(`   - Evidence: ${evidence}`)).toEqual([])
     })
 
-    it('should accept a cited folder that resolves', () => {
-      expect(evidenceKinds('   - Evidence: `src/dir/` holds it')).toEqual([])
-    })
-
-    it('should report a cited path absent from the tree', () => {
-      expect(evidenceKinds('   - Evidence: `src/gone.ts` reads it')).toEqual([
+    it.each([
+      ['a path under a present folder', '`src/gone.ts` reads it'],
+      ['a bare filename', '`gone.md` says so'],
+      ['a path with a line number', '`src/gone.ts:12` reads it'],
+    ])('should report %s absent from the tree', (_case, evidence) => {
+      expect(evidenceKinds(`   - Evidence: ${evidence}`)).toEqual([
         'evidence-unresolved',
       ])
     })
 
-    it('should report a bare filename absent from the tree', () => {
-      expect(evidenceKinds('   - Evidence: `gone.md` says so')).toEqual([
-        'evidence-unresolved',
-      ])
-    })
-
-    it('should never resolve a placeholder path', () => {
-      expect(
-        evidenceKinds(
-          '   - Evidence: `.canon/plans/feature-<slug>.md` holds it',
-        ),
-      ).toEqual([])
-    })
-
-    it('should read a span holding a space as a command, never a path', () => {
-      expect(
-        evidenceKinds(
-          '   - Evidence: `bun --bun vitest run src/gone.test.ts` fails',
-        ),
-      ).toEqual([])
-    })
-
-    it('should read a span with no slash or extension as a symbol', () => {
-      expect(
-        evidenceKinds('   - Evidence: `checkQuestionContract` reads it'),
-      ).toEqual([])
-    })
-
-    it('should never resolve a cited URL', () => {
-      expect(
-        evidenceKinds('   - Evidence: `https://example.com/a.md` says so'),
-      ).toEqual([])
-    })
-
-    it('should never resolve an import alias', () => {
-      expect(
-        evidenceKinds('   - Evidence: `@/records/validate` exports it'),
-      ).toEqual([])
+    it.each([
+      ['a placeholder path', '`.canon/plans/feature-<slug>.md`'],
+      ['a command with a path inside', '`bun --bun vitest run src/gone.ts`'],
+      ['a symbol', '`checkQuestionContract`'],
+      ['a member access', '`process.env`'],
+      ['a URL', '`https://example.com/a.md`'],
+      ['a slash command', '`/session-worktree`'],
+      ['a plugin slash command', '`/canon:plan-feature`'],
+      ['a flag', '`--root=src/x`'],
+      ['a remote branch', '`origin/main`'],
+      ['a ref', '`refs/heads/main`'],
+      ['an import alias', '`@/records/validate`'],
+      ['a dollar alias', '`$lib/foo`'],
+      ['a home alias', '`~/components/x`'],
+      ['a hash alias', '`#app/x`'],
+      ['a node import', '`node:fs/promises`'],
+      ['a package subpath', '`vitest/config`'],
+    ])('should never resolve %s', (_case, span) => {
+      expect(evidenceKinds(`   - Evidence: ${span} shows it`)).toEqual([])
     })
 
     it('should leave a cited path unresolved when no root is read', () => {
       const body = withEvidence('   - Evidence: `src/gone.ts` reads it')
 
-      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+      expect(checkPlanEvidence('feature-a-b.md', body)).toEqual([])
     })
   })
 
@@ -1208,6 +1206,42 @@ describe('validateRecords', () => {
     const outcome = await validateRecords(ROOT, 'plans')
 
     expect(outcome).toMatchObject({ ok: true, records: 1, findings: [] })
+  })
+
+  it('should resolve a cited path against the root it validates', async () => {
+    mkdirSync(join(ROOT, 'src'), { recursive: true })
+    await writeFile(join(ROOT, 'src/real.ts'), '')
+    await seedPlan(
+      'feature-a-b.md',
+      withEvidence(
+        '   - Evidence: `src/real.ts` reads it, and `src/gone.ts` does not exist',
+      ),
+    )
+
+    const outcome = await validateRecords(ROOT, 'plans')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings).toEqual([])
+    expect(outcome.evidence?.map((found) => found.kind)).toEqual([
+      'evidence-unresolved',
+    ])
+    expect(outcome.evidence?.[0].message).toContain('src/gone.ts')
+  })
+
+  it('should report a missing Evidence line under evidence and never findings', async () => {
+    await seedPlan(
+      'feature-a-b.md',
+      conformingPlan().replace(`${EVIDENCE_LINE}\n`, ''),
+    )
+
+    const outcome = await validateRecords(ROOT, 'plans')
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      findings: [],
+      evidence: [{ kind: 'evidence-missing', record: 'feature-a-b.md' }],
+    })
   })
 
   it('should report a counterpart-class plan in a project keeping stacks', async () => {
