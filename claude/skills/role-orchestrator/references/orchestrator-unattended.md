@@ -121,7 +121,7 @@ Omit a section with nothing in it.
 
 Merge-ready means CI green at the tip, both reviews closed, and the lift run. Read it rather than recalling it.
 
-- Write each merge line per `## The merge line` in `orchestrator-output.md`, off `already-ready` or `clear` from `canon pr lift <number> --check --json` read at that moment
+- Write each merge line per `## The merge line` in `orchestrator-output.md`, off `already-ready` or `clear` naming no check under `running`, from `canon pr lift <number> --check --json` read then
 - Order the lines per `orchestrator-merge-order.md`, since two branches sharing a file still owe a rebase in that order
 - List a pull request whose read refuses under `Stopped` with the reason, rather than as merge-ready
 
