@@ -17,6 +17,8 @@ const EXEMPT_MARKER = /^<!--\s*canon-length-exempt:[ \t]*(\S.*?)\s*-->$/
 const CHANGELOG = 'CHANGELOG.md'
 const CHANGELOG_REASON = 'CHANGELOG.md is written by the release tool'
 
+const DOCS_FOLDER = 'docs/'
+
 export interface CeilingDocument {
   readonly rel: string
   readonly source: string
@@ -25,6 +27,8 @@ export interface CeilingDocument {
 export interface CeilingFinding {
   readonly rel: string
   readonly renderedLines: number
+  /** The rendered lines this document may reach, from `ceilingFor`. */
+  readonly ceiling: number
   /** The stated reason, or null where the document is not exempt. */
   readonly exempt: string | null
 }
@@ -32,6 +36,17 @@ export interface CeilingFinding {
 /** Whether the release tool writes this document, which no measure reads. */
 export function isChangelog(rel: string): boolean {
   return basename(rel) === CHANGELOG
+}
+
+/**
+ * The rendered lines a document may reach. A consumer guide under the root
+ * `docs/` folder takes the lower docs cap, since a person reads it, and every
+ * other document keeps the ceiling an agent pays for on demand.
+ */
+export function ceilingFor(rel: string): number {
+  return rel.startsWith(DOCS_FOLDER)
+    ? CHECKPOINTS.docsCeiling
+    : CHECKPOINTS.ceiling
 }
 
 /** The reason a document is exempt from the ceiling, or null where it is not. */
@@ -48,7 +63,7 @@ export function lengthExemption(rel: string, source: string): string | null {
 }
 
 /**
- * Every document past the ceiling, longest first, exempt ones included with
+ * Every document past its own ceiling, longest first, exempt ones included with
  * their reason so a report can count them rather than hide them.
  */
 export function ceilingFindings(
@@ -58,12 +73,14 @@ export function ceilingFindings(
     .map(({ rel, source }) => ({
       rel,
       renderedLines: documentHeight(source),
+      ceiling: ceilingFor(rel),
       source,
     }))
-    .filter(({ renderedLines }) => renderedLines > CHECKPOINTS.ceiling)
-    .map(({ rel, renderedLines, source }) => ({
+    .filter(({ renderedLines, ceiling }) => renderedLines > ceiling)
+    .map(({ rel, renderedLines, ceiling, source }) => ({
       rel,
       renderedLines,
+      ceiling,
       exempt: lengthExemption(rel, source),
     }))
     .sort((a, b) => b.renderedLines - a.renderedLines)

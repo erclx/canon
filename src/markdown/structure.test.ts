@@ -109,6 +109,7 @@ describe('CHECKPOINTS', () => {
       spread: 5,
       opener: 2,
       ceiling: 300,
+      docsCeiling: 200,
     })
   })
 })

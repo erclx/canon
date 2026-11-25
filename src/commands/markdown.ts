@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
-import { isChangelog, lengthExemption } from '@/markdown/ceiling'
+import { ceilingFor, isChangelog, lengthExemption } from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
 import type { DensityKind } from '@/markdown/density'
@@ -443,6 +443,7 @@ async function runAudit(
           spread: checkpoints.spread,
           opener: checkpoints.opener,
           ceiling: checkpoints.ceiling,
+          docsCeiling: checkpoints.docsCeiling,
         },
         entries: reports.map((report) => ({
           path: report.rel,
@@ -1151,8 +1152,9 @@ function reportLength(
     'A changelog is exempt by name, and so is a document carrying a canon-length-exempt marker that names a reason.',
   )
 
+  const caps = `the ${checkpoints.ceiling}-line ceiling or the ${checkpoints.docsCeiling}-line docs/ cap`
   const past = reports.filter(
-    (report) => report.renderedLines > checkpoints.ceiling,
+    (report) => report.renderedLines > ceilingFor(report.rel),
   )
   const over = past
     .filter((report) => report.exempt === null)
@@ -1160,15 +1162,14 @@ function reportLength(
   const exempt = past.length - over.length
 
   if (over.length === 0) {
-    logInfo(`No document past the ${checkpoints.ceiling}-line ceiling.`)
+    logInfo(`No document past ${caps}.`)
   } else {
-    logWarn(
-      `${plural(over.length, 'document')} past the ${checkpoints.ceiling}-line ceiling`,
-    )
+    logWarn(`${plural(over.length, 'document')} past ${caps}`)
     pipeOutput(
       over
         .map(
-          (report) => `${report.rel}  ${report.renderedLines} rendered lines`,
+          (report) =>
+            `${report.rel}  ${report.renderedLines} rendered lines past ${ceilingFor(report.rel)}`,
         )
         .join('\n'),
     )

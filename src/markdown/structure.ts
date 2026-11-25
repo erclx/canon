@@ -39,6 +39,7 @@ export const CHECKPOINTS = {
   spread: 5,
   opener: 2,
   ceiling: 300,
+  docsCeiling: 200,
 } as const
 
 /**
@@ -82,6 +83,11 @@ export interface Checkpoints {
    * gate stage rather than by any exit code of the audit.
    */
   readonly ceiling: number
+  /**
+   * Rendered lines a consumer guide under `docs/` may reach, lower than
+   * `ceiling` since a person reads it rather than an agent loading it on demand.
+   */
+  readonly docsCeiling: number
 }
 
 export interface BulletFinding {

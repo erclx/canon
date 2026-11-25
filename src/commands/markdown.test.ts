@@ -56,6 +56,22 @@ function config(): string {
 }
 
 describe('markdown audit', () => {
+  it('should list a consumer doc past the docs cap and leave a skill reference under the ceiling', async () => {
+    const lines = (count: number): string =>
+      Array.from({ length: count }, (_, index) => `Line ${index + 1}.`).join(
+        '\n\n',
+      )
+    write('docs/guide.md', `${lines(101)}\n`)
+    write('claude/skills/a/references/guide.md', `${lines(126)}\n`)
+
+    const result = await run(['markdown', 'audit', '.'])
+
+    expect(result.stderr).toContain('docs/guide.md  201 rendered lines past 200')
+    expect(result.stderr).not.toContain(
+      'claude/skills/a/references/guide.md  251 rendered lines',
+    )
+  })
+
   it('should report a density finding in a target with no config', async () => {
     write('docs/guide.md', `# Guide\n\n${LONG_PARAGRAPH}`)
 

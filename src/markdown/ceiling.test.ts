@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { ceilingFindings, lengthExemption } from '@/markdown/ceiling'
-import { CHECKPOINTS } from '@/markdown/structure'
+import {
+  ceilingFindings,
+  ceilingFor,
+  lengthExemption,
+} from '@/markdown/ceiling'
 
 const MARKER = '<!-- canon-length-exempt: a verbatim run record -->'
 
@@ -18,7 +21,7 @@ function document(rel: string, source: string) {
 describe('ceilingFindings', () => {
   it('passes a document sitting exactly at the ceiling', () => {
     const findings = ceilingFindings([
-      document('docs/guide.md', lines(CHECKPOINTS.ceiling)),
+      document('claude/skills/a/references/guide.md', lines(300)),
     ])
 
     expect(findings).toEqual([])
@@ -26,12 +29,47 @@ describe('ceilingFindings', () => {
 
   it('reports a document one line past the ceiling', () => {
     const findings = ceilingFindings([
-      document('docs/guide.md', lines(CHECKPOINTS.ceiling + 1)),
+      document('claude/skills/a/references/guide.md', lines(301)),
     ])
 
     expect(findings).toEqual([
-      { rel: 'docs/guide.md', renderedLines: 301, exempt: null },
+      {
+        rel: 'claude/skills/a/references/guide.md',
+        renderedLines: 301,
+        ceiling: 300,
+        exempt: null,
+      },
     ])
+  })
+
+  it('passes a skill reference under the ceiling and past the docs cap', () => {
+    const findings = ceilingFindings([
+      document('claude/skills/a/references/guide.md', lines(299)),
+    ])
+
+    expect(findings).toEqual([])
+  })
+
+  it('passes a consumer doc sitting exactly at the docs cap', () => {
+    const findings = ceilingFindings([document('docs/guide.md', lines(200))])
+
+    expect(findings).toEqual([])
+  })
+
+  it('reports a consumer doc one line past the docs cap', () => {
+    const findings = ceilingFindings([document('docs/guide.md', lines(201))])
+
+    expect(findings).toEqual([
+      { rel: 'docs/guide.md', renderedLines: 201, ceiling: 200, exempt: null },
+    ])
+  })
+
+  it('exempts a consumer doc past the docs cap that carries the marker', () => {
+    const findings = ceilingFindings([
+      document('docs/record.md', `${MARKER}\n\n${lines(250)}`),
+    ])
+
+    expect(findings[0]?.exempt).toBe('a verbatim run record')
   })
 
   it('exempts a changelog at any depth by name', () => {
@@ -81,6 +119,20 @@ describe('ceilingFindings', () => {
     ])
 
     expect(findings.map((finding) => finding.rel)).toEqual(['b.md', 'a.md'])
+  })
+})
+
+describe('ceilingFor', () => {
+  it('holds a document under docs/ to the docs cap', () => {
+    expect(ceilingFor('docs/agents/config.md')).toBe(200)
+  })
+
+  it('holds a docs folder nested below the root to the ceiling', () => {
+    expect(ceilingFor('tooling/base/seeds/docs/guide.md')).toBe(300)
+  })
+
+  it('holds a root document whose name opens on docs to the ceiling', () => {
+    expect(ceilingFor('docs-notes.md')).toBe(300)
   })
 })
 

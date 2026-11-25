@@ -513,8 +513,8 @@ export const skillDescriptionTotal: Measure = async (ctx) => {
 }
 
 /**
- * Every tracked document against the whole-document ceiling, naming each one
- * past it. In-process, since a gating length in `canon markdown audit` would
+ * Every tracked document against its whole-document ceiling, naming each one
+ * past it with the cap it broke. In-process, since a gating length in `canon markdown audit` would
  * fail every long plan the planning skills audit.
  */
 export const documentCeiling: Measure = async (ctx) => {
@@ -536,25 +536,28 @@ export const documentCeiling: Measure = async (ctx) => {
   const findings = ceilingFindings(documents)
   const over = findings.filter((finding) => finding.exempt === null)
   const exempt = findings.length - over.length
-  const ceiling = CHECKPOINTS.ceiling
+  const caps = `the ${CHECKPOINTS.ceiling}-line ceiling or the ${CHECKPOINTS.docsCeiling}-line docs/ cap`
 
   if (over.length === 0) {
     const exemptNote = exempt > 0 ? `, ${exempt} exempt` : ''
     return {
       emissions: [
         info(
-          `No document past the ${ceiling}-line ceiling across ${plural(documents.length, 'markdown file')}${exemptNote}`,
+          `No document past ${caps} across ${plural(documents.length, 'markdown file')}${exemptNote}`,
         ),
       ],
     }
   }
 
   const where = over
-    .map((finding) => `${finding.rel} ${finding.renderedLines} rendered lines`)
+    .map(
+      (finding) =>
+        `${finding.rel} ${finding.renderedLines} rendered lines past ${finding.ceiling}`,
+    )
     .join(', ')
   return {
     emissions: [],
-    failure: `${plural(over.length, 'document')} past the ${ceiling}-line ceiling: ${where}. Split each at a seam, or for a verbatim record add a \`<!-- canon-length-exempt: <reason> -->\` line naming why.`,
+    failure: `${plural(over.length, 'document')} past ${caps}: ${where}. Split each at a seam, or for a verbatim record add a \`<!-- canon-length-exempt: <reason> -->\` line naming why.`,
   }
 }
 
