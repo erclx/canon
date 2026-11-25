@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: 'e2e',
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  reporter: isCI ? 'list' : 'html',
+  reporter: isCI ? [['list'], ['html', { open: 'never' }]] : 'html',
   use: {
     trace: 'on-first-retry',
     baseURL,

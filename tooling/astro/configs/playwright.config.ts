@@ -9,7 +9,7 @@ export default defineConfig({
   // Absorbs shared-runner noise on a fresh scaffold with no flake history, at the cost of hiding a real defect until someone reads the run summary.
   retries: isCI ? 2 : 0,
   // No override here: Playwright's own CPU-derived default suits every CI runner
-  reporter: isCI ? 'list' : 'html',
+  reporter: isCI ? [['list'], ['html', { open: 'never' }]] : 'html',
   use: {
     trace: 'on-first-retry',
     baseURL,

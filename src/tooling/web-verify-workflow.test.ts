@@ -11,7 +11,7 @@ interface WorkflowStep {
   if?: string
   run?: string
   env?: Record<string, string>
-  with?: { key?: string; name?: string }
+  with?: { key?: string; name?: string; path?: string }
 }
 
 interface WorkflowJob {
@@ -202,6 +202,43 @@ describe('shipped Playwright configs', () => {
       ])
     },
   )
+
+  describe('reporter', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it.each(stacks)(
+      'should write the HTML report the upload reads on CI in %s',
+      async (stack) => {
+        vi.stubEnv('CI', '1')
+
+        const config = await loadConfig(stack)
+
+        expect(config.reporter).toEqual([['list'], ['html', { open: 'never' }]])
+      },
+    )
+
+    it.each(stacks)(
+      'should keep the HTML report alone on a local run in %s',
+      async (stack) => {
+        vi.stubEnv('CI', '')
+
+        const config = await loadConfig(stack)
+
+        expect(config.reporter).toBe('html')
+      },
+    )
+
+    it('should upload the folder the HTML report writes by default', () => {
+      const upload = stepNamed(
+        readJobs()['e2e-shards'].steps,
+        'Upload E2E Report',
+      )
+
+      expect(upload.with?.path).toBe('playwright-report/')
+    })
+  })
 })
 
 describe('web verify.yml e2e-tests summary job', () => {
