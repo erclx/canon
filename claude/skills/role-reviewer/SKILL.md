@@ -85,6 +85,7 @@ Run `canon pr lift <number> --json` in the background after posting `## Review c
 - Run the lift with `run_in_background` and send the message on its wake, since the verb waits up to 1200 seconds on a pending CI run and a foreground call outlasts the tool's limit
 - Skip that message when the reason names the other review as open or missing, since the other reviewer's close runs the verb again
 - On a ready pull request the verb waits on CI too. A standing or CI reason beside `isReady: true` holds the merge line rather than the ready mark, so relay it that way.
+- Relay `measurement-pending` like any other refusal, naming each run under `pending`, since the worker's result message asks the controller to lift once the row is filled
 
 ### A carried rebase or merge
 
