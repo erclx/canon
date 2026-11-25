@@ -132,10 +132,9 @@ Run it from the project root, checked against shadcn `4.23.0` on 2026-11-22.
 
 The browser rows follow.
 
-| Command                     | Purpose                                 |
-| --------------------------- | --------------------------------------- |
-| `bun run test:e2e`          | Run Playwright E2E tests.               |
-| `bun run test:e2e:changed`  | Run specs the diff's import graph hits. |
-| `bun run screenshot`        | Build, preview, capture screenshots.    |
-| `bun run readme-screenshot` | Capture the README frame.               |
-| `bun run smoke:prod`        | Capture against a required base URL.    |
+| Command                    | Purpose                                 |
+| -------------------------- | --------------------------------------- |
+| `bun run test:e2e`         | Run Playwright E2E tests.               |
+| `bun run test:e2e:changed` | Run specs the diff's import graph hits. |
+| `bun run screenshot`       | Build, preview, capture screenshots.    |
+| `bun run smoke:prod`       | Capture against a required base URL.    |
