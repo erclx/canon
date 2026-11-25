@@ -19,7 +19,7 @@ import {
   reelMoves,
 } from '@/pr/carry'
 import { DEFAULT_REEL_WIDTH } from '@/pr/evidence'
-import { readReelWaivers, readWaivers } from '@/pr/waiver'
+import { readReelWaivers, readUndrivenWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
@@ -383,6 +383,24 @@ function droveNothing(counts: UiCounts | undefined): boolean {
 }
 
 /**
+ * Whether the newest UI verdict left boxes undriven with no waiver counting
+ * them all. Only that verdict's own body is read, since an older one waived a
+ * different pass. An unparsed count reads unchecked.
+ */
+function leavesUndriven(
+  reviews: readonly ReviewRow[],
+  counts: UiCounts | undefined,
+): boolean {
+  if (counts === undefined || counts.notDriven === 0) return false
+  if (droveNothing(counts)) return true
+  const verdict = reviews.findLast(
+    (row) => resolveUiScope({ reviews: [row] }).state !== 'none',
+  )
+  const standing = verdict === undefined ? [] : standingPasses([verdict])
+  return !readUndrivenWaivers(standing).includes(counts.notDriven)
+}
+
+/**
  * Binds only where the evidence record carries a checklist to drive. A close
  * behind the head holds across what `readUiCarry` carries, and a refusal names
  * every observable path in `drivenPaths` with the painted subset beside it.
@@ -401,8 +419,8 @@ export async function uiGate(
   if (scope.state === 'none') return fail('ui', 'ui-missing')
   if (scope.source !== 'marker') return fail('ui', 'ui-unmarked')
   if (scope.commit === undefined) return fail('ui', 'ui-behind')
-  // Before the head test, so a carried close is refused too. An unparsed count reads unchecked.
-  if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
+  // Before the head test, so a carried close is refused too.
+  if (leavesUndriven(reviews, scope.counts)) return fail('ui', 'ui-undriven')
 
   const carry = await readUiCarry(
     {

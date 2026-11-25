@@ -40,6 +40,9 @@ const UI_CLOSED_UNDRIVEN: ReviewRow = {
 const UI_CLOSED_UNDRIVEN_AT_MOVED: ReviewRow = {
   body: `## UI review closed\n\n${UNDRIVEN_LINE}\n<!-- review-ui: head=${MOVED} -->`,
 }
+const PARTLY_UNDRIVEN_LINE =
+  '0 failed · 0 need your eyes · 7 passed · 9 not driven'
+const WAIVED_NINE = '- **Waived undriven:** 9: local only on a hosted preview'
 const UI_CLOSED_EYES_ONLY: ReviewRow = {
   body: `## UI review closed\n\n0 failed · 3 need your eyes · 0 passed · 0 not driven\n<!-- review-ui: head=${HEAD} -->`,
 }
@@ -62,6 +65,13 @@ const CODE_CLOSED_EDITED: ReviewRow = {
 const UI_CLOSED_EDITED: ReviewRow = {
   body: UI_CLOSED.body,
   commit: { oid: MOVED },
+}
+
+/** A UI close at `head` carrying `lines` under its heading. */
+function uiClosed(lines: readonly string[], head = HEAD): ReviewRow {
+  return {
+    body: `## UI review closed\n\n${lines.join('\n')}\n<!-- review-ui: head=${head} -->`,
+  }
 }
 
 interface Fixture {
@@ -963,6 +973,150 @@ describe('lift', () => {
 
       expect(record.reason).toBe('ui-undriven')
       expect(calls.reads).toEqual([])
+    })
+
+    it('should refuse ui-undriven on a close that left some boxes undriven with no waiver', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [CODE_CLOSED, uiClosed([PARTLY_UNDRIVEN_LINE])],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should lift on an undriven waiver whose count matches the close', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [CODE_CLOSED, uiClosed([PARTLY_UNDRIVEN_LINE, WAIVED_NINE])],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
+    })
+
+    it('should refuse ui-undriven on a waiver whose count is stale', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          CODE_CLOSED,
+          uiClosed([
+            PARTLY_UNDRIVEN_LINE,
+            '- **Waived undriven:** 8: local only',
+          ]),
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should refuse ui-undriven on a waiver inside a fenced block', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          CODE_CLOSED,
+          uiClosed([PARTLY_UNDRIVEN_LINE, '```text', WAIVED_NINE, '```']),
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should refuse ui-undriven when the pass drove nothing, whatever it waives', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          CODE_CLOSED,
+          uiClosed([
+            UNDRIVEN_LINE,
+            '- **Waived undriven:** 10: no address answered',
+          ]),
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should not read an undriven waiver off an older UI close', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          CODE_CLOSED,
+          uiClosed([PARTLY_UNDRIVEN_LINE, WAIVED_NINE]),
+          uiClosed([PARTLY_UNDRIVEN_LINE]),
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should carry an undriven waiver with its close across an inert push', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          CODE_CLOSED,
+          uiClosed([PARTLY_UNDRIVEN_LINE, WAIVED_NINE], MOVED),
+        ],
+        changed: { isAncestor: true, paths: ['README.md'] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
+    })
+
+    it('should not read an undriven waiver off a code review', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          {
+            body: `## Review closed\n\n${WAIVED_NINE}\n<!-- review-pr: commit=${HEAD} read-at=${READ_AT} -->`,
+          },
+          uiClosed([PARTLY_UNDRIVEN_LINE]),
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should not read an undriven waiver off a dismissed UI close', async () => {
+      const { api } = makeApi({
+        evidence: withDrivable,
+        reviews: [
+          CODE_CLOSED,
+          {
+            ...uiClosed([PARTLY_UNDRIVEN_LINE, WAIVED_NINE]),
+            state: 'DISMISSED',
+          },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should read an undriven count as unbinding when no drivable box is left', async () => {
+      const { api } = makeApi({
+        evidence: { ...withDrivable, hasDrivableBox: false },
+        reviews: [CODE_CLOSED, uiClosed([PARTLY_UNDRIVEN_LINE])],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
     })
 
     it('should lift on a close holding only needs-eyes boxes', async () => {

@@ -20,6 +20,13 @@ const WAIVER_LINE = /^- \*\*Waived capture:\*\* `([^`]+)`:\s*(\S.*)$/
  */
 const REEL_WAIVER_LINE = /^- \*\*Waived reel:\*\*\s*(\S.*)$/
 
+/**
+ * The line `review-ui` writes in its own verdict to accept the boxes it left
+ * undriven. It counts them rather than naming any, so a later pass that leaves
+ * a different number undriven outgrows it.
+ */
+const UNDRIVEN_WAIVER_LINE = /^- \*\*Waived undriven:\*\* (\d+):\s*\S/
+
 const FENCE = /^\s*(```|~~~)/
 
 /**
@@ -61,5 +68,13 @@ export function readReelWaivers(reviews: readonly ReviewRow[]): string[] {
   return unfencedLines(reviews).flatMap((line) => {
     const reason = REEL_WAIVER_LINE.exec(line)?.[1]
     return reason === undefined ? [] : [reason]
+  })
+}
+
+/** The box count on every undriven waiver in the review bodies, in order. */
+export function readUndrivenWaivers(reviews: readonly ReviewRow[]): number[] {
+  return unfencedLines(reviews).flatMap((line) => {
+    const count = UNDRIVEN_WAIVER_LINE.exec(line)?.[1]
+    return count === undefined ? [] : [Number(count)]
   })
 }
