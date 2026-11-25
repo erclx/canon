@@ -83,9 +83,9 @@ export type SessionReport =
        */
       readonly confidence: Confidence
       /**
-       * Foreign records with no socket, started since boot or at no readable time.
-       * Their pid could not be checked, so an empty roster beside a count above
-       * zero is a roster that could not be checked rather than one that ended.
+       * Foreign records with no socket, less those in `foreignPreBoot`. Their pid
+       * could not be checked, so an empty roster beside a count above zero is a
+       * roster that could not be checked rather than one that ended.
        */
       readonly foreignDead: number
       /**
@@ -94,9 +94,9 @@ export type SessionReport =
        */
       readonly foreign?: readonly ForeignRecord[]
       /**
-       * Foreign records started before this boot, ended since no process outlives
-       * a reboot and so outside `foreignDead`. Optional as `foreign` is, and a
-       * caller reads its absence as none set aside.
+       * Foreign records from this machine whose every stamp predates its boot,
+       * ended since no process outlives a reboot. Optional as `foreign` is, and
+       * a caller reads its absence as none set aside.
        */
       readonly foreignPreBoot?: readonly ForeignRecord[]
       readonly sessions: readonly ResolvedSession[]
