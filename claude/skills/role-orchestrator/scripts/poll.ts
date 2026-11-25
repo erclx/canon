@@ -2,8 +2,14 @@
 //
 // Run as `bun poll.ts`. The pure pieces are exported so a test drives the code
 // a loop runs, and `main` runs only when this file is the entry point.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { dirname, join } from 'node:path'
 
 import { baseBranch, baseRef, mainRoot, mapPool, run, runAsync } from './repo'
 
@@ -457,6 +463,11 @@ export const classify = (
     )
   }
 
+  // A code close behind a held UI review has no other line, and each close reports once.
+  if (row.heading === 'closed' && old.state !== 'closed') {
+    lines.push(`CODE-CLOSED #${row.number} at ${short(row.head)}`)
+  }
+
   // A post or a push moves the UI state, and either is when an action is owed.
   lines.push(...classifyUi(row, old))
   lines.push(...classifyEvidence(row, old))
@@ -549,12 +560,13 @@ export const standingLine = (
 
 /**
  * An unread pull request keeps its line, so the GONE sweep does not read the gap
- * as a merge. Its heading is blanked to match no branch unless it reads
- * `reported`, since echoing it would classify a pull request never reached.
+ * as a merge. Its heading is blanked unless it reads `reported` or `closed`, and
+ * a kept `closed` stops the close printing again on the next read.
  */
 export const carryForward = (old: Baseline): Baseline => ({
   ...old,
-  state: old.state === 'reported' ? 'reported' : 'carried',
+  state:
+    old.state === 'reported' || old.state === 'closed' ? old.state : 'carried',
 })
 
 const parseJson = (text: string): unknown => {
@@ -1228,6 +1240,50 @@ const print = (result: PollRun): void => {
   for (const line of result.out) console.log(line)
 }
 
+// The lines that route to an act. Any other line is held in a wait and printed
+// with the next exit, since a wake over one costs a turn that does nothing.
+const ACTIONABLE = [
+  'READY',
+  'CONFLICT',
+  'STALE',
+  'OVERLAP',
+  'EVIDENCE',
+  'UI-CLOSED',
+  'CODE-CLOSED',
+  'UNMATCHED',
+  'poll:',
+]
+
+/** Matches the token before the first space, so `STALE` never matches `UI-STALE`. */
+export const isActionable = (line: string): boolean =>
+  ACTIONABLE.includes(line.split(/\s+/)[0])
+
+/**
+ * Held lines are movement the baseline already took, so a wait stopped before
+ * it printed them would lose them. They sit beside the baseline until a run prints them.
+ */
+const heldPath = (root: string): string =>
+  join(root, '.canon', 'tmp', 'pr', 'poll', 'held.txt')
+
+const readHeld = (root: string): string[] =>
+  existsSync(heldPath(root))
+    ? readFileSync(heldPath(root), 'utf8')
+        .split('\n')
+        .filter((line) => line !== '')
+    : []
+
+const writeHeld = (root: string, lines: string[]): void => {
+  mkdirSync(dirname(heldPath(root)), { recursive: true })
+  writeFileSync(heldPath(root), lines.map((line) => `${line}\n`).join(''))
+}
+
+/** The count of lines an exit carries that ended no wait, printed only when above zero. */
+export const heldLine = (lines: string[]): string[] => {
+  const held = lines.filter((line) => !isActionable(line)).length
+
+  return held === 0 ? [] : [`HELD      ${held} line(s) above ended no wait`]
+}
+
 const main = async (args: string[]): Promise<number> => {
   const root = mainRoot()
   if (root === null) {
@@ -1248,30 +1304,48 @@ const main = async (args: string[]): Promise<number> => {
   }
 
   if (wait === null) {
+    const held = readHeld(root)
     const result = await pollOnce(root, { record })
-    print(result)
-    if (result.status === 0 && !result.isChanged) console.log('No movement.')
+    print({ ...result, out: [...held, ...result.out] })
+    if (record) rmSync(heldPath(root), { force: true })
+    if (result.status === 0 && !result.isChanged && held.length === 0) {
+      console.log('No movement.')
+    }
 
     return result.status
   }
 
-  // Only movement ends early, and a failed read holds to the cap rather than ending it.
+  // Only an actionable line ends early, and a failed read holds to the cap rather than ending it.
   const deadline = Date.now() + wait * 1000
   const failed = new Set<string>()
+  const carried: string[] = readHeld(root)
+  const settle = (): void => {
+    if (record) rmSync(heldPath(root), { force: true })
+  }
   for (;;) {
     const result = await pollOnce(root, { record })
     for (const line of result.err) failed.add(line)
-    if (result.status === 0 && result.isChanged) {
-      print({ ...result, err: [...failed] })
+    if (result.status === 0) carried.push(...result.out)
+    if (result.status === 0 && carried.some(isActionable)) {
+      print({
+        ...result,
+        err: [...failed],
+        out: [...carried, ...heldLine(carried)],
+      })
+      settle()
 
       return 0
     }
+    if (record && carried.length > 0) writeHeld(root, carried)
     // An early exit is a re-arm the orchestrator spends a turn on, whatever `--every` says.
     const left = deadline - Date.now()
     if (left <= 0) {
       for (const line of failed) console.error(line)
+      // Held lines are movement the baseline already took, so the cap prints them whatever the last read did.
+      for (const line of [...carried, ...heldLine(carried)]) console.log(line)
+      settle()
       if (result.status !== 0) return result.status
-      console.log('No movement.')
+      if (carried.length === 0) console.log('No movement.')
 
       return 0
     }
