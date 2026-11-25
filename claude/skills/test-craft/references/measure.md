@@ -39,7 +39,7 @@ These rules keep the machine's state from favoring either side.
 These rules separate what the change did from what the run did.
 
 - Run one commit against itself, with the same rounds. Its spread is the noise a change has to clear, so a gain inside that spread is not a result.
-- Run a warm-up before the counted rounds and leave it out of the counts, since the first run pays for cold caches. The tool hyperfine does the same with `--warmup`.
+- Run a warm-up of both sides at once before the counted rounds, and leave it out of the counts, since the first run pays for cold caches. The tool hyperfine does the same with `--warmup`.
 - Cap each measured step. Report a step past the cap as not reached, since dropping it makes the slow side look faster.
 - Fix the round count before the run, at least 10 where the run is short, and never extend it until the result looks right
 
