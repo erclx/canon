@@ -81,6 +81,7 @@ export const LEDGER_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'test-first'),
   join(SHIPPED_CORPUS, 'ui-craft'),
   join(SHIPPED_CORPUS, 'proposal-critique'),
+  join(SHIPPED_CORPUS, 'ci-workflow'),
 ]
 
 function references(...names: string[]): string[] {
