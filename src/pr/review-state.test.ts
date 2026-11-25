@@ -250,7 +250,7 @@ describe('readReviewState', () => {
         ],
       ],
       changed: { isAncestor: false, paths: [] },
-      rebased: { differingPaths: [] },
+      rebased: { differingPaths: [], ownPaths: [] },
     })
 
     const result = await readReviewState(api)
@@ -265,7 +265,7 @@ describe('readReviewState', () => {
     })
   })
 
-  it('should carry the code close across a base merge and hold the UI close behind it', async () => {
+  it('should carry both closes across a base merge', async () => {
     const { api } = makeApi({
       tips: [PUSHED],
       reviews: [
@@ -275,7 +275,7 @@ describe('readReviewState', () => {
         ],
       ],
       changed: { isAncestor: true, paths: ['src/cli.ts'] },
-      rebased: { differingPaths: [] },
+      rebased: { differingPaths: [], ownPaths: [] },
       unmerged: [],
     })
 
@@ -285,7 +285,7 @@ describe('readReviewState', () => {
       kind: 'read',
       record: {
         review: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'merge' },
-        ui: { reason: 'ui-behind', isCovered: false },
+        ui: { isCovered: true, carriedFrom: HEAD, carriedAcross: 'merge' },
       },
     })
   })
@@ -295,7 +295,7 @@ describe('readReviewState', () => {
       tips: [PUSHED],
       reviews: [[codePass('## Review closed', HEAD)]],
       changed: { isAncestor: false, paths: [] },
-      rebased: { differingPaths: ['README.md'] },
+      rebased: { differingPaths: ['README.md'], ownPaths: ['README.md'] },
     })
 
     const result = await readReviewState(api)
@@ -554,7 +554,7 @@ describe('agrees with lift', () => {
           ],
         ],
         changed: { isAncestor: false, paths: [] },
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
       },
     ],
     [
@@ -568,7 +568,7 @@ describe('agrees with lift', () => {
           ],
         ],
         changed: { isAncestor: true, paths: ['src/cli.ts'] },
-        rebased: { differingPaths: [] },
+        rebased: { differingPaths: [], ownPaths: [] },
         unmerged: [],
       },
     ],
@@ -583,7 +583,7 @@ describe('agrees with lift', () => {
           ],
         ],
         changed: { isAncestor: false, paths: [] },
-        rebased: { differingPaths: ['src/cli.ts'] },
+        rebased: { differingPaths: ['src/cli.ts'], ownPaths: ['src/cli.ts'] },
       },
     ],
   ]

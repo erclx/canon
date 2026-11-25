@@ -11,7 +11,7 @@ The step runs when the evidence step returned `ok`, when the fallback posted a c
 
 - An `ok` or a fallback checklist means the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most
 - A `preview` in `owed` is how `git-ship` reaches this step alone when an earlier run's deploy timed out
-- An evidence record carrying a `commentId` takes the `owed` case alone, owed again once a served path changes past the build its `previewHead` names
+- An evidence record carrying a `commentId` takes the `owed` case alone, owed again once the branch changes a served path past the build its `previewHead` names
 - The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs
 
 ```bash

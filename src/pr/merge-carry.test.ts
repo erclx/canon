@@ -9,7 +9,9 @@ import {
   readRebasedPaths,
   readUnmergedCommits,
   reviewGate,
+  uiGate,
 } from '@/pr/lift'
+import { DEFAULT_PAINTED } from '@/pr/painted'
 
 const LINES = Array.from({ length: 20 }, (_, index) => `line ${index + 1}`)
 
@@ -23,7 +25,11 @@ function closedAt(commit: string) {
   }
 }
 
-describe('reviewGate across a merge of the base', () => {
+function uiClosedAt(commit: string) {
+  return { body: `## UI review closed\n\n<!-- review-ui: head=${commit} -->` }
+}
+
+describe('closes across a merge of the base', () => {
   let root: string
 
   async function git(...args: string[]): Promise<string> {
@@ -222,6 +228,98 @@ describe('reviewGate across a merge of the base', () => {
       gate: 'review',
       isOk: false,
       reason: 'review-behind',
+    })
+  })
+
+  describe('uiGate', () => {
+    function gateAt(driven: string, head: string) {
+      return uiGate(api, DEFAULT_PAINTED, [uiClosedAt(driven)], head, true)
+    }
+
+    it('should carry the close across a clean merge of the base', async () => {
+      const driven = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n', 'other.ts': 'moved\n' }, 'main')
+      const head = await mergeMain()
+
+      expect(await gateAt(driven, head)).toEqual({
+        gate: 'ui',
+        isOk: true,
+        carriedFrom: driven,
+        carriedAcross: 'merge',
+      })
+    })
+
+    it('should name only the path both sides wrote in a clean merge', async () => {
+      const driven = await commit({ 'shared.ts': edit(17, 'branch') }, 'feat')
+      await onMain({ 'shared.ts': edit(2, 'main'), 'main.ts': 'm\n' }, 'main')
+      const head = await mergeMain()
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['shared.ts'],
+      })
+    })
+
+    it('should name a path both sides wrote under a quoted name', async () => {
+      await onMain({ 'caf\u00e9.ts': `${LINES.join('\n')}\n` }, 'seed')
+      await mergeMain()
+      const driven = await commit(
+        { 'caf\u00e9.ts': edit(17, 'branch') },
+        'feat',
+      )
+      await onMain({ 'caf\u00e9.ts': edit(2, 'main') }, 'main')
+      const head = await mergeMain()
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: [String.raw`"caf\303\251.ts"`],
+      })
+    })
+
+    it('should name the path whose conflict the merge resolved by hand', async () => {
+      const driven = await commit({ 'shared.ts': edit(10, 'branch') }, 'feat')
+      await onMain({ 'shared.ts': edit(10, 'main'), 'main.ts': 'm\n' }, 'main')
+      await execa('git', ['merge', '-q', 'main'], { cwd: root, reject: false })
+      const head = await commit({ 'shared.ts': edit(10, 'resolved') }, 'merge')
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['shared.ts'],
+      })
+    })
+
+    it('should name an edit the merge carried outside the branch diff', async () => {
+      const driven = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n' }, 'main')
+      const head = await mergeMainWith({ 'other.ts': 'sneaked\n' })
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['other.ts'],
+      })
+    })
+
+    it('should name every changed path on a branch commit after the merge', async () => {
+      const driven = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await onMain({ 'main.ts': 'm\n' }, 'main')
+      await mergeMain()
+      const head = await commit({ 'feat.ts': 'more\n' }, 'more')
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['feat.ts', 'main.ts'],
+      })
+    })
+
+    it('should refuse a rewrite that changed the branch diff', async () => {
+      const driven = await commit({ 'feat.ts': 'feat\n' }, 'feat')
+      await git('checkout', '-q', '-B', 'feat', 'main')
+      const head = await commit({ 'feat.ts': 'rewritten\n' }, 'feat')
+
+      expect(await gateAt(driven, head)).toMatchObject({
+        reason: 'ui-behind',
+        drivenPaths: ['feat.ts'],
+      })
     })
   })
 

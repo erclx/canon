@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { type GitRunner, readRebasedPaths } from '@/pr/lift'
+import { type GitRunner, readChangedPaths, readRebasedPaths } from '@/pr/lift'
 
 const UNRESOLVED = '1111111111111111111111111111111111111111'
 
@@ -66,6 +66,7 @@ describe('readRebasedPaths', () => {
 
     expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
       differingPaths: [],
+      ownPaths: ['new.ts', 'shared.ts'],
     })
   })
 
@@ -80,6 +81,7 @@ describe('readRebasedPaths', () => {
 
     expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
       differingPaths: [],
+      ownPaths: ['new.ts', 'shared.ts'],
     })
   })
 
@@ -99,6 +101,7 @@ describe('readRebasedPaths', () => {
 
     expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
       differingPaths: ['shared.ts'],
+      ownPaths: ['new.ts', 'shared.ts'],
     })
   })
 
@@ -112,6 +115,7 @@ describe('readRebasedPaths', () => {
 
     expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
       differingPaths: ['z-notes.md'],
+      ownPaths: ['shared.ts', 'z-notes.md'],
     })
   })
 
@@ -123,7 +127,42 @@ describe('readRebasedPaths', () => {
 
     expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
       differingPaths: ['shared.ts'],
+      ownPaths: ['new.ts', 'shared.ts'],
     })
+  })
+
+  it('should list as own a path only one end of the branch wrote', async () => {
+    const reviewed = await commit({ 'dropped.ts': 'x\n' }, 'feat')
+    await git('checkout', '-q', '-b', 'rewritten', 'main')
+    const head = await commit({ 'added.ts': 'x\n' }, 'rewritten')
+
+    const read = await readRebasedPaths(runner, 'main', reviewed, head)
+
+    expect(read?.ownPaths).toEqual(['added.ts', 'dropped.ts'])
+  })
+
+  it('should list no path main alone wrote under a merge', async () => {
+    const reviewed = await commit({ 'new.ts': 'x\n' }, 'feat')
+    await git('checkout', '-q', 'main')
+    await commit({ 'main-only.ts': 'y\n' }, 'main')
+    await git('checkout', '-q', 'feat')
+    await git('merge', '-q', '--no-edit', 'main')
+    const head = await git('rev-parse', 'HEAD')
+
+    expect(await readRebasedPaths(runner, 'main', reviewed, head)).toEqual({
+      differingPaths: [],
+      ownPaths: ['new.ts'],
+    })
+  })
+
+  it('should spell a quoted path the way readChangedPaths does', async () => {
+    const from = await commit({ 'one.ts': 'x\n' }, 'one')
+    const to = await commit({ 'caf\u00e9.ts': 'x\n' }, 'two')
+
+    const changed = await readChangedPaths(runner, from, to)
+    const read = await readRebasedPaths(runner, 'main', from, to)
+
+    expect(read?.differingPaths).toEqual(changed?.paths)
   })
 
   it('should read nothing when the reviewed commit does not resolve', async () => {

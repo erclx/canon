@@ -32,7 +32,7 @@ import {
 } from '@/pr/evidence'
 import { isWithinTolerance } from '@/pr/pixels'
 import { readCarry, reelMoves } from '@/pr/carry'
-import { readChangedPaths } from '@/pr/lift'
+import { type GitRunner, readChangedPaths, readRebasedPaths } from '@/pr/lift'
 import { isPainted, loadPaintedPatterns } from '@/pr/painted'
 import { resolveTip, type TipRefusal } from '@/pr/head'
 import {
@@ -94,7 +94,7 @@ type EvidenceRefusal =
 
 /** Why the check could not tell which head the carried preview serves, refused under `gh-failed` rather than read as settled. */
 const UNREAD_PREVIEW_HEAD =
-  'gh could not list the deploy runs for this branch, or the paths changed since the built head, so whether the carried preview serves the tip is unknown.'
+  'gh could not list the deploy runs for this branch, or the paths changed since the built head could not be read, as when the remote no longer holds that head, so whether the carried preview serves the tip is unknown.'
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
@@ -342,8 +342,13 @@ export function registerEvidence(pr: Command): void {
         'succeeded, and when the build is stale and a path the push filter',
         'serves changed since, with `servedSinceBuilt` saying which. A stale',
         'build whose later commits touch no served path stays settled, and a',
-        'compare GitHub cut at 300 files counts as served. A run listing or',
-        'compare that fails refuses as gh-failed rather than reading settled.',
+        'compare GitHub cut at 300 files counts as served. Across a rebase or',
+        "a merge only the branch's own diff counts, read at the built head and",
+        "the tip against each one's merge base, so a served path the base alone",
+        'changed owes nothing, and one both sides changed under a merge owes a',
+        'preview however cleanly it merged. A run listing or compare that',
+        'fails, or a built head the remote no longer holds, refuses as',
+        'gh-failed rather than reading settled.',
         'The record carries `owed` and the same marked fields, plus',
         '`reelSkip`, the text after **No reel:** on the marked comment, present',
         'only when that line is posted, and `reelSkips`, each **No reel at',
@@ -594,6 +599,65 @@ type CarriedHead =
     }
   | { readonly kind: 'refused'; readonly reason: TipRefusal | 'gh-failed' }
 
+/** Fetches by sha, so it moves no tracking ref a gate fetching beside it would lock on. */
+async function fetchMissing(
+  git: GitRunner,
+  commits: readonly string[],
+): Promise<void> {
+  const held = await Promise.all(
+    commits.map((commit) => git(['cat-file', '-e', `${commit}^{commit}`])),
+  )
+  const missing = commits.filter((_, index) => held[index] === undefined)
+  if (missing.length > 0) await git(['fetch', '-q', 'origin', ...missing])
+}
+
+/**
+ * Whether the branch changed a served path since the built head, undefined when
+ * a read failed. Across a rebase or a merge only a path the branch wrote counts,
+ * so a path the base alone changed never owes a preview.
+ */
+async function readServedSince(
+  root: string,
+  filter: ServedFilter,
+  base: string | undefined,
+  built: string,
+  tip: string,
+): Promise<boolean | undefined> {
+  const git = gitRunner(root)
+  await fetchMissing(git, [built, tip])
+  const changed = await readChangedPaths(git, built, tip)
+  if (changed === undefined) return undefined
+
+  if (changed.isAncestor) {
+    const range = ['--min-parents=2', '--count', tip, `^${built}`]
+    const merges = (await git(['rev-list', ...range]))?.trim()
+    if (merges === undefined) return undefined
+    if (merges === '0') {
+      const compared = await listComparedPaths(root, built, tip)
+      if (compared === undefined) return undefined
+      return (
+        compared.kind === 'truncated' || servesChange(filter, compared.paths)
+      )
+    }
+  }
+
+  if (base === undefined) return undefined
+  const resolved = await resolveTip(base, refReader(root))
+  if (resolved.kind === 'refused') return undefined
+  await fetchMissing(git, [resolved.tip])
+  const own = await readRebasedPaths(git, resolved.tip, built, tip)
+  if (own === undefined) return undefined
+
+  // Read past the patch compare, which a clean merge of a shared path can leave equal.
+  const bothWrote = changed.paths.filter((path) => own.ownPaths.includes(path))
+  const moved = [...own.differingPaths, ...bothWrote]
+  // A path git quotes matches no served glob, so it counts as served.
+  return (
+    moved.some((path) => path.startsWith('"')) ||
+    (moved.length > 0 && servesChange(filter, moved))
+  )
+}
+
 /**
  * Reads the carried preview's built head against the remote tip the way `canon
  * pr preview --check` does, so the two agree. A stale build counts as behind
@@ -604,6 +668,7 @@ async function readCarriedHead(
   workflow: string,
   filter: ServedFilter,
   branch: string,
+  base: string | undefined,
 ): Promise<CarriedHead> {
   const resolved = await resolveTip(branch, refReader(root))
   if (resolved.kind === 'refused') return resolved
@@ -618,14 +683,16 @@ async function readCarriedHead(
   if (reading.reason !== 'stale' || reading.built === undefined) {
     return { kind: 'read', reading }
   }
-  const compared = await listComparedPaths(root, reading.built, reading.tip)
-  if (compared === undefined) return { kind: 'refused', reason: 'gh-failed' }
-  return {
-    kind: 'read',
-    reading,
-    servedSinceBuilt:
-      compared.kind === 'truncated' || servesChange(filter, compared.paths),
-  }
+  const servedSinceBuilt = await readServedSince(
+    root,
+    filter,
+    base,
+    reading.built,
+    reading.tip,
+  )
+  return servedSinceBuilt === undefined
+    ? { kind: 'refused', reason: 'gh-failed' }
+    : { kind: 'read', reading, servedSinceBuilt }
 }
 
 async function runEvidence(
@@ -810,6 +877,7 @@ async function runEvidence(
             deploy.path,
             deploy.filter,
             identity.branch,
+            identity.base,
           )
         : undefined
     if (carriedHead?.kind === 'refused') {

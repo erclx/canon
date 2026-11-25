@@ -19,7 +19,7 @@ Holds the readers and writers behind `canon pr`, all over REST rather than Graph
 - `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started
 - `evidence.ts`, `tick.ts`, `bijection.ts`, and `links.ts` own the marked comment, ticks, key-changes check, and its links. `frames.ts` files frames, captures, and reels on `canon/frames` until a prune
 - `preview.ts` and `local.ts` write and remove the address line, read off the deploy trigger and off a declared port then the cwd. `drive-copy.ts` rebuilds a UI pass's copy and its own server
-- `lift.ts` readies a pull request only when every gate passes, or returns a ready one to draft. `carry.ts` holds the push and rebase carries the tick shares, and the code review's merge carry
+- `lift.ts` readies a pull request only when every gate passes, or returns a ready one to draft. `carry.ts` holds the push, rebase, and merge carries, which the tick shares with the UI gate
 
 ### `src/listeners/`
 

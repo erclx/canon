@@ -1248,6 +1248,7 @@ describe('canon pr evidence --check', () => {
   describe('with a carried preview read against the tip', () => {
     const BUILT = 'da60d8794da60d8794da60d8794da60d8794da60'
     let tip: string
+    let forkPoint: string
 
     function writeCompared(lines: readonly string[]): void {
       writeFileSync(join(tempDir, 'compared.txt'), `${lines.join('\n')}\n`)
@@ -1262,6 +1263,7 @@ describe('canon pr evidence --check', () => {
       writeFileSync(join(tempDir, 'files.tsv'), 'modified\tweb/index.html\n')
       writeComment(markedCommentBody())
       tip = pushBranch()
+      forkPoint = execaSync('git', ['-C', repoRoot, 'rev-parse', 'main']).stdout
     })
 
     it('should settle a preview built at the tip and name the build', async () => {
@@ -1277,7 +1279,7 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should owe a preview built before a served path changed', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
       writeCompared(['complete', 'web/index.html', 'docs/guide.md'])
 
       const record = await runCheck()
@@ -1287,7 +1289,7 @@ describe('canon pr evidence --check', () => {
         owed: ['preview'],
         previewHead: {
           reason: 'stale',
-          built: BUILT,
+          built: forkPoint,
           tip,
           servedSinceBuilt: true,
         },
@@ -1295,7 +1297,7 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should settle a preview built before a push touching no served path', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
       writeCompared(['complete', 'assets/evidence/dark/hero.png', 'docs/a.md'])
 
       const record = await runCheck()
@@ -1307,7 +1309,7 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should owe a stale preview whose compare listing GitHub cut short', async () => {
-      writeRuns([{ headSha: BUILT }])
+      writeRuns([{ headSha: forkPoint }])
       writeCompared(['truncated'])
 
       const record = await runCheck()
@@ -1356,7 +1358,16 @@ describe('canon pr evidence --check', () => {
     })
 
     it('should refuse as gh-failed when the changes since the build cannot be listed', async () => {
+      writeRuns([{ headSha: forkPoint }])
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({ reason: 'gh-failed' })
+    })
+
+    it('should refuse as gh-failed when the remote no longer holds the built head', async () => {
       writeRuns([{ headSha: BUILT }])
+      writeCompared(['complete', 'docs/a.md'])
 
       const record = await runCheck()
 

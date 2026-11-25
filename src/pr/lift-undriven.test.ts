@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { RebaseRead } from '@/pr/carry'
 import { type ChangedRead, type GateResult, uiGate } from '@/pr/lift'
 import { DEFAULT_PAINTED } from '@/pr/painted'
 import type { ReviewRow } from '@/pr/review-scope'
@@ -20,13 +21,16 @@ interface Reading {
   readonly reviews: readonly ReviewRow[]
   readonly hasDrivableBox?: boolean
   readonly changed?: ChangedRead
+  readonly rebased?: RebaseRead
+  readonly unmerged?: readonly string[]
 }
 
 function read(reading: Reading): Promise<GateResult> {
   return uiGate(
     {
       readChanged: async () => reading.changed,
-      readRebased: async () => undefined,
+      readRebased: async () => reading.rebased,
+      readUnmerged: async () => reading.unmerged,
     },
     DEFAULT_PAINTED,
     reading.reviews,
@@ -146,6 +150,48 @@ describe('uiGate over undriven boxes', () => {
         carriedFrom: MOVED,
         undrivenWaived: 9,
       })
+    })
+
+    it.each([
+      [
+        'rebase',
+        { isAncestor: false, paths: [] },
+        { differingPaths: [], ownPaths: ['src/App.tsx'] },
+      ],
+      [
+        'merge',
+        { isAncestor: true, paths: ['src/main-only.ts'] },
+        { differingPaths: [], ownPaths: ['src/App.tsx'] },
+      ],
+    ] as const)(
+      'should carry a waiver with its close across a %s of the base',
+      async (carriedAcross, changed, rebased) => {
+        const gate = await read({
+          reviews: [uiClosed([PARTLY_DRIVEN, WAIVED_NINE], MOVED)],
+          changed,
+          rebased,
+          unmerged: [],
+        })
+
+        expect(gate).toEqual({
+          gate: 'ui',
+          isOk: true,
+          carriedFrom: MOVED,
+          carriedAcross,
+          undrivenWaived: 9,
+        })
+      },
+    )
+
+    it('should refuse an unwaived close before it reads a merge of the base', async () => {
+      const gate = await read({
+        reviews: [uiClosed([PARTLY_DRIVEN], MOVED)],
+        changed: { isAncestor: true, paths: ['src/main-only.ts'] },
+        rebased: { differingPaths: [], ownPaths: [] },
+        unmerged: [],
+      })
+
+      expect(gate).toEqual(REFUSED)
     })
   })
 })

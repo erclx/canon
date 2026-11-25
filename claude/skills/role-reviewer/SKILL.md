@@ -90,7 +90,7 @@ Run `canon pr lift <number> --json` in the background after posting `## Review c
 
 A re-review request on a rebased head earns no pass when `canon pr review-state <number> --json` reads `carriedAcross: "rebase"` on this session's family. The rebase left the branch diff equal, so the close still holds at the new head.
 
-A request on a head that merged the base earns none either when the code family reads `carriedAcross: "merge"`, since every commit after the close is a merge or already on the base and the branch diff is equal. The UI family never reads `merge`. A UI close behind a merged head still owes its pass.
+A request on a head that merged the base earns none either when this session's family reads `carriedAcross: "merge"`, since every commit after the close is a merge or already on the base and the branch diff is equal. A path both sides changed holds the UI close back however cleanly it merged, and `drivenPaths` names it for the pass it owes.
 
 - Reply to the requester that the close carried, naming `carriedFrom` and the new head
 - Run `canon pr lift <number> --json` with `run_in_background` on a draft, since CI and the evidence still settle at the new head, and message the controller the reason on its wake as on a close
