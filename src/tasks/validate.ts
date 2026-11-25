@@ -1302,22 +1302,6 @@ async function readLabelFolders(root: string): Promise<LabelFolders> {
   return { live, archived, declined }
 }
 
-/**
- * The tasks a `Waiting on` cell cites, by a bare sibling pointer or a bare
- * phase label, the way the parked-row check reads them. A label naming more
- * than one task yields nothing, since a guess would order a row on the wrong one.
- */
-export async function readCitedStems(
-  cell: string,
-  root: string,
-): Promise<string[]> {
-  const linked = citedStem(cell)
-  if (linked) return [linked]
-
-  const bare = bareLabels(cell, await readLabelFolders(root))
-  return bare.kind === 'stems' ? [...bare.stems] : []
-}
-
 /** Where a blocker clause ends. A comma after a label ends it, a dot inside a filename does not, and `and` does not. */
 const BLOCKER_BREAK = /\.(?=\s|$)|[;,]|\bbecause\b/i
 
@@ -1329,36 +1313,98 @@ export function isOperatorHeld(cell: string): boolean {
   return OPERATOR_HELD.test(cell)
 }
 
-/** A verb saying the row sits beside a task, never behind it. */
+/** A verb saying the row sits beside a task, never behind it. A bare `with` is one, since a blocker never opens on it. */
 const BESIDE_VERB = new RegExp(
-  `${RANK_VERB.source}|\\bshares\\b|\\brebases\\b|\\blaunches\\s+with\\b`,
+  `${RANK_VERB.source}|\\branked\\s+(?:above|below)\\b|\\bshares\\b|\\brebases\\b|\\bwith\\b`,
   'i',
 )
 
+/** A word saying the tasks after it gate the row, whatever placing verb came before it in the clause. */
+const BLOCKER_VERB =
+  /\b(?:after|behind|waits?\s+(?:on|for)|waiting\s+on|depends\s+on|blocked\s+(?:by|on)|needs|once|until)\b/i
+
+/** A task followed by `merging`, which gates even inside a placing verb's reach. */
+const MERGING_TASK = /(?:\uE000\d+\uE001|\bv\d+\.\d+\b)(?=\s+merging\b)/gi
+
+/** What a clause leaves once its citations, `and`, and punctuation go, which is nothing for a bare list of tasks. */
+const CITATION_LIST_RESIDUE = /\uE000\d+\uE001|\bv\d+\.\d+\b|\band\b|[\s,&]/gi
+
+/** One clause of a `Waiting on` cell as read, and the tasks it blocks on. */
+export interface BlockerClause {
+  readonly clause: string
+  readonly stems: readonly string[]
+}
+
 /**
- * The tasks a `Waiting on` cell cites as blockers. Each clause is read up to
- * a ranking, sharing, or launches-with verb, since those place a row and never
- * gate it. Links are held aside so a filename's dot is no clause break.
+ * The part of a clause that can gate. A placing verb cuts what follows it up
+ * to the next blocker verb, sparing a task followed by `merging`, and a blocker
+ * verb ahead of it governs the rest.
  */
-export async function readBlockerStems(
+function gatingText(clause: string): string {
+  const placing = clause.search(BESIDE_VERB)
+  if (placing < 0) return clause
+
+  const blocker = clause.search(BLOCKER_VERB)
+  if (blocker >= 0 && blocker < placing) return clause
+
+  const cut = clause.slice(placing, blocker < 0 ? undefined : blocker)
+  const spared = (cut.match(MERGING_TASK) ?? []).join(' ')
+  const tail = blocker < 0 ? '' : clause.slice(blocker)
+  return `${clause.slice(0, placing)} ${spared} ${tail}`
+}
+
+/**
+ * Reads each clause of a `Waiting on` cell. A placing verb never gates what it
+ * governs, and a bare list of tasks after a placing clause joins it. Links are
+ * masked so a filename's dot is no break.
+ */
+export async function readBlockerClauses(
   cell: string,
   root: string,
-): Promise<string[]> {
+): Promise<BlockerClause[]> {
   const links: string[] = []
   const masked = cell.replace(/\[[^\]]*\]\([^)]*\)/g, (link) => {
     links.push(link)
     return `\uE000${links.length - 1}\uE001`
   })
-  const blockers = masked
-    .split(BLOCKER_BREAK)
-    .map((clause) => {
-      const at = clause.search(BESIDE_VERB)
-      return at < 0 ? clause : clause.slice(0, at)
-    })
-    .join(', ')
-    .replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
+  const restore = (text: string) =>
+    text.replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
+  const folders = await readLabelFolders(root)
 
-  return readCitedStems(blockers, root)
+  const read = (text: string): string[] => {
+    const cited = linkTargets(text)
+      .map((target) => target.split('#')[0])
+      .filter((target) => target && !target.includes('/'))
+      .map((target) => stemOf(target))
+    const bare = bareLabels(text.replace(/\uE000\d+\uE001/g, ' '), folders)
+    const labels = bare.kind === 'stems' ? bare.stems : []
+    return [
+      ...new Set([...cited, ...labels].filter((stem) => stem !== undefined)),
+    ]
+  }
+
+  const pieces = masked.split(new RegExp(`(${BLOCKER_BREAK.source})`, 'i'))
+  let placing: boolean = false
+  const clauses: BlockerClause[] = []
+  for (let index = 0; index < pieces.length; index += 2) {
+    const clause = pieces[index].trim()
+    if (!clause) continue
+
+    const afterComma = (pieces[index - 1] ?? '').trim() === ','
+    const joins: boolean =
+      placing && afterComma && clause.replace(CITATION_LIST_RESIDUE, '') === ''
+    const stems: string[] = joins ? [] : read(restore(gatingText(clause)))
+    const verb = clause.search(BESIDE_VERB)
+    placing =
+      joins ||
+      (verb >= 0 &&
+        stems.length === 0 &&
+        clause.search(BLOCKER_VERB) < 0 &&
+        read(restore(clause.slice(verb))).length > 0)
+    clauses.push({ clause: restore(clause), stems })
+  }
+
+  return clauses
 }
 
 /** What one blocker citation produced, since a row can be neither settled nor open. */

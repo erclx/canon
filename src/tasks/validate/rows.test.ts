@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { recordDir } from '@/roots/record'
 import {
   type Finding,
+  readBlockerClauses,
   validateBoard,
   type ValidateOptions,
 } from '@/tasks/validate'
@@ -411,5 +412,200 @@ describe('validateBoard held rows', () => {
       ok: true,
       live: { sessions: 'not-asked', pulls: 'not-asked' },
     })
+  })
+})
+
+describe('readBlockerClauses', () => {
+  async function seedLive(...stems: readonly string[]) {
+    for (const stem of stems) await seedTask(stem, '', undefined, NO_PLAN)
+  }
+
+  async function readBlockerStems(cell: string, root: string) {
+    const clauses = await readBlockerClauses(cell, root)
+    return [...new Set(clauses.flatMap((read) => read.stems))]
+  }
+
+  it('should read a joined share as no blocker', async () => {
+    await seedLive('v44.2-a', 'v44.4-b', 'v44.5-c')
+
+    const stems = await readBlockerStems(
+      'shares a.ts with v44.2 and v44.5, and cli.md with v44.4',
+      ROOT,
+    )
+
+    expect(stems).toEqual([])
+  })
+
+  it('should read a bare with as no blocker', async () => {
+    await seedLive('v44.5-c')
+
+    const stems = await readBlockerStems(
+      'one reviewer pass at a time with v44.5',
+      ROOT,
+    )
+
+    expect(stems).toEqual([])
+  })
+
+  it('should keep a second clause blocking when it opens on its own blocker word', async () => {
+    await seedLive('v44.2-a', 'v44.4-b')
+
+    const stems = await readBlockerStems(
+      'shares a.ts with v44.2, and after v44.4 merging',
+      ROOT,
+    )
+
+    expect(stems).toEqual(['v44.4-b'])
+  })
+
+  it('should keep both stems beside on a launches-with cell', async () => {
+    await seedLive('v44.3-a', 'v44.4-b')
+
+    const stems = await readBlockerStems('launches with v44.3 and v44.4', ROOT)
+
+    expect(stems).toEqual([])
+  })
+
+  it('should not split a link label holding a comma, with, and and', async () => {
+    await seedLive('v44.5-c')
+
+    const stems = await readBlockerStems(
+      'waits on [the parser, with more](v44.5-c.md)',
+      ROOT,
+    )
+
+    expect(stems).toEqual(['v44.5-c'])
+  })
+
+  it.each([
+    ['waits on v44.2 with v44.4', ['v44.2-a', 'v44.4-b']],
+    ['blocked by a contract collision with v44.4', ['v44.4-b']],
+    ['ranked above v44.2 and behind v44.4', ['v44.4-b']],
+    ['plan ready with answers after v44.4 merging', ['v44.4-b']],
+    ['waits on v44.2 with v44.4, and v44.5', ['v44.2-a', 'v44.4-b', 'v44.5-c']],
+  ])(
+    'should keep a blocker a placing verb shares its clause with: %s',
+    async (cell, expected) => {
+      await seedLive('v44.2-a', 'v44.4-b', 'v44.5-c')
+
+      const stems = await readBlockerStems(cell, ROOT)
+
+      expect(stems).toEqual(expected)
+    },
+  )
+
+  it.each([
+    'follows v44.2, and needs v44.4',
+    'follows v44.2, and waits for v44.4',
+    'follows v44.2, and once v44.4 merges',
+    'shares a.ts with v44.2, and blocked on v44.4',
+    'shares a.ts with v44.2, and wait on v44.4',
+    'shares a.ts with v44.2, and v44.4 merges first',
+    'shares a.ts with v44.2, and behind v44.4',
+    'shares a.ts with v44.2, and waits on v44.4',
+    'shares a.ts with v44.2, and blocked by v44.4',
+    'shares a.ts with v44.2, and v44.4 merging',
+    'ranked above v44.2 and needs v44.4',
+    'ranked above v44.2 and once v44.4 merges',
+    'ranked above v44.2 and v44.4 merging',
+    'one reviewer pass with v44.2 until v44.4 lands',
+    'plan ready with answers waiting on v44.4',
+    'plan ready with answers depends on v44.4',
+  ])('should keep an and clause blocking on its own verb: %s', async (cell) => {
+    await seedLive('v44.2-a', 'v44.4-b')
+
+    const stems = await readBlockerStems(cell, ROOT)
+
+    expect(stems).toEqual(['v44.4-b'])
+  })
+
+  it.each([
+    'shares a.ts with v44.2, v44.4, and v44.5',
+    'follows v44.2, and v44.4',
+  ])(
+    'should read a bare list after a placing clause as beside: %s',
+    async (cell) => {
+      await seedLive('v44.2-a', 'v44.4-b', 'v44.5-c')
+
+      const stems = await readBlockerStems(cell, ROOT)
+
+      expect(stems).toEqual([])
+    },
+  )
+
+  it.each([
+    'plan ready with answers settled; v44.4',
+    'parked with the landing page work, and v44.4',
+    'opens the group; v44.4',
+    'follows v44.2; v44.4',
+    'shares a.ts with v44.2; v44.4',
+  ])(
+    'should keep a bare task blocking when no comma joins it to a placing clause: %s',
+    async (cell) => {
+      await seedLive('v44.2-a', 'v44.4-b')
+
+      const stems = await readBlockerStems(cell, ROOT)
+
+      expect(stems).toEqual(['v44.4-b'])
+    },
+  )
+
+  it.each([
+    ['ranked above v44.2 and v44.4 merging, and v44.5', ['v44.4-b', 'v44.5-c']],
+    ['v44.2 with v44.4, and v44.5', ['v44.2-a', 'v44.5-c']],
+    ['ranked above v44.2 and [v44.4](v44.4-b.md) merging', ['v44.4-b']],
+    ['follows v44.2 after the freeze, and v44.4', ['v44.4-b']],
+    ['ranked above v44.2 and needs the migration, v44.4', ['v44.4-b']],
+  ])(
+    'should not pass placing on from a clause that gates: %s',
+    async (cell, expected) => {
+      await seedLive('v44.2-a', 'v44.4-b', 'v44.5-c')
+
+      const stems = await readBlockerStems(cell, ROOT)
+
+      expect(stems).toEqual(expected)
+    },
+  )
+
+  it('should read every citation in one clause', async () => {
+    await seedLive('v44.2-a', 'v44.4-b')
+
+    const stems = await readBlockerStems(
+      'waits on [v44.2](v44.2-a.md) and v44.4',
+      ROOT,
+    )
+
+    expect(stems).toEqual(['v44.2-a', 'v44.4-b'])
+  })
+
+  it('should read a rank as no blocker and a wait as a blocker', async () => {
+    await seedLive('v44.2-a', 'v43.7-d')
+
+    const rank = await readBlockerStems(
+      'product, plan ready; follows v44.2',
+      ROOT,
+    )
+    const wait = await readBlockerStems('waits on v43.7', ROOT)
+
+    expect([rank, wait]).toEqual([[], ['v43.7-d']])
+  })
+
+  it('should read ranked above as no blocker beside a real one', async () => {
+    await seedLive('v214.4-e', 'v43.7-d')
+
+    const stems = await readBlockerStems(
+      'product, plan ready; ranked above v214.4, waits on v43.7',
+      ROOT,
+    )
+
+    expect(stems).toEqual(['v43.7-d'])
+  })
+
+  it('should keep an after cell blocking', async () => {
+    await seedLive('v43.7-d')
+
+    const stems = await readBlockerStems('after v43.7 merging', ROOT)
+
+    expect(stems).toEqual(['v43.7-d'])
   })
 })
