@@ -13,7 +13,7 @@ The fresh tree carries no dependencies and its derived port stays invisible, and
 
 ## Must
 
-- The name comes through ordered sources, the caller, the fixed toolkit sync name, then the plan matched to the branch, previewed with its source and sanitized to what the entry tool accepts
+- The name comes through ordered sources, the caller or the dated toolkit sync name, then the plan matched to the branch, previewed with its source and sanitized to what the entry tool accepts
 - The created branch is renamed to `<type>/<name>`, the type taken from the plan's `canon tasks plan-branch` record or `feat`, and the bare flag is read and repaired on both sides of entry
 - The target branch and directory are tested before entry, so a collision stops without building a worktree
 - One line reports whether the tree carries its dependencies, or has no manifest, and another reports the derived port offset
