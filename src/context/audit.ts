@@ -89,7 +89,7 @@ export const SCRIPTS_HEADING = 'Scripts'
  * directly under `development/`, whose scripts entry the standard exempts from
  * the `Scripts` H3 and which a split folder names by project.
  */
-function isDevelopmentEntry(rel: string): boolean {
+export function isDevelopmentEntry(rel: string): boolean {
   return /(?:^|\/)development(?:\/[^/]+)?\.md$/.test(rel)
 }
 
@@ -102,7 +102,7 @@ export const REQUIRED_SECTIONS: readonly string[] =
   REQUIRED_SECTIONS_BY_FOLDER.context
 
 const HEADING_TEXT = /^#{1,6}\s+(.+?)\s*$/
-const TABLE_ROW = /^\s*\|/
+export const TABLE_ROW =/^\s*\|/
 const TABLE_SEPARATOR = /^\s*\|[\s:|-]+\|\s*$/
 const NAMED_CELL = /`[^`]+`|\[[^\]]+\]\([^)]+\)/
 
@@ -439,8 +439,8 @@ function otherSections(
   return found
 }
 
-const HEADING_LEVEL = /^(#{1,6})\s+(.+?)\s*$/
-const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/
+export const HEADING_LEVEL =/^(#{1,6})\s+(.+?)\s*$/
+export const LIST_ITEM =/^\s*(?:[-*+]|\d+[.)])\s+/
 const INDENTED = /^\s+\S/
 const FOLDER_TITLE = /^`[^`]+`$/
 
