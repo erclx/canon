@@ -285,7 +285,7 @@ Every outcome reaches the review with its proof named.
 **Measured runs**
 
 - Write the place of each measured run beside it as `test`, `CI`, or `operator`. A bullet naming a measurement with none reports as `measured-run-unplaced` and never sets the exit.
-- Pick `test` for a run the suite carries, `CI` for a workflow on a machine of its own, and `operator` for a run needing hardware or a person. A worker never measures on the shared machine.
+- Pick `test` for a count or a score a test asserts, whatever the load. Send a timing to `CI`, on a machine of its own, or to `operator`, which is optional unless the plan requires it.
 - Raise a `CI` place as a question when the project has no comparison workflow, since the build would invent one.
 - The method sits in `${CLAUDE_SKILL_DIR}/../test-craft/references/measure.md`, and the workflow in `${CLAUDE_SKILL_DIR}/../ci-workflow/references/comparison.md`.
 

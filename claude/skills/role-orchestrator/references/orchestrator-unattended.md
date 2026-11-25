@@ -141,7 +141,7 @@ The operator's word starts it and the operator's word ends it, so no pass decide
 
 - Enter the loop at once, and record the mode and its start time per `orchestrator-handoff.md`
 - Take the run's worker cap from the operator's spoken cap, and with none, 5, since a wave of about 15 polling sessions once spent the hourly GitHub quota
-- Count the up to two reviewers each worker brings, so a cap of 4 can mean 12 sessions
+- Each worker can bring up to two reviewers outside the cap, so a cap of 4 can mean 12 sessions
 - On "stop", launch nothing further and let every running session finish as it would, then say what is still running
 - Never end on the unattended tests in `## Ending the run`, since an attended run waits for the next merge
 

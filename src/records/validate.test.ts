@@ -1180,6 +1180,18 @@ describe('validateRecords', () => {
       expect(outcome.structure).toEqual([])
     })
 
+    it.each([
+      'A test that timed out at 5 seconds reports the cause: `bun run test`',
+      'The run hits its timeout of 30 seconds and reports it: `bun run test`',
+    ])(
+      'should not read a time limit in prose as a measured-run: %s',
+      async (entry) => {
+        const outcome = await measuredRuns(`- ${entry}`)
+
+        expect(outcome.structure).toEqual([])
+      },
+    )
+
     it('should read a measured-run word only in Verification', async () => {
       await seedPlan(
         'feature-a-b.md',

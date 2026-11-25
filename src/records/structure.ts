@@ -20,7 +20,7 @@ export const STRUCTURE_CRITERIA = ['S1', 'S2', 'S3', 'S4', 'S5'] as const
 
 export type StructureCriterion = (typeof STRUCTURE_CRITERIA)[number]
 
-/** One place a record misses a criterion, an intake field spilling past its line, or a bundle row no reader resolves. */
+/** One place a record misses a criterion, an intake field spilling past its line, a bundle row no reader resolves, or a measured run with no place. */
 export interface StructureEntry {
   readonly criterion:
     | StructureCriterion
@@ -219,6 +219,7 @@ function withinProse(lines: readonly string[], entry: StructureEntry): boolean {
 }
 
 const PLACE = /`(?:test|CI|operator)`/
+const TIME_LIMIT = /\btimed[ -]out\b/gi
 const VERIFICATION_HEADING = /^##\s+Verification\s*$/
 
 /**
@@ -239,7 +240,8 @@ function measuredRunUnplaced(text: string): StructureEntry[] {
     if (!inVerification || !LIST_ITEM.test(line.text)) continue
 
     const bullet = bulletAt(lines, line.number - 1)
-    if (!namesMeasurement(bullet) || PLACE.test(bullet)) continue
+    if (!namesMeasurement(bullet.replace(TIME_LIMIT, '')) || PLACE.test(bullet))
+      continue
 
     found.push({
       criterion: 'measured-run-unplaced',
