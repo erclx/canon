@@ -453,6 +453,37 @@ describe('canon checks', () => {
     expect(result.stdout).toContain('File length: src/a.ts is too long')
   })
 
+  it('should print every failed stage before it fails once', () => {
+    writeGate(
+      'canon',
+      1,
+      '[{"label":"Context citations","status":"failed","failure":"6 bullets","output":"first output"},{"label":"Quiet","status":"failed"},{"label":"Markdown","status":"failed","failure":"1 finding","output":"second output"}]',
+    )
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('first output')
+    expect(result.stdout).toContain('second output')
+    expect(result.stdout).toContain('Context citations: 6 bullets')
+    expect(result.stdout).toContain('Quiet: failed')
+    expect(result.stdout).toContain('Markdown: 1 finding')
+  })
+
+  it('should read an unmeasured stage that follows a failed one', () => {
+    writeGate(
+      'canon',
+      1,
+      '[{"label":"Markdown","status":"failed","failure":"1 finding"},{"label":"Docs","status":"unmeasured"}]',
+    )
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('Docs: measured nothing')
+    expect(result.stdout).toContain('Markdown: 1 finding')
+  })
+
   it('should fail a nonzero exit whose record names no failed stage', () => {
     writeGate('canon', 1, PASSED)
 

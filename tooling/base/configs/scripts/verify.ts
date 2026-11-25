@@ -134,8 +134,12 @@ function logSkip(message: string): void {
   print(`${GREY}│ - ${message}${NC}`)
 }
 
-function fail(message: string): never {
+function failLine(message: string): void {
   print(`${GREY}│${NC} ${RED}✗${NC} ${message}`)
+}
+
+function fail(message: string): never {
+  failLine(message)
   throw new VerifyFailure(message)
 }
 
@@ -447,6 +451,8 @@ function checkCanonGate(): void {
     return
   }
 
+  // Every failed stage prints before the run fails, so one push shows them all.
+  const failures: string[] = []
   for (const stage of record.stages) {
     if (stage.status === 'passed') logInfo(stage.label)
     else if (stage.status === 'skipped') logSkip(`${stage.label}: skipped`)
@@ -455,11 +461,12 @@ function checkCanonGate(): void {
       logSkip(`${stage.label}: ${UNMEASURED}`)
     } else if (stage.status === 'failed') {
       if (stage.output !== undefined) pipeOutput(stage.output)
-      fail(
-        `${stage.label}: ${stage.failure ?? 'failed'}. Run 'canon gate run' to read each finding`,
-      )
+      const message = `${stage.label}: ${stage.failure ?? 'failed'}. Run 'canon gate run' to read each finding`
+      failLine(message)
+      failures.push(message)
     }
   }
+  if (failures.length > 0) throw new VerifyFailure(failures.join('\n'))
 
   if (result.status !== 0 || !record.ok) {
     fail(
