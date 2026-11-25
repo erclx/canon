@@ -141,13 +141,16 @@ A box the pass could not drive because the drive fixture holds no such state is 
 
 ### A read-only start state
 
-A box blocked because the page opened read-only, such as an edit control that is absent or disabled, has not been tried until it was driven on the `access`-joined address.
+A box blocked because the page opened read-only, such as an edit control that is absent or disabled, has not been tried until it was driven on the `access`-joined address. A read-only address is never itself a cause off the page.
 
 - Run `pw goto` on the joined address and reach the box's route by its own controls, since a route joined to the bare rung drops the access
-- Count the box only after that retry. A value that then answers takes its verdict as any box does.
-- A box still blocked there, or one in a project declaring no `access`, is not driven for a cause on the page, which opens the heading with the state it needs named
+- Retry on the record's `local` address when the pass drives a hosted one, joined the same way, since the seed reaches the local page alone. Name it in the verdict as a local preview, unverified.
+- Count the box only after both retries. A value that then answers takes its verdict as any box does.
 
-A read-only address is never a cause off the page and never waived, since the building session can declare the `access` or seed the state.
+A box still blocked takes the split under `### A state the fixture lacks`, read by whether a commit on this branch can open the state.
+
+- A state the drive fixture or the project's seed could hold is a cause on the branch, which opens the heading and is never waived
+- A state no commit here can open, such as an `access` the config must declare first, takes the exit there and the waiver. Name that state as the cause, never the read-only address.
 
 ### A refused address
 
