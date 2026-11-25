@@ -102,7 +102,7 @@ export const REQUIRED_SECTIONS: readonly string[] =
   REQUIRED_SECTIONS_BY_FOLDER.context
 
 const HEADING_TEXT = /^#{1,6}\s+(.+?)\s*$/
-export const TABLE_ROW =/^\s*\|/
+export const TABLE_ROW = /^\s*\|/
 const TABLE_SEPARATOR = /^\s*\|[\s:|-]+\|\s*$/
 const NAMED_CELL = /`[^`]+`|\[[^\]]+\]\([^)]+\)/
 
@@ -439,8 +439,8 @@ function otherSections(
   return found
 }
 
-export const HEADING_LEVEL =/^(#{1,6})\s+(.+?)\s*$/
-export const LIST_ITEM =/^\s*(?:[-*+]|\d+[.)])\s+/
+export const HEADING_LEVEL = /^(#{1,6})\s+(.+?)\s*$/
+export const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/
 const INDENTED = /^\s+\S/
 const FOLDER_TITLE = /^`[^`]+`$/
 
