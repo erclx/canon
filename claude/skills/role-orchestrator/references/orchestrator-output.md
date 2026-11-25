@@ -143,6 +143,7 @@ Write the line only off `already-ready` or `clear` from `canon pr lift <number> 
 
 - Read a record whose `gates` carries no `ci` entry as CI unread, which a CLI older than the plugin returns, and write no line on it
 - On a `ci-pending` reason, report CI as running and run `canon pr lift <number> --json` with `run_in_background` as the wake, then take a fresh `--check` read and write the line only off that
+- On a record naming checks under `running`, report each name as still going and write no line, then write it only off a later `--check` read naming none
 - On any other refusal, report the reason and write no line, since a stale standing goes back through the poll's rebase handback
 
 ### A bot pull request

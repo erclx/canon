@@ -93,7 +93,9 @@ canon pr review-state <number> --json
 
 ### The READY stop
 
-The poll prints `READY` once per head for a pull request out of draft whose every gate, CI included, reads clear at that head, read through `canon pr lift <number> --check --json`. Nothing is owed on it but the operator's merge, so a poll re-armed on it spends a wake on nothing.
+The poll prints `READY` once per head for a pull request out of draft whose every gate reads clear and every check has settled at that head, read through `canon pr lift <number> --check --json`. Nothing is owed on it but the operator's merge, so a poll re-armed on it spends a wake on nothing.
+
+The lift gates CI on the required checks alone, so the poll holds READY while the record names any check under `running`. A failed check the base does not require rides the READY line after `advisory failed:`. A check that never finishes withholds READY with no line, so read a silent ready one through `--check` and report its `running` names.
 
 - Hold each READY number until a later line names it, being `MOVED`, `REBASED`, `CONFLICT`, `STALE`, or `GONE`, which drops it
 - Stop re-arming once every open pull request but a release one is held, and name the numbers waiting on the merge in that turn

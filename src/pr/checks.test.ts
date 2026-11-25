@@ -314,7 +314,11 @@ describe('collapseChecks over a required set', () => {
       required,
     )
 
-    expect(reading).toMatchObject({ state: 'passing', advisory: [] })
+    expect(reading).toMatchObject({
+      state: 'passing',
+      advisory: [],
+      running: [MAC],
+    })
   })
 
   it('should name a failing advisory run without failing the tip', () => {
@@ -335,7 +339,11 @@ describe('collapseChecks over a required set', () => {
       required,
     )
 
-    expect(reading).toMatchObject({ state: 'passing', advisory: [MAC] })
+    expect(reading).toMatchObject({
+      state: 'passing',
+      advisory: [MAC],
+      running: [],
+    })
   })
 
   it('should keep the foreign-run guard ahead of the required set', () => {
@@ -359,7 +367,7 @@ describe('collapseChecks over a required set', () => {
     expect(reading).toMatchObject({ state: 'pending', advisory: [] })
   })
 
-  it('should carry no advisory field when no required set was read', () => {
+  it('should carry no advisory or running field when no required set was read', () => {
     const reading = collapseChecks(TIP, {
       total_count: 1,
       check_runs: [
@@ -374,6 +382,7 @@ describe('collapseChecks over a required set', () => {
 
     expect(reading.state).toBe('failing')
     expect(reading).not.toHaveProperty('advisory')
+    expect(reading).not.toHaveProperty('running')
   })
 })
 

@@ -39,6 +39,7 @@ import {
   readChecksGate,
   readEvidenceGate,
   warnAdvisory,
+  warnRunning,
 } from '@/commands/pr/gates'
 
 interface LiftCommandOptions extends ReadOptions {
@@ -137,8 +138,10 @@ export function registerLift(pr: Command): void {
         '',
         "The required checks are the ones the base branch's rules list. A",
         'check outside them is waited on by nobody, and one that failed is',
-        'named in the record as `advisory` without blocking. Rules that do not',
-        'read, or that list no check, gate by every check run on the tip.',
+        'named in the record as `advisory` without blocking. One still going',
+        'is named as `running`, which never gates either, so a reader waiting',
+        'on every check at the head reads it there. Rules that do not read, or',
+        'that list no check, gate by every check run on the tip.',
         '',
         'Review state, UI state, evidence, and standing are read before the CI',
         'wait, so a reviewer whose partner is still driving refuses at once. The',
@@ -385,6 +388,7 @@ async function runLift(
     if (!gate.isOk) logWarn(`${gate.gate}: ${gate.reason ?? 'not clear'}`)
   }
   warnAdvisory(record.advisory)
+  warnRunning(record.running)
   outro()
 
   if (emitJson) {

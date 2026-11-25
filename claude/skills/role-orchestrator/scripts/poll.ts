@@ -60,6 +60,8 @@ export interface Row {
   isRebased: boolean
   /** The lift verb's readiness at the head, empty when this run took no reading or it was refused. */
   ready: '' | Readiness
+  /** Non-required checks the lift named as failed at the head, carried onto the READY line. */
+  advisory: string[]
   unmatchedCount: number
   unmatchedHeading: string
 }
@@ -379,7 +381,11 @@ const classifyFirstSighting = (
 const readyLine = (row: Row, reportedAt: string): string[] =>
   row.ready === 'ready' && reportedAt !== row.head
     ? [
-        `READY     #${row.number} at ${short(row.head)}, waiting only on the merge`,
+        `READY     #${row.number} at ${short(row.head)}, waiting only on the merge${
+          row.advisory.length > 0
+            ? `, advisory failed: ${row.advisory.join(', ')}`
+            : ''
+        }`,
       ]
     : []
 
@@ -895,8 +901,8 @@ const readEvidence = async (
 
 /**
  * Branches on `reason`, since the verb exits 1 on a refusal it still prints.
- * `already-ready` alone is a ready pull request every gate clears at the head,
- * CI included. A failed read is unread rather than not ready, so it reprints nothing.
+ * The lift gates CI on the required set, so `already-ready` reads `not` while it
+ * names a check `running`. A failed read is unread, so it reprints nothing.
  */
 export const readinessFromLift = (
   record: unknown,
@@ -910,9 +916,20 @@ export const readinessFromLift = (
 
   return fields.reason === 'already-ready' &&
     fields.isReady === true &&
-    fields.head === head
+    fields.head === head &&
+    namesOf(fields.running).length === 0
     ? 'ready'
     : 'not'
+}
+
+const namesOf = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.filter((name): name is string => typeof name === 'string')
+    : []
+
+interface LiftReading {
+  ready: '' | Readiness
+  advisory: string[]
 }
 
 /** Only a code close can be ready, and one reported at this head costs no second read. */
@@ -921,16 +938,21 @@ const readReadiness = async (
   head: string,
   heading: string,
   old: Baseline | undefined,
-): Promise<'' | Readiness> =>
-  heading === 'closed' && old?.ready !== head
-    ? readinessFromLift(
-        parseJson(
-          (await runAsync('canon', ['pr', 'lift', number, '--check', '--json']))
-            .stdout,
-        ),
-        head,
-      )
-    : ''
+): Promise<LiftReading> => {
+  if (heading !== 'closed' || old?.ready === head) {
+    return { advisory: [], ready: '' }
+  }
+  const record = parseJson(
+    (await runAsync('canon', ['pr', 'lift', number, '--check', '--json']))
+      .stdout,
+  )
+  const advisory =
+    typeof record === 'object' && record !== null
+      ? namesOf((record as Record<string, unknown>).advisory)
+      : []
+
+  return { advisory, ready: readinessFromLift(record, head) }
+}
 
 const buildRow = async (
   number: string,
@@ -950,7 +972,7 @@ const buildRow = async (
   const record = parseJson(state.stdout)
   const scope = scopeFromVerb(record, now) ?? scopeFallback(payload, now)
   const written = merges === 'unknown' ? null : await readWritten(head, ref)
-  const [stale, ready] = await Promise.all([
+  const [stale, lift] = await Promise.all([
     readStale(written, ref),
     readReadiness(number, head, scope.state, old),
   ])
@@ -965,7 +987,8 @@ const buildRow = async (
     passAt: scope.readAt,
     paths: written?.paths ?? null,
     prior: scope.commit,
-    ready,
+    ready: lift.ready,
+    advisory: lift.advisory,
     replyAt: replies.newestAt,
     resp: replies.count,
     stale: stale.stale,

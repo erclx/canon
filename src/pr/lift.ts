@@ -214,6 +214,8 @@ export interface ChecksGate {
   readonly isConflicted: boolean
   /** Failing checks outside the required set, which are reported and never gate. */
   readonly advisory?: readonly string[]
+  /** Checks outside the required set still going, which are reported and never gate. */
+  readonly running?: readonly string[]
   /**
    * Tip runs GitHub queued and never gave a job, read only on a pending,
    * unconflicted reading. Absent or empty leaves the reading `ci-pending`.
@@ -227,6 +229,14 @@ export function advisoryOf(reading: ChecksGate): {
 } {
   const advisory = reading.advisory ?? []
   return advisory.length > 0 ? { advisory } : {}
+}
+
+/** The running field a record carries, absent when nothing outside the required set runs. */
+export function runningOf(reading: ChecksGate): {
+  running?: readonly string[]
+} {
+  const running = reading.running ?? []
+  return running.length > 0 ? { running } : {}
 }
 
 /**
@@ -280,6 +290,11 @@ export interface LiftRecord {
   readonly stalled?: readonly StalledRun[]
   /** Failing checks the base does not require, named so a reader sees them before merging. */
   readonly advisory?: readonly string[]
+  /**
+   * Checks the base does not require still going at the head, which never gate,
+   * named so a reader waiting on every check knows the head has not settled.
+   */
+  readonly running?: readonly string[]
   readonly isLifted: boolean
   /** Whether the caller can treat the pull request as ready afterwards. */
   readonly isOk: boolean
@@ -742,6 +757,7 @@ function alreadyReady(
     waitedSeconds,
     ...carried(gates),
     ...advisoryOf(reading),
+    ...runningOf(reading),
   })
 }
 
@@ -879,6 +895,7 @@ async function settleAfterWait(
     waitedSeconds: ci.waited,
     ...carried(cleared),
     ...advisoryOf(ci.reading),
+    ...runningOf(ci.reading),
   }
 }
 
@@ -952,6 +969,7 @@ export async function lift(
       waitedSeconds: 0,
       ...carried(all),
       ...advisoryOf(reading),
+      ...runningOf(reading),
     }
   }
 

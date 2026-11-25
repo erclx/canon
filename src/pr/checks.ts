@@ -42,6 +42,8 @@ export interface ChecksReading {
    * was read, so a reading over every check keeps its old shape.
    */
   readonly advisory?: readonly string[]
+  /** Checks outside the required set still going, present exactly when `advisory` is. */
+  readonly running?: readonly string[]
 }
 
 /**
@@ -156,7 +158,7 @@ export function collapseChecks(
     foreign: runs.length - matched.length,
     reported: listing.total_count ?? runs.length,
     collapsed,
-    ...(required !== undefined && { advisory: [] }),
+    ...(required !== undefined && { advisory: [], running: [] }),
   }
 
   if (reading.foreign > 0) return { ...reading, state: 'pending' }
@@ -174,11 +176,11 @@ export function collapseChecks(
   const rows = [...kept.map(adapt), ...statusRows]
   if (rows.length === 0) return { ...reading, state: 'pending' }
 
-  const { state, advisory } = rollupRequired(rows, required)
+  const { state, advisory, running } = rollupRequired(rows, required)
   return {
     ...reading,
     state: state ?? 'pending',
-    ...(required !== undefined && { advisory }),
+    ...(required !== undefined && { advisory, running }),
   }
 }
 

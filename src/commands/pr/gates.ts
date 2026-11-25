@@ -230,6 +230,8 @@ function readReelSkips(skips: unknown): Map<number, string> {
   )
 }
 
+const UNREAD_STATUSES = 'commit statuses (unread)'
+
 export async function readChecksGate(
   root: string,
   number: string,
@@ -268,10 +270,16 @@ export async function readChecksGate(
       missesGatingCheck(tip, listing, required, statuses)
         ? await readStalledRuns(root, tip)
         : []
+    // An unread status list may hide a pending context, so it holds whoever waits on `running`.
+    const running =
+      reading.running === undefined || combined !== null
+        ? reading.running
+        : [...reading.running, UNREAD_STATUSES]
     return {
       state: reading.state,
       isConflicted: reading.conflicted,
       ...(reading.advisory !== undefined && { advisory: reading.advisory }),
+      ...(running !== undefined && { running }),
       ...(stalled.length > 0 && { stalled }),
     }
   } catch {
@@ -353,6 +361,14 @@ async function readRequiredChecks(
     return requiredChecks(JSON.parse(rules))
   } catch {
     return undefined
+  }
+}
+
+export function warnRunning(running: readonly string[] | undefined): void {
+  for (const name of running ?? []) {
+    logWarn(
+      `running: ${name} has not finished, which the base's rules do not require, so it did not block`,
+    )
   }
 }
 

@@ -90,7 +90,7 @@ describe('rollupRequired', () => {
         ],
         new Set([STATIC]),
       ),
-    ).toEqual({ state: 'passing', advisory: [] })
+    ).toEqual({ state: 'passing', advisory: [], running: [MAC] })
   })
 
   it('should report a failing advisory check apart without failing the head', () => {
@@ -102,7 +102,25 @@ describe('rollupRequired', () => {
         ],
         new Set([STATIC]),
       ),
-    ).toEqual({ state: 'passing', advisory: [MAC] })
+    ).toEqual({ state: 'passing', advisory: [MAC], running: [] })
+  })
+
+  // A skipped run is completed, so a skipped advisory job never holds the head as still running.
+  it('should leave a skipped advisory check out of running', () => {
+    expect(
+      rollupRequired(
+        [
+          { name: STATIC, status: 'COMPLETED', conclusion: 'SUCCESS' },
+          { name: MAC, status: 'QUEUED' },
+          {
+            name: '📦 Dependency Advisories',
+            status: 'COMPLETED',
+            conclusion: 'SKIPPED',
+          },
+        ],
+        new Set([STATIC]),
+      ).running,
+    ).toEqual([MAC])
   })
 
   it('should read failing when a required check failed', () => {
@@ -114,7 +132,7 @@ describe('rollupRequired', () => {
         ],
         new Set([STATIC]),
       ),
-    ).toEqual({ state: 'failing', advisory: [] })
+    ).toEqual({ state: 'failing', advisory: [], running: [] })
   })
 
   // A required check whose run has not been created yet is not a pass, or a head where only macOS reported reads green.
@@ -124,7 +142,7 @@ describe('rollupRequired', () => {
         [{ name: MAC, status: 'COMPLETED', conclusion: 'SUCCESS' }],
         new Set([STATIC]),
       ),
-    ).toEqual({ state: 'pending', advisory: [] })
+    ).toEqual({ state: 'pending', advisory: [], running: [] })
   })
 
   it('should gate by every check when no required set was read', () => {
@@ -136,7 +154,7 @@ describe('rollupRequired', () => {
         ],
         undefined,
       ),
-    ).toEqual({ state: 'pending', advisory: [] })
+    ).toEqual({ state: 'pending', advisory: [], running: [] })
   })
 
   it('should gate by every check when the rules require none', () => {
@@ -148,7 +166,7 @@ describe('rollupRequired', () => {
         ],
         new Set(),
       ),
-    ).toEqual({ state: 'failing', advisory: [] })
+    ).toEqual({ state: 'failing', advisory: [], running: [] })
   })
 })
 

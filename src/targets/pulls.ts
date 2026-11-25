@@ -137,6 +137,8 @@ export interface RequiredRollup {
   readonly state: ChecksState | null
   /** Names of checks outside the required set that failed, which never gate. */
   readonly advisory: readonly string[]
+  /** Names of checks outside the required set still going, which never gate. */
+  readonly running: readonly string[]
 }
 
 /**
@@ -148,15 +150,18 @@ export function rollupRequired(
   required: ReadonlySet<string> | undefined,
 ): RequiredRollup {
   if (required === undefined || required.size === 0) {
-    return { state: rollup(checks), advisory: [] }
+    return { state: rollup(checks), advisory: [], running: [] }
   }
 
   const isRequired = (check: RawCheck): boolean =>
     check.name !== undefined && required.has(check.name)
   const gating = checks.filter(isRequired)
-  const advisory = checks
-    .filter((check) => !isRequired(check) && rollup([check]) === 'failing')
-    .map((check) => check.name ?? '')
+  const namedWhere = (verdict: ChecksState): string[] =>
+    checks
+      .filter((check) => !isRequired(check) && rollup([check]) === verdict)
+      .map((check) => check.name ?? '')
+  const advisory = namedWhere('failing')
+  const running = namedWhere('pending')
 
   const state = rollup(gating)
   const isMissing = [...required].some(
@@ -165,6 +170,7 @@ export function rollupRequired(
   return {
     state: state !== 'failing' && isMissing ? 'pending' : state,
     advisory,
+    running,
   }
 }
 
