@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import { join, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
@@ -57,6 +58,8 @@ import {
   type RequirementsReport,
 } from '@/context/requirements'
 import { auditIndexes, type FolderDrift } from '@/context/index-drift'
+import { measureRooms, roomAdvice, roomAt } from '@/context/room'
+import { bodyLines } from '@/markdown/scan'
 import { RENDER_WIDTH } from '@/markdown/structure'
 import {
   frameError,
@@ -277,7 +280,7 @@ async function runAudit(
     reportReferenceForm(entries, folders)
     reportSections(sections, extras, folders)
     reportGateKeys(gateKeyFaults)
-    reportShape(shape, gatedPrefixes, widened)
+    reportShape(shape, await shapeAdvice(root, shape), gatedPrefixes, widened)
     reportLength(length ?? [], keys.gateLength)
     reportTables(entries)
     reportProvenance(entries, folders)
@@ -611,6 +614,43 @@ function readIssue(issue: ShapeIssue): string {
   }
 }
 
+/** The shape breaks a block's length limits raise, which the advice answers. */
+const ROOM_KINDS: ReadonlySet<ShapeIssue['kind']> = new Set([
+  'gotcha-count',
+  'gotcha-paragraph',
+  'layout-bullets',
+  'layout-paragraphs',
+])
+
+/**
+ * Words the ways out once per block an entry's findings reach, by reading the
+ * entry again since the published record carries no source and keeps its fields.
+ */
+async function shapeAdvice(
+  root: string,
+  shape: readonly ShapeFinding[],
+): Promise<Map<string, string[]>> {
+  const advice = new Map<string, string[]>()
+
+  await Promise.all(
+    shape.map(async (finding) => {
+      const lines = finding.issues.filter((issue) => ROOM_KINDS.has(issue.kind))
+      if (lines.length === 0) return
+
+      const rooms = measureRooms(
+        finding.rel,
+        bodyLines(await readFile(join(root, finding.rel), 'utf8')),
+      )
+      const blocks = new Set(
+        lines.flatMap((issue) => roomAt(rooms, issue.line) ?? []),
+      )
+      advice.set(finding.rel, [...blocks].map(roomAdvice))
+    }),
+  )
+
+  return advice
+}
+
 /**
  * Prints nothing while the gate keys read clean, so a project that sets
  * neither sees the report it always did.
@@ -630,6 +670,7 @@ function reportGateKeys(faults: readonly string[]): void {
  */
 function reportShape(
   shape: readonly ShapeFinding[],
+  advice: ReadonlyMap<string, readonly string[]>,
   gatedPrefixes: readonly string[],
   widened: boolean,
 ): void {
@@ -665,6 +706,7 @@ function reportShape(
         (finding) =>
           `${finding.rel}${finding.gated ? `  ${mark}` : ''}\n${finding.issues
             .map((issue) => `  :${issue.line}  ${readIssue(issue)}`)
+            .concat((advice.get(finding.rel) ?? []).map((text) => `  ${text}`))
             .join('\n')}`,
       )
       .join('\n'),

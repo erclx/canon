@@ -210,6 +210,32 @@ describe('markdown audit', () => {
     )
   })
 
+  it('should carry the room advice on a finding inside a Layout block', async () => {
+    write(
+      'canon/context/surfaces/cli.md',
+      `# CLI\n\n## Layout\n\n### \`src/a/\`\n\nThe lead.\n\n- ${'a long bullet '.repeat(20)}\n`,
+    )
+
+    const result = await run(['markdown', 'audit'])
+    const output = `${result.stdout}${result.stderr}`
+
+    expect(output).toContain('`src/a/` holds 1 of 5 bullets and a lead of 9')
+    expect(output).toContain('move a long cell into a bullet')
+  })
+
+  it('should leave the room advice off a finding in a skill file', async () => {
+    write(
+      'claude/skills/x/SKILL.md',
+      `# X\n\nThe lead.\n\n- ${'a long bullet '.repeat(20)}\n`,
+    )
+
+    const result = await run(['markdown', 'audit'])
+    const output = `${result.stdout}${result.stderr}`
+
+    expect(output).toContain('give a long list H3s')
+    expect(output).not.toContain('holds 1 of 5')
+  })
+
   it('should measure no table outside the density scope', async () => {
     write(
       'notes/scratch.md',

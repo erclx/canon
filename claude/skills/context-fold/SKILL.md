@@ -13,6 +13,8 @@ metadata:
 
 The skip for a session that changed nothing lives at the end of Step 2, because it needs the diff to decide.
 
+Read `${CLAUDE_SKILL_DIR}/references/context.md` before any edit to an entry, in a fold and in a hand edit alike, since its limits fail a full list at the push.
+
 ## Diff baseline
 
 Steps 2, 3, and 4 share one diff. Resolve the base ref once and reuse it:
