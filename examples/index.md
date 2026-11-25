@@ -26,7 +26,7 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 - [Performance pull request body](shipping/pull-request-body-perf.md): a tide-table cache fix carrying its measurement table. Read against `claude/skills/git-pr/references/pr.md` at `cb10464a`.
 - [Evidence comment](shipping/evidence-comment.md): the screenshots, reel, and checklist on the surge alert pull request. Read against `claude/skills/pr-evidence/references/evidence.md` at `8dc630b2`.
 - [Code review](shipping/code-review.md): a findings pass and the close-out that follows the fix. Read against `claude/skills/review-pr/references/post.md` at `61171fa3` and `claude/skills/review-pr/references/body-variants.md` at `84168b71`.
-- [UI review](shipping/ui-review.md): a driven pass with one failed box and one not driven. Read against `claude/skills/review-ui/references/post.md` at `fac3eff3`.
+- [UI review](shipping/ui-review.md): a driven pass with one failed box and one not driven. Read against `claude/skills/review-ui/references/post.md` at `681b0a02`.
 - [Review reply](shipping/address-reply.md): the worker's reply fixing and declining findings, then a finding raised after the close. Read against `claude/skills/review-address/SKILL.md` at `e8a08f8d` and `claude/skills/review-address/references/post-review-findings.md` at `6dd6c4f8`.
 
 ## Project
