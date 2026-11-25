@@ -460,7 +460,10 @@ describe('merge reading the base standing', () => {
 
     const record = await merge(api, { number: 2544, isDryRun: false })
 
-    expect(record).toMatchObject({ reason: 'standing-stale', bot: 'dependabot' })
+    expect(record).toMatchObject({
+      reason: 'standing-stale',
+      bot: 'dependabot',
+    })
   })
 
   it('should name no bot kind on a stale ordinary pull request', async () => {
