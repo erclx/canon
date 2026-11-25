@@ -66,7 +66,9 @@ describe('markdown audit', () => {
 
     const result = await run(['markdown', 'audit', '.'])
 
-    expect(result.stderr).toContain('docs/guide.md  201 rendered lines past 200')
+    expect(result.stderr).toContain(
+      'docs/guide.md  201 rendered lines past 200',
+    )
     expect(result.stderr).not.toContain(
       'claude/skills/a/references/guide.md  251 rendered lines',
     )
