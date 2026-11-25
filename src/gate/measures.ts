@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import {
   CLIENT_COMMAND_MARKER,
   CLIENT_COMMANDS,
@@ -321,9 +321,18 @@ export const configFiles: Measure = async (ctx) => {
     .map((finding) => warn(finding.message))
 
   if (failures.length > 0) {
+    const pages = [
+      ...new Set(
+        failures.map((finding) =>
+          basename(finding.file) === 'app.toml'
+            ? 'canon docs app-config'
+            : 'canon docs config',
+        ),
+      ),
+    ]
     return {
       emissions: warnings,
-      failure: `${failures.map((finding) => finding.message).join(' ')} Every key: canon docs config`,
+      failure: `${failures.map((finding) => finding.message).join(' ')} Every key: ${pages.join(', ')}`,
     }
   }
   return {

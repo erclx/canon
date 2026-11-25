@@ -802,6 +802,24 @@ describe('configFiles', () => {
     expect(report.failure).toContain(`canon/config/${name}`)
   })
 
+  it('points an app.toml finding at the app config page', async () => {
+    write('app.toml', '[drive]\nlaunch = 3\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toContain('Every key: canon docs app-config')
+    expect(report.failure).not.toContain('canon docs config')
+  })
+
+  it('points a finding in another file at the config page', async () => {
+    write('context.toml', 'roots = 3\n')
+
+    const report = await configFiles(context())
+
+    expect(report.failure).toContain('Every key: canon docs config')
+    expect(report.failure).not.toContain('canon docs app-config')
+  })
+
   it('warns on an unknown file and still passes', async () => {
     write('nope.toml', 'a = 1\n')
 
