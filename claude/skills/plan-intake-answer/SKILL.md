@@ -60,6 +60,10 @@ Give every option what it means and what it costs. An option with no stated cost
 
 Send the whole batch in one turn. When the session runs on a surface carrying a structured question tool, such as `AskUserQuestion` in Claude Code, send it through one call with one entry per item. Otherwise write it as a numbered list in one message with the suggestion marked.
 
+### An item settled by looking
+
+Offer `sketch` as one more option on an item settled by looking, meaning it waits on a `design-pick` pass. It lands as a pending pick, which the answer contract states, so nothing promotes the item until the pick fills its slot.
+
 ### A cluster the drive already decided
 
 When every unread item in the cluster carries a `decision`, put the cluster as one question rather than one per item, however many items it holds. It is one question, so the four-item cap does not apply.
@@ -81,6 +85,7 @@ canon intake answer <slug> --cluster <file> --set <label>=<answer> --set <label>
 - Pass the label exactly as the heading spells it, including a letter suffix such as `3a`
 - Write the operator's selection as the answer, using `ok` for a verdict accepted as it stands
 - Omit an unanswered item from the call. An empty value writes a slot that reads as answered.
+- Land a `sketch` selection as `--set <label>=sketch`, and leave it out of the answered count the close reports
 
 On an accepted decided cluster, land every item through `--decided` in place of `--set`:
 
@@ -90,7 +95,7 @@ canon intake answer <slug> --cluster <file> --decided <label> --decided <label>
 
 The verb writes `ok, as decided in drive-log finding <nn>` into each slot. It refuses the whole call as `undecided` when a label's pointer reaches no decision, so on that refusal put the named items singly through Step 3.
 
-The verb refuses the whole batch when any item in it already carries an answer, since a filled slot is a decision already made. On that refusal, drop the named item and send the rest.
+The verb refuses the whole batch when any item in it already carries an answer other than a pending pick, since a filled slot is a decision already made. On that refusal, drop the named item and send the rest.
 
 ## Step 5: offer to close declined issues
 
@@ -155,6 +160,6 @@ Close the run with the path so the reader can open what changed:
 
 ```plaintext
 ✅ <N> answered across <N> cluster(s) in <slug>
-<M> item(s) left unread
+<M> item(s) left unread, <P> waiting on a pick
 .canon/intake/<slug>/
 ```

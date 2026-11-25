@@ -176,8 +176,16 @@ This inverts the plan file's contract, where a blank slot means accept the sugge
 The operator types into the cluster file, or answers in chat and a verb lands the selection on the item. Both put the answer on the item, which keeps retrieval working, and neither lets a session decide one.
 
 - An answer given in conversation and never written back leaves the item unread, since the file is the record
-- An item already carrying an answer is refused rather than overwritten, whichever route the second answer takes
+- An item already carrying an answer is refused rather than overwritten, whichever route the second answer takes, a pending pick aside
 - Revising a filled slot is the operator editing their own line
+
+### A pending pick
+
+An answer opening on the word `sketch` leaves the item to a pick not yet taken, such as `- **You:** sketch`. The item is answered and undecided, so nothing promotes it.
+
+- The word counts only as the answer's first, in any case, so `Sketch, with the inspector` is pending and `ok, sketch first` is a decision
+- `canon intake list <slug> --json` reports each such item as `pendingPick`, and `--unread` leaves it out
+- `canon intake answer` fills that slot by `--decided` or `--set`, and refuses every other filled slot as `answered`
 
 ### A decision already recorded
 
