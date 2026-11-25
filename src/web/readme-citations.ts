@@ -74,3 +74,56 @@ export function readmeCitationsIn(
 
   return citations
 }
+
+export const README_ONLY_MARKER = 'canon-readme-only'
+
+export interface UncitedReadmeSection {
+  readonly heading: string
+  /** One-based line of the `## ` heading in `README.md`. */
+  readonly line: number
+}
+
+/** The comment's own close is stripped first, or `isMarked` reads `-->` as the reason. */
+function isReadmeOnly(line: string): boolean {
+  return isMarked([line.replace(/-->\s*$/, '')], 0, README_ONLY_MARKER)
+}
+
+const SECTION_HEADING = /^## (.+)$/
+const FENCE = /^\s*(```|~~~)/
+
+/**
+ * Every `## ` section of `README.md` no quoted phrase falls inside, heading included, and no marker covers.
+ * The marker sits on the first non-blank line under the heading, since a formatter inserts a blank line there.
+ */
+export function uncitedReadmeSections(
+  readme: string,
+  phrases: readonly string[],
+): UncitedReadmeSection[] {
+  const lines = readme.split('\n')
+  const starts: number[] = []
+  let fenced = false
+
+  for (const [index, line] of lines.entries()) {
+    if (FENCE.test(line)) fenced = !fenced
+    else if (!fenced && SECTION_HEADING.test(line)) starts.push(index)
+  }
+
+  const uncited: UncitedReadmeSection[] = []
+
+  for (const [position, start] of starts.entries()) {
+    const end = starts[position + 1] ?? lines.length
+    const body = lines.slice(start, end).join('\n')
+    if (phrases.some((phrase) => body.includes(phrase))) continue
+
+    let first = start + 1
+    while (first < end && (lines[first] ?? '').trim() === '') first += 1
+    if (first < end && isReadmeOnly(lines[first] ?? '')) continue
+
+    uncited.push({
+      heading: SECTION_HEADING.exec(lines[start] ?? '')?.[1] ?? '',
+      line: start + 1,
+    })
+  }
+
+  return uncited
+}

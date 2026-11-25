@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  README_ONLY_MARKER,
   README_PARAPHRASE_MARKER,
   readmeCitationsIn,
+  uncitedReadmeSections,
 } from '@/web/readme-citations'
 
 describe('readmeCitationsIn', () => {
@@ -140,5 +142,73 @@ describe('readmeCitationsIn', () => {
     )
 
     expect(citations).toEqual([])
+  })
+})
+
+describe('uncitedReadmeSections', () => {
+  it('should pass a section whose heading a phrase quotes', () => {
+    const readme = '# canon\n\n## Install it\n\nRun one command.\n'
+
+    expect(uncitedReadmeSections(readme, ['Install it'])).toEqual([])
+  })
+
+  it('should pass a section a phrase cites only through its body', () => {
+    const readme =
+      '## Five roles\n\nYou talk to the orchestrator that starts them.\n'
+
+    expect(
+      uncitedReadmeSections(readme, ['the orchestrator that starts them']),
+    ).toEqual([])
+  })
+
+  it('should report an unmarked section no phrase falls inside, by heading and line', () => {
+    const readme =
+      '# canon\n\n## Cited\n\nQuoted body.\n\n## Contributing\n\nIssues are welcome.\n'
+
+    expect(uncitedReadmeSections(readme, ['Quoted body'])).toEqual([
+      { heading: 'Contributing', line: 7 },
+    ])
+  })
+
+  it('should not credit a section with a phrase that sits in the next one', () => {
+    const readme = '## First\n\nNothing here.\n\n## Second\n\nQuoted body.\n'
+
+    expect(uncitedReadmeSections(readme, ['Quoted body'])).toEqual([
+      { heading: 'First', line: 1 },
+    ])
+  })
+
+  it('should pass a section marked README-only with a reason on the first line under its heading', () => {
+    const readme = `## Contributing\n\n<!-- ${README_ONLY_MARKER}: the landing has no contributing section -->\n\nIssues are welcome.\n`
+
+    expect(uncitedReadmeSections(readme, [])).toEqual([])
+  })
+
+  it('should report a section whose README-only marker names no reason', () => {
+    const readme = `## Contributing\n\n<!-- ${README_ONLY_MARKER}: -->\n\nIssues are welcome.\n`
+
+    expect(uncitedReadmeSections(readme, [])).toEqual([
+      { heading: 'Contributing', line: 1 },
+    ])
+  })
+
+  it('should not let a marker further down the body cover the section', () => {
+    const readme = `## Contributing\n\nIssues are welcome.\n\n<!-- ${README_ONLY_MARKER}: too late -->\n`
+
+    expect(uncitedReadmeSections(readme, [])).toEqual([
+      { heading: 'Contributing', line: 1 },
+    ])
+  })
+
+  it('should read a heading-shaped line inside a code fence as body', () => {
+    const readme = '## Cited\n\n```bash\n## not a heading\n```\n'
+
+    expect(uncitedReadmeSections(readme, ['Cited'])).toEqual([])
+  })
+
+  it('should report nothing for text above the first section', () => {
+    const readme = '# canon\n\nAn opening nobody quotes.\n'
+
+    expect(uncitedReadmeSections(readme, [])).toEqual([])
   })
 })

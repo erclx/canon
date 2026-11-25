@@ -49,6 +49,8 @@ describe('public positioning', () => {
   })
 
   it('should take the hero lead from the README opening line', () => {
-    expect(readmeOpening()).toContain(fold.lead)
+    const lead = fold.lead.charAt(0).toLowerCase() + fold.lead.slice(1)
+
+    expect(readmeOpening()).toContain(lead)
   })
 })

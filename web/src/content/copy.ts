@@ -23,13 +23,13 @@ export const site = {
   origin: ORIGIN,
   /** The browser tab and the share title, which read the project name alone with no tagline after it. */
   title: 'Canon',
-  // README.md: "A Claude Code plugin and CLI that runs agent work from plan to merge."
+  // README.md: "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way."
   description:
-    'A Claude Code plugin and CLI that runs agent work from plan to merge.',
-  /** The README's payoff line, also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`. */
-  // README.md: "Runs your agent's work and keeps its code good, on one setup for every repo."
+    "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way.",
+  /** The README's opening sentence, also the `description` in `package.json` and both manifests, kept equal by `positioning.test.ts`. */
+  // README.md: "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way."
   tagline:
-    "Runs your agent's work and keeps its code good, on one setup for every repo.",
+    "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way.",
   /** The handle the social card signs with, rather than the copyright holder `LICENSE` names. */
   author: 'erclx',
 }
@@ -71,12 +71,12 @@ export const fold = {
   // README.md: "Claude Code plugin and CLI"
   kick: 'Claude Code plugin and CLI',
   /** The claim in three runs, with the record icon set before `plan` and the merge icon before `merge`. */
-  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from" "plan to merge"
-  parts: ['Canon runs agent work from', 'plan to', 'merge'] as const,
-  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs agent work from plan to merge"
-  headline: 'Canon runs agent work from plan to merge',
-  // README.md: "And holds it to good engineering practice the whole way."
-  lead: 'And holds it to good engineering practice the whole way.',
+  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs your agent's work from" "plan to merge"
+  parts: ["Canon runs your agent's work from", 'plan to', 'merge'] as const,
+  // README.md: canon-allow-readme-paraphrase: the product name ahead of the opening sentence's claim. "runs your agent's work from" "plan to merge"
+  headline: "Canon runs your agent's work from plan to merge",
+  // README.md: canon-allow-readme-paraphrase: the opening sentence's second clause, capitalized to stand as its own line. "holds it to cited engineering practice"
+  lead: 'Holds it to cited engineering practice, and sets up every repo the same way.',
   view: {
     title: 'claude',
     // README.md: canon-allow-readme-paraphrase: the agent view's own prompt hint, which no README sentence carries.
@@ -226,8 +226,8 @@ export const guardrails = {
 export const worktrees = {
   // README.md: "Every feature gets its own worktree"
   head: 'Every feature gets its own worktree',
-  // README.md: "So several agents can build at once without touching each other's files."
-  lede: "So several agents can build at once without touching each other's files.",
+  // README.md: "Several agents can build at once without touching each other's files."
+  lede: "Several agents can build at once without touching each other's files.",
   // README.md: canon-allow-readme-paraphrase: the band naming the shared folder, which the README states as the record in the main checkout. "the one `.canon/` record in the main checkout"
   band: {
     name: '.canon/',
@@ -245,8 +245,8 @@ export const worktrees = {
 export const evidence = {
   // README.md: "See the interface evidence before you merge"
   head: 'See the interface evidence before you merge',
-  // README.md: "Every pull request comes with a short film of the new screen working in the app."
-  lede: 'Every pull request comes with a short film of the new screen working in the app.',
+  // README.md: "Every pull request that changes a screen comes with a short film of the new screen working in the app."
+  lede: 'Every pull request that changes a screen comes with a short film of the new screen working in the app.',
   // README.md: canon-allow-readme-paraphrase: the reel's control and caption, which no README sentence carries. "posts the reel"
   still: (pullRequest: number, repository: string) =>
     `The opening frame of the reel on pull request #${pullRequest} on ${repository}`,
@@ -262,15 +262,15 @@ export const evidence = {
 export const board = {
   // README.md: "Come back to finished pull requests"
   head: 'Come back to finished pull requests',
-  // README.md: "Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you."
+  // README.md: canon-allow-readme-paraphrase: the product name capitalized as the page writes it. "Queue features on the task board before you leave." "builds and reviews them, and holds each merge for you."
   lede: 'Queue features on the task board before you leave. Canon builds and reviews them, and holds each merge for you.',
 }
 
 export const health = {
   // README.md: "Audits for code an agent wrote"
   head: 'Audits for code an agent wrote',
-  // README.md: "They list the files and functions past a line limit, so you know what to split before it gets worse."
-  lede: 'They list the files and functions past a line limit, so you know what to split before it gets worse.',
+  // README.md: "Each audit lists the files and functions past a line limit, so you know what to split before it gets worse."
+  lede: 'Each audit lists the files and functions past a line limit, so you know what to split before it gets worse.',
   /** The labels around the figures `web/src/lib/health.ts` reads at build time. */
   // README.md: canon-allow-readme-paraphrase: column heads and captions for the two reports, which no README sentence carries.
   view: {
