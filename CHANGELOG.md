@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.124.0](https://github.com/erclx/canon/compare/v5.123.0...v5.124.0) (2026-11-25)
+
+
+### Features
+
+* **orchestrator:** exit the poll only on actionable lines ([#3533](https://github.com/erclx/canon/issues/3533)) ([3d38b89](https://github.com/erclx/canon/commit/3d38b895884c88aa7099181687d1c0f41d617b1f))
+* **pr:** read stamped standards into the merge standing ([#3532](https://github.com/erclx/canon/issues/3532)) ([a8da215](https://github.com/erclx/canon/commit/a8da215a5355aec310bfb2fe70b962b036a7022b))
+* **tooling:** shard e2e behind one check and leave suites to ci ([#3534](https://github.com/erclx/canon/issues/3534)) ([b7da21c](https://github.com/erclx/canon/commit/b7da21cb06cf66d55ec9f3367c5f4dd020e0bf2c))
+* **tooling:** ship a scoped check:changed gate with a remembered pass ([#3536](https://github.com/erclx/canon/issues/3536)) ([98ce384](https://github.com/erclx/canon/commit/98ce384531da82e618522572f468ad1cd0033c36))
+
 ## [5.123.0](https://github.com/erclx/canon/compare/v5.122.0...v5.123.0) (2026-11-25)
 
 
