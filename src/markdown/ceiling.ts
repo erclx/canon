@@ -27,7 +27,6 @@ export interface CeilingDocument {
 export interface CeilingFinding {
   readonly rel: string
   readonly renderedLines: number
-  /** The rendered lines this document may reach, from `ceilingFor`. */
   readonly ceiling: number
   /** The stated reason, or null where the document is not exempt. */
   readonly exempt: string | null
@@ -38,11 +37,7 @@ export function isChangelog(rel: string): boolean {
   return basename(rel) === CHANGELOG
 }
 
-/**
- * The rendered lines a document may reach. A consumer guide under the root
- * `docs/` folder takes the lower docs cap, since a person reads it, and every
- * other document keeps the ceiling an agent pays for on demand.
- */
+/** The rendered lines a document may reach, lower for a guide under the root `docs/`. */
 export function ceilingFor(rel: string): number {
   return rel.startsWith(DOCS_FOLDER)
     ? CHECKPOINTS.docsCeiling
