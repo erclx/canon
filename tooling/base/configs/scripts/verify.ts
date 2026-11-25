@@ -499,39 +499,76 @@ function splitPaths(output: string): string[] {
   return output.split('\0').filter((path) => path !== '')
 }
 
-const TRUNKS = ['origin/HEAD', 'origin/main', 'origin/master']
+const TRUNKS = ['origin/main', 'origin/master']
 
-// Undefined on a first push, where origin holds no branch to compare with and
-// no fetch can bring one.
-function resolveBase(): string | undefined {
-  if (git(['rev-parse', '--git-dir']) === undefined) {
-    fail('Not a git repository, so nothing says what changed')
-  }
-  const trunk = TRUNKS.find(
-    (ref) =>
+// The one trunk the web workflow starts on, and a pull request is what starts it.
+const CI_TRUNK = 'main'
+
+type Trunk =
+  | { readonly kind: 'base'; readonly ref: string; readonly base: string }
+  | { readonly kind: 'unpushed' }
+  | { readonly kind: 'none'; readonly hint: string }
+
+function readTrunk(): Trunk {
+  const named = git(['rev-parse', '--abbrev-ref', 'origin/HEAD'])?.trim()
+  const ref = [named ?? 'origin/HEAD', ...TRUNKS].find(
+    (name) =>
       git([
         'rev-parse',
         '--verify',
         '--quiet',
-        `refs/remotes/${ref}^{commit}`,
+        `refs/remotes/${name}^{commit}`,
       ]) !== undefined,
   )
-  if (trunk === undefined) {
-    const isUnpushed =
-      git(['remote', 'get-url', 'origin']) !== undefined &&
-      git(['for-each-ref', '--count=1', 'refs/remotes/origin']) === ''
-    if (isUnpushed) return undefined
-    fail(
-      `None of ${TRUNKS.join(', ')} resolves, so nothing says what changed. Run 'git fetch origin', then 'git remote set-head origin --auto' for a trunk under another name`,
-    )
+  if (ref !== undefined) {
+    const base = git(['merge-base', 'HEAD', `refs/remotes/${ref}`])?.trim()
+    if (base !== undefined) return { kind: 'base', ref, base }
+    return {
+      kind: 'none',
+      hint: `No merge base with ${ref}. Run 'git fetch origin', adding --unshallow in a shallow clone`,
+    }
   }
-  const base = git(['merge-base', 'HEAD', `refs/remotes/${trunk}`])
-  if (base === undefined) {
-    fail(
-      `No merge base with ${trunk}, so nothing says what changed. Run 'git fetch origin', adding --unshallow in a shallow clone`,
-    )
+  if (git(['remote', 'get-url', 'origin']) === undefined) {
+    return {
+      kind: 'none',
+      hint: "No remote is named origin. Name the one this project pushes to with 'git remote rename <name> origin'",
+    }
   }
-  return base.trim()
+  if (git(['for-each-ref', '--count=1', 'refs/remotes/origin']) === '') {
+    return { kind: 'unpushed' }
+  }
+  return {
+    kind: 'none',
+    hint: `None of ${TRUNKS.join(', ')} resolves. Run 'git fetch origin', then 'git remote set-head origin --auto' for a trunk under another name`,
+  }
+}
+
+// Why a changed run leaves nothing to CI, and undefined when it may. Only the
+// web phase list requires a build, and a sync into a subfolder ships no CI.
+function reasonUnscoped(
+  trunk: Trunk,
+  list: PhaseList,
+  declared: Set<string>,
+): string | undefined {
+  if (git(['rev-parse', '--show-prefix'])?.trim() !== '') {
+    return 'This folder is not the repository root'
+  }
+  if (!list.require.includes('build') || !declared.has(TIED_TESTS)) {
+    return `This is not a web project declaring ${TIED_TESTS}`
+  }
+  if (trunk.kind === 'unpushed') {
+    return 'origin holds no branch to compare with yet'
+  }
+  if (trunk.kind === 'none') {
+    fail(`Nothing says what changed. ${trunk.hint}`)
+  }
+  if (trunk.ref !== `origin/${CI_TRUNK}`) {
+    return `The trunk here is ${trunk.ref}, which no shipped workflow starts on`
+  }
+  if (git(['symbolic-ref', '--short', 'HEAD'])?.trim() === CI_TRUNK) {
+    return `${CI_TRUNK} is checked out, and a push to it starts no workflow`
+  }
+  return undefined
 }
 
 function listPaths(args: readonly string[]): string[] {
@@ -696,7 +733,14 @@ function listTools(): string[] {
   return [...new Set(['canon', 'bun', 'node', ...named])]
 }
 
-function readPassKey(base: string): PassKey {
+interface Basis {
+  readonly base: string
+  readonly isScoped: boolean
+}
+
+// What git tracks is a fact of its own, since a nested root and several gate
+// checks read tracked files and the tree holds untracked ones the same way.
+function readPassKey(basis: Basis): PassKey {
   const tree = writeTree()
   if (tree === undefined) {
     return {
@@ -713,9 +757,23 @@ function readPassKey(base: string): PassKey {
     versions.push([tool, version])
   }
   const folder = git(['rev-parse', '--show-prefix'])?.trim()
+  const untracked = git([
+    'ls-files',
+    '-z',
+    '--others',
+    '--exclude-standard',
+    ':/',
+  ])
   return {
     kind: 'key',
-    text: JSON.stringify({ tree, base, folder, isCi, versions }),
+    text: JSON.stringify({
+      tree,
+      untracked,
+      ...basis,
+      folder,
+      isCi,
+      versions,
+    }),
   }
 }
 
@@ -735,9 +793,9 @@ function logForgotten(reason: string): void {
 }
 
 // Drops the last pass unless it holds, so a run that fails leaves none.
-function openPass(base: string, isForced: boolean): Pass {
+function openPass(basis: Basis, isForced: boolean): Pass {
   const path = passPath()
-  const key = readPassKey(base)
+  const key = readPassKey(basis)
   if (path === undefined) return { hasPassed: false, keep: () => {} }
   const hasPassed =
     !isForced &&
@@ -757,7 +815,7 @@ function openPass(base: string, isForced: boolean): Pass {
         logForgotten(`a check ${UNMEASURED}`)
         return
       }
-      const after = readPassKey(base)
+      const after = readPassKey(basis)
       if (after.kind === 'none' || after.text !== key.text) {
         logForgotten('its content or a tool changed while it ran')
         return
@@ -765,20 +823,6 @@ function openPass(base: string, isForced: boolean): Pass {
       writeFileSync(path, key.text)
     },
   }
-}
-
-// Why a changed run leaves nothing to CI, and undefined when it may. A sync
-// into a subfolder ships no workflow, so no declared script speaks for one there.
-function reasonUnscoped(
-  base: string | undefined,
-  declared: Set<string>,
-): string | undefined {
-  if (base === undefined) return 'origin holds no branch to compare with yet'
-  if (git(['rev-parse', '--show-prefix'])?.trim() !== '') {
-    return 'This folder is not the repository root'
-  }
-  if (!declared.has(TIED_TESTS)) return `${TIED_TESTS} is not declared here`
-  return undefined
 }
 
 interface Flags {
@@ -803,14 +847,19 @@ function main(flags: Flags): void {
   if (!isNested) print(`${GREY}┌${NC}`)
 
   const required = new Set(list.require)
-  const base = flags.isChanged ? resolveBase() : undefined
-  const unscoped = flags.isChanged ? reasonUnscoped(base, declared) : undefined
-  const isScoped = base !== undefined && unscoped === undefined
+  const trunk = flags.isChanged ? readTrunk() : undefined
+  const unscoped =
+    trunk === undefined ? undefined : reasonUnscoped(trunk, list, declared)
   if (unscoped !== undefined) logSkip(`${unscoped}, so every phase runs`)
 
-  // A nested run keeps no pass, since the root's key covers its tree and tools.
+  const base = trunk?.kind === 'base' ? trunk.base : undefined
+  const scopedBase = unscoped === undefined ? base : undefined
+  const isScoped = scopedBase !== undefined
+
   const pass =
-    base !== undefined && !isNested ? openPass(base, flags.isForced) : undefined
+    base === undefined
+      ? undefined
+      : openPass({ base, isScoped }, flags.isForced)
   if (pass?.hasPassed) {
     logSkip(
       'Skipped: this content already passed. Run with --force to check it again',
@@ -823,7 +872,7 @@ function main(flags: Flags): void {
     if (isScoped && CI_PHASES.has(phase.script)) continue
     runPhase(phase, required.has(phase.script), declared)
   }
-  if (isScoped) runTiedTests(base)
+  if (scopedBase !== undefined) runTiedTests(scopedBase)
 
   logStep('Canon checks')
   checkCanonGate()
@@ -852,9 +901,9 @@ function main(flags: Flags): void {
   if (!isNested) {
     print(`${GREY}└${NC}\n`)
     print(
-      base === undefined
-        ? `${GREEN}✓ Verification passed${NC}`
-        : `${GREEN}✓ Changed check passed${NC}`,
+      flags.isChanged
+        ? `${GREEN}✓ Changed check passed${NC}`
+        : `${GREEN}✓ Verification passed${NC}`,
     )
   }
 }

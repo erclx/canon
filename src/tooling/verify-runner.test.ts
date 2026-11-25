@@ -815,6 +815,7 @@ const setUpChanged = (files: readonly string[] = []): void => {
   for (const file of files) writeSource(file)
   commit()
   pushTrunk()
+  runGit('checkout', '-q', '-b', 'feature')
 }
 
 describe('changed mode', () => {
@@ -876,13 +877,29 @@ describe('changed mode', () => {
     expect(runChanged().status).toBe(1)
   })
 
+  it('should run every phase where a stack other than web declares test:changed', () => {
+    setUpChanged()
+    writeList('python')
+    writePackage({
+      ...declare(STACK_SCRIPTS.python),
+      'test:run': 'exit 1',
+      'test:changed': 'log-tests',
+    })
+
+    const result = runChanged()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('Unit tests failed')
+    expect(result.stdout).not.toContain('CI runs')
+  })
+
   it('should name CI nowhere when test:changed is undeclared', () => {
     setUpChanged()
     writePackage(declare(STACK_SCRIPTS.web))
 
     const result = runChanged()
 
-    expect(result.stdout).toContain('test:changed is not declared here')
+    expect(result.stdout).toContain('This is not a web project')
     expect(result.stdout).not.toContain('CI')
   })
 
@@ -1031,44 +1048,80 @@ describe('the tie rule', () => {
 })
 
 describe('the trunk', () => {
-  it('should read a trunk named master', () => {
-    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
-    runGit('update-ref', '-d', 'refs/remotes/origin/main')
-    pushTrunk('master')
-    writeSource('src/cart.ts', 'edited')
-
-    runChanged()
-
-    expect(readTests()).toEqual(['src/cart.test.ts'])
-  })
-
-  it('should read origin/HEAD ahead of origin/main', () => {
-    setUpChanged(['src/cart.ts', 'src/cart.test.ts'])
-    writeSource('src/cart.ts', 'edited')
-    commit()
-    pushTrunk('trunk')
-    runGit(
-      'symbolic-ref',
-      'refs/remotes/origin/HEAD',
-      'refs/remotes/origin/trunk',
-    )
+  const runEveryPhase = (reason: string): void => {
+    writePackage({ ...WEB_CHANGED, 'test:run': 'true', build: 'true' })
 
     const result = runChanged()
 
-    expect(result.stdout).toContain('Skipped: no test is tied to the change')
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain(reason)
+    expect(result.stdout).toContain('Unit tests passed')
+    expect(result.stdout).toContain('Build passed')
+    expect(result.stdout).not.toContain('CI runs')
+  }
+
+  it('should run every phase on a trunk the web workflow never starts on', () => {
+    setUpChanged()
+    runGit('update-ref', '-d', 'refs/remotes/origin/main')
+    pushTrunk('master')
+
+    runEveryPhase('The trunk here is origin/master')
   })
 
-  it('should refuse with a fetch hint when no trunk resolves', () => {
+  it('should read origin/HEAD ahead of origin/main', () => {
     setUpChanged()
+    pushTrunk('develop')
+    runGit(
+      'symbolic-ref',
+      'refs/remotes/origin/HEAD',
+      'refs/remotes/origin/develop',
+    )
+
+    runEveryPhase('The trunk here is origin/develop')
+  })
+
+  it('should stay scoped where origin/HEAD names origin/main', () => {
+    setUpChanged()
+    runGit(
+      'symbolic-ref',
+      'refs/remotes/origin/HEAD',
+      'refs/remotes/origin/main',
+    )
+
+    expect(runChanged().stdout).toContain('which CI runs')
+  })
+
+  it('should run every phase where the trunk itself is checked out', () => {
+    setUpChanged()
+    runGit('checkout', '-q', '-B', 'main')
+
+    runEveryPhase('main is checked out')
+  })
+
+  it('should run every phase with no trunk where no push is scoped', () => {
+    setUpChanged()
+    runGit('update-ref', '-d', 'refs/remotes/origin/main')
+    writeList('python')
+    writePackage(declare(STACK_SCRIPTS.python))
+
+    const result = runChanged()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Unit tests passed')
+  })
+
+  it('should name the missing remote where none is named origin', () => {
+    setUpChanged()
+    runGit('remote', 'add', 'upstream', 'https://example.com/a.git')
     runGit('update-ref', '-d', 'refs/remotes/origin/main')
 
     const result = runChanged()
 
     expect(result.status).toBe(1)
-    expect(result.stdout).toContain('git fetch origin')
+    expect(result.stdout).toContain('No remote is named origin')
   })
 
-  it('should refuse when origin holds other branches and no trunk', () => {
+  it('should refuse with a fetch hint when no trunk resolves', () => {
     setUpChanged()
     runGit('remote', 'add', 'origin', 'https://example.com/a.git')
     runGit('update-ref', '-d', 'refs/remotes/origin/main')
@@ -1092,27 +1145,21 @@ describe('the trunk', () => {
     expect(result.stdout).toContain('No merge base with origin/main')
   })
 
-  it('should refuse outside a git repository', () => {
+  it('should run every phase outside a git repository', () => {
     setUp('web', STACK_SCRIPTS.web)
 
     const result = runChanged()
 
-    expect(result.status).toBe(1)
-    expect(result.stdout).toContain('Not a git repository')
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Unit tests passed')
   })
 
   it('should run every phase on a first push, where origin has no branch', () => {
     setUpChanged()
     runGit('remote', 'add', 'origin', 'https://example.com/a.git')
     runGit('update-ref', '-d', 'refs/remotes/origin/main')
-    writePackage({ ...WEB_CHANGED, 'test:run': 'true', build: 'true' })
 
-    const result = runChanged()
-
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('so every phase runs')
-    expect(result.stdout).toContain('Unit tests passed')
-    expect(result.stdout).toContain('Build passed')
+    runEveryPhase('origin holds no branch to compare with yet')
   })
 })
 
@@ -1199,10 +1246,14 @@ describe('the remembered pass', () => {
   const gateRuns = (): number =>
     readArgv().filter((argv) => argv.startsWith('gate run')).length
 
-  const writeNested = (dir: string, list: string): void => {
+  const writeNestedFiles = (dir: string, list: string): void => {
     writeSource(`${dir}/package.json`, '{"scripts":{}}')
     writeSource(`${dir}/scripts/verify.json`, list)
     copyFileSync(RUNNER, join(fixture, dir, 'scripts/verify.ts'))
+  }
+
+  const writeNested = (dir: string, list: string): void => {
+    writeNestedFiles(dir, list)
     commit()
   }
 
@@ -1342,6 +1393,7 @@ describe('the remembered pass', () => {
     it('should change with the version of a tool the phase list names', () => {
       setUpChanged()
       writeList('python')
+      writePackage(declare(STACK_SCRIPTS.python))
       writeVersion('uv', '1.0.0')
       runChanged()
       writeVersion('uv', '2.0.0')
@@ -1374,6 +1426,31 @@ describe('the remembered pass', () => {
       runChanged()
 
       expect(gateRuns()).toBe(ran * 2)
+    })
+
+    it('should change when an untracked nested root is committed', () => {
+      setUpChanged()
+      writeNestedFiles('service', '{"require":["lint"]}')
+      const untracked = runChanged()
+      commit()
+
+      const tracked = runChanged()
+
+      expect(untracked.status).toBe(0)
+      expect(tracked.status).toBe(1)
+    })
+
+    it('should change when the run stops being scoped', () => {
+      setUpChanged()
+      writePackage({ ...WEB_CHANGED, 'test:run': 'exit 1' })
+      commit()
+      const scoped = runChanged()
+      runGit('checkout', '-q', '-B', 'main')
+
+      const full = runChanged()
+
+      expect(scoped.status).toBe(0)
+      expect(full.status).toBe(1)
     })
 
     it('should change with the folder the run starts in', () => {
@@ -1444,6 +1521,7 @@ describe('the remembered pass', () => {
 
     it('should be one with a tool that reports no version', () => {
       writeList('python')
+      writePackage(declare(STACK_SCRIPTS.python))
       writeStub('uv', 1)
 
       expectNoPass()
