@@ -55,7 +55,7 @@ export const PULL_REFUSALS: Record<PullRefusal | HeadRefusal, string> = {
   'no-object-head':
     'The pull request object reported no head commit, so there is nothing to compare the tip against.',
   'runs-unreadable':
-    'The check runs for this commit could not be read. An empty answer here would report a commit as having no check rather than as unread, so nothing is reported.',
+    'The check runs or commit statuses for this commit could not be read. An empty answer here would report a commit as having no check rather than as unread, so nothing is reported.',
   'reviews-unreadable':
     'The reviews on this pull request could not be read. An empty answer here would report a reviewed pull request as never reviewed, which routes the next pass to the whole change, so nothing is reported.',
   'bad-input':

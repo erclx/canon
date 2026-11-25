@@ -61,7 +61,7 @@ The first review a change gets is a dispatched reviewer's. The worker's gate ins
 
 Findings travel on the PR. `review-pr` posts them, `review-address` fixes them and pushes, and `review-pr` runs again on the added commits.
 
-- `canon pr head` resolves the tip a pass scopes against, and `canon pr checks` reports the runs for it. See `canon pr head --help`.
+- `canon pr head` resolves the tip a pass scopes against, and `canon pr checks` reports the runs and commit statuses for it. See `canon pr head --help`.
 - A worker messages its controller when the PR opens with any row it turned up, when each address pass pushes with CI still running, and on a block, then ends its turn. It sends nothing on progress.
 - A declined finding carries the fact that settled it in its reply body, and a minor goes to the findings of the task the branch closes
 - A finding answered without a commit still owes a close-out, read from the worker's response

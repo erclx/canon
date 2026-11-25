@@ -43,3 +43,11 @@ gh api --paginate 'repos/{owner}/{repo}/commits/<tip>/check-runs?per_page=100' -
 ```
 
 A run whose `status` is not `completed` is pending. A tip listing no run at all is pending too rather than green, the same reading `canon pr checks` gives it.
+
+Read the commit statuses beside them, since a project whose base requires no check gates on a status too, as a deploy reports through one:
+
+```bash
+gh api 'repos/{owner}/{repo}/commits/<tip>/status?per_page=100' --jq '.statuses[] | {context, state} | @json'
+```
+
+A status whose `state` is `pending` is pending, and one reading `failure` or `error` is failing. A tip with a status and no check run is pending rather than green.

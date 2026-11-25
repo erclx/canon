@@ -437,22 +437,97 @@ describe('collapseChecks over a required commit status', () => {
     expect(reading.state).toBe('passing')
   })
 
-  // The fallback predates the rules and never saw a commit status, so one cannot fail it.
-  it('should leave statuses out when no required set was read', () => {
-    const reading = collapseChecks(TIP, listing, undefined, [
-      { context: DEPLOY, state: 'failure' },
-    ])
+  describe('with nothing required', () => {
+    it.each([
+      ['unread', undefined],
+      ['empty', new Set<string>()],
+    ])(
+      'should read failing on a failed status when the rules are %s',
+      (_, set) => {
+        const reading = collapseChecks(TIP, listing, set, [
+          { context: 'codecov/patch', state: 'failure' },
+        ])
+
+        expect(reading.state).toBe('failing')
+      },
+    )
+
+    it.each([
+      ['unread', undefined],
+      ['empty', new Set<string>()],
+    ])(
+      'should read pending on a pending status when the rules are %s',
+      (_, set) => {
+        const reading = collapseChecks(TIP, listing, set, [
+          { context: DEPLOY, state: 'pending' },
+        ])
+
+        expect(reading.state).toBe('pending')
+      },
+    )
+
+    it('should read passing once the status succeeds beside a passing run', () => {
+      const reading = collapseChecks(TIP, listing, undefined, [
+        { context: DEPLOY, state: 'success' },
+      ])
+
+      expect(reading.state).toBe('passing')
+    })
+
+    it('should read pending on a success status with no check run yet', () => {
+      const reading = collapseChecks(
+        TIP,
+        { total_count: 0, check_runs: [] },
+        undefined,
+        [{ context: DEPLOY, state: 'success' }],
+      )
+
+      expect(reading.state).toBe('pending')
+    })
+
+    it('should read pending when the status list is unread beside a passing run', () => {
+      const reading = collapseChecks(TIP, listing, undefined, null)
+
+      expect(reading.state).toBe('pending')
+    })
+
+    it('should read failing on a failed run beside an unread status list', () => {
+      const reading = collapseChecks(
+        TIP,
+        {
+          total_count: 1,
+          check_runs: [
+            {
+              head_sha: TIP,
+              name: STATIC,
+              status: 'completed',
+              conclusion: 'failure',
+            },
+          ],
+        },
+        undefined,
+        null,
+      )
+
+      expect(reading.state).toBe('failing')
+    })
+  })
+
+  it('should read an unread status list as none when a required set is read', () => {
+    const reading = collapseChecks(TIP, listing, new Set([STATIC]), null)
 
     expect(reading.state).toBe('passing')
   })
 
-  // A repository with no rulesets answers an empty rule list, the same fallback as unread.
-  it('should leave statuses out when the rules require nothing', () => {
-    const reading = collapseChecks(TIP, listing, new Set(), [
+  it('should keep a failed status outside the required set advisory', () => {
+    const reading = collapseChecks(TIP, listing, new Set([STATIC]), [
       { context: 'codecov/patch', state: 'failure' },
     ])
 
-    expect(reading.state).toBe('passing')
+    expect({ state: reading.state, advisory: reading.advisory }).toEqual({
+      state: 'passing',
+      advisory: ['codecov/patch'],
+    })
   })
 })
 

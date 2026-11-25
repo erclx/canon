@@ -141,7 +141,7 @@ export function registerLift(pr: Command): void {
         'named in the record as `advisory` without blocking. One still going',
         'is named as `running`, which never gates either, so a reader waiting',
         'on every check at the head reads it there. Rules that do not read, or',
-        'that list no check, gate by every check run on the tip.',
+        'that list no check, gate by every check run and commit status on the tip.',
         '',
         'Review state, UI state, evidence, and standing are read before the CI',
         'wait, so a reviewer whose partner is still driving refuses at once. The',

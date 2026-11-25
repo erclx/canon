@@ -230,6 +230,56 @@ function readReelSkips(skips: unknown): Map<number, string> {
   )
 }
 
+/** What the status endpoint gave back for a tip. */
+export type StatusRead =
+  | { readonly kind: 'unreachable' }
+  | { readonly kind: 'unparsable' }
+  | {
+      readonly kind: 'read'
+      readonly rows: readonly RawStatus[]
+      /** The endpoint reported more statuses than it returned rows. */
+      readonly partial: boolean
+    }
+
+/**
+ * Reads the commit statuses on a tip from `commits/<sha>/status`, newest per
+ * context, and says what it could not trust rather than deciding, since a
+ * required set and an empty one read a partial list differently.
+ */
+export async function readStatusRows(
+  root: string,
+  tip: string,
+): Promise<StatusRead> {
+  const text = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/commits/${tip}/status?per_page=100`,
+  ])
+  if (text === null) return { kind: 'unreachable' }
+  try {
+    const body = JSON.parse(text) as {
+      statuses?: unknown
+      total_count?: number
+    }
+    if (!Array.isArray(body.statuses)) return { kind: 'unparsable' }
+    return {
+      kind: 'read',
+      rows: body.statuses as readonly RawStatus[],
+      partial: (body.total_count ?? 0) > body.statuses.length,
+    }
+  } catch {
+    return { kind: 'unparsable' }
+  }
+}
+
+/** The rows a verb can trust, undefined on a failed, unparsable, or partial read. */
+export async function readStatuses(
+  root: string,
+  tip: string,
+): Promise<readonly RawStatus[] | undefined> {
+  const read = await readStatusRows(root, tip)
+  return read.kind === 'read' && !read.partial ? read.rows : undefined
+}
+
 const UNREAD_STATUSES = 'commit statuses (unread)'
 
 export async function readChecksGate(
@@ -238,26 +288,23 @@ export async function readChecksGate(
   tip: string,
 ): Promise<ChecksGate | undefined> {
   // A failed status read leaves a required context unseen, which reads pending.
-  const [listed, pulled, combined] = await Promise.all([
+  const [listed, pulled, read] = await Promise.all([
     gh(root, [
       'api',
       `repos/{owner}/{repo}/commits/${tip}/check-runs?per_page=100`,
     ]),
     gh(root, ['api', `repos/{owner}/{repo}/pulls/${number}`]),
-    gh(root, [
-      'api',
-      `repos/{owner}/{repo}/commits/${tip}/status?per_page=100`,
-    ]),
+    readStatusRows(root, tip),
   ])
   if (listed === null) return undefined
   try {
     const row = pulled === null ? undefined : (JSON.parse(pulled) as RestPull)
     const required = await readRequiredChecks(root, row?.base?.ref)
+    // Under a required set a partial list passes its rows and an unparsable one fails the gate, as before.
+    const gatesByName = required !== undefined && required.size > 0
+    if (read.kind === 'unparsable' && gatesByName) return undefined
     const statuses =
-      combined === null
-        ? []
-        : ((JSON.parse(combined) as { statuses?: readonly RawStatus[] })
-            .statuses ?? [])
+      read.kind === 'read' && (!read.partial || gatesByName) ? read.rows : null
     const listing = JSON.parse(listed) as CheckRunListing
     const reading = withMergeState(
       mergeStateOf(row?.mergeable_state),
@@ -267,12 +314,12 @@ export async function readChecksGate(
     const stalled =
       reading.state === 'pending' &&
       !reading.conflicted &&
-      missesGatingCheck(tip, listing, required, statuses)
+      missesGatingCheck(tip, listing, required, statuses ?? [])
         ? await readStalledRuns(root, tip)
         : []
     // An unread status list may hide a pending context, so it holds whoever waits on `running`.
     const running =
-      reading.running === undefined || combined !== null
+      reading.running === undefined || read.kind !== 'unreachable'
         ? reading.running
         : [...reading.running, UNREAD_STATUSES]
     return {

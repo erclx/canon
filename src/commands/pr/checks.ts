@@ -6,6 +6,7 @@ import {
   withMergeState,
 } from '@/pr/checks'
 import { resolveTip } from '@/pr/head'
+import { readStatuses } from '@/commands/pr/gates'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 import {
   PULL_REFUSALS,
@@ -19,7 +20,9 @@ import {
 
 export function registerChecks(pr: Command): void {
   pr.command('checks')
-    .description('Report the check runs belonging to the branch tip')
+    .description(
+      'Report the check runs and commit statuses belonging to the branch tip',
+    )
     .argument('[number]', 'Pull request to read, defaulting to this branch')
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Repository to read, defaulting to the cwd')
@@ -30,7 +33,8 @@ export function registerChecks(pr: Command): void {
         '',
         '`gh pr checks` cannot be made sha-aware at all: its field set carries no',
         'sha, so a caller cannot learn which commit its answer describes. This',
-        'resolves the tip from the remote and reads the check runs keyed on it.',
+        'resolves the tip from the remote and reads the check runs keyed on it,',
+        'with the commit statuses beside them, since a deploy reports through one.',
         '',
         'Pending is reported for a tip carrying no run yet as well as for one',
         'still going, since the endpoint has answered with a non-zero count and',
@@ -44,8 +48,8 @@ export function registerChecks(pr: Command): void {
         '  unresolvable-ref  the remote read failed, which is not an absent branch',
         '  no-remote-branch  the remote carries no branch by that name, so there',
         '                    is no tip to compare against',
-        '  runs-unreadable   the check runs for the tip could not be read, which is',
-        '                    unread rather than none',
+        '  runs-unreadable   the check runs or statuses for the tip could not be read,',
+        '                    which is unread rather than none',
         '  gh-missing        `gh` is not on the path, so no pull request resolved',
         '  gh-failed         `gh` could not answer for this branch, so name a number',
         '  rate-limited      GitHub refused a read for a spent quota, named with',
@@ -121,14 +125,24 @@ async function runChecks(
     )
   }
 
+  const statuses = await readStatuses(root, resolved.tip)
+  if (statuses === undefined) {
+    return refuseWith(
+      'runs-unreadable',
+      PULL_REFUSALS['runs-unreadable'],
+      emitJson,
+      root,
+    )
+  }
+
   const reading = withMergeState(
     identity.mergeState,
-    collapseChecks(resolved.tip, listing),
+    collapseChecks(resolved.tip, listing, undefined, statuses),
   )
 
   logStep('Scope')
   logInfo(
-    `${identity.branch} at ${reading.tip.slice(0, 8)}, ${plural(reading.matched, 'run')} belonging to it`,
+    `${identity.branch} at ${reading.tip.slice(0, 8)}, ${plural(reading.matched, 'run')} and ${statuses.length} ${statuses.length === 1 ? 'status' : 'statuses'} belonging to it`,
   )
   // Named apart from the count above, since a foreign-commit run alone makes the verdict pending.
   if (reading.foreign > 0) {
@@ -150,9 +164,11 @@ async function runChecks(
         : 'Pending',
   )
   if (reading.state === 'passing') {
-    logInfo('every run on the tip completed and none failed')
+    logInfo('every run or status on the tip completed and none failed')
   } else if (reading.state === 'failing') {
-    logWarn('a run on the tip failed, which no run still going can clear')
+    logWarn(
+      'a run or status on the tip failed, which none still going can clear',
+    )
   } else if (reading.conflicted) {
     logWarn(
       'the branch conflicts with its base, so no run will start for the tip. Rebase onto the base rather than waiting.',
@@ -162,7 +178,7 @@ async function runChecks(
       `no run belongs to the tip yet${reading.reported > 0 ? `, against a reported count of ${reading.reported}` : ''}. That is unread rather than clean.`,
     )
   } else {
-    logInfo('a run on the tip has yet to conclude')
+    logInfo('a run or status on the tip has yet to conclude')
   }
 
   outro()
@@ -173,6 +189,7 @@ async function runChecks(
         root,
         ...(identity.number !== undefined && { number: identity.number }),
         branch: identity.branch,
+        statuses: statuses.length,
         ...reading,
       })}\n`,
     )

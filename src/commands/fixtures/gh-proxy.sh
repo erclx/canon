@@ -50,7 +50,10 @@ case "$*" in
 *"/pulls/7/files"*) echo '[{"filename":"src/a.ts","status":"added"}]' | jq -r "$f" ;;
 *"/check-runs"*) [ -f "$fx/checks.json" ] && cat "$fx/checks.json" || echo '{"total_count":0,"check_runs":[]}' ;;
 *"/rules/branches/"*) [ -f "$fx/rules.json" ] && cat "$fx/rules.json" || exit 1 ;;
-*"/status?"*) [ -f "$fx/status.json" ] && cat "$fx/status.json" || exit 1 ;;
+*"/status?"*)
+  [ -f "$fx/status-fail" ] && exit 1
+  [ -f "$fx/status.json" ] && cat "$fx/status.json" || echo '{"total_count":0,"statuses":[]}'
+  ;;
 *"/actions/runs/"*"/jobs"*) [ -f "$fx/jobs.json" ] && cat "$fx/jobs.json" || exit 1 ;;
 *"/actions/runs?"*) [ -f "$fx/runs.json" ] && cat "$fx/runs.json" || exit 1 ;;
 *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
