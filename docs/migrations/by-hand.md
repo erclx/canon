@@ -87,6 +87,14 @@ The web stack no longer ships `scripts/install-playwright-deps.sh`, and nothing 
 - A workflow of your own may still call it, so search for the name before deleting
 - A self-hosted runner adds `bunx playwright install-deps chromium` before the browser install
 
+## Keep or delete the README screenshot files, your call
+
+The web stack no longer ships `.github/workflows/readme-screenshot.yml`, `scripts/readme-screenshot.sh`, or the `readme-screenshot` script in `package.json`. Sync deletes nothing, so a copy you hold stays yours, and no later sync updates it.
+
+- Keep all three if the workflow refreshes your README frame. The script sources `scripts/lib/preview-server.sh` and calls `e2e/screenshot.ts --print-evidence-root`, and the stack still ships both.
+- Delete them together otherwise, since the workflow runs the script through the `package.json` entry
+- `canon/config/config.json` may still hold a hash or a disposition for each path. Sync and `canon tooling diff` ignore both, and `canon tooling lift <path>` clears a declined or customized entry.
+
 ## Move decisions out of a held architecture record, once
 
 The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CLAUDE.md` import stay. Move a trap a session would hit into that domain's `## Gotchas`, then delete the file and its `@canon/ARCHITECTURE.md` line.
@@ -103,11 +111,11 @@ A web project's `e2e/screenshot.ts` is a config. It now loads `CASES` from a see
 
 A web project's capture harness now commits evidence at 390, 768, and 1280. It writes nothing at 320, and checks every case there for sideways scroll and clipped controls instead.
 
-The README script writes its frame under `<EVIDENCE_ROOT>/readme/` in place of `assets/evidence/readme/`. Both files are configs, so the change lands on your next sync, except in a script you customized to fill `README_FILTER`.
+The README script writes its frame under `<EVIDENCE_ROOT>/readme/` in place of `assets/evidence/readme/`. The web stack no longer ships the script or its workflow, so a copy you hold takes the change by hand.
 
 - Delete each committed `320--<theme>.png` under your `EVIDENCE_ROOT`, since no run rewrites or removes it, and commit the 390 and 768 frames the next capture writes.
 - Fix a page the run now fails at 320, or name `'320'` in that case's `excludeViewports` to defer the check. An `excludeViewports` name no width carries is warned on and ignored.
-- Merge the `README_EVIDENCE_DIR` default and the `GITHUB_OUTPUT` lines into a customized `scripts/readme-screenshot.sh`, since the workflow fails while the script hands it no `dir`.
+- Merge the `README_EVIDENCE_DIR` default and the `GITHUB_OUTPUT` lines into your `scripts/readme-screenshot.sh`, since the workflow fails while the script hands it no `dir`.
 - Point the README's `srcset` at `<EVIDENCE_ROOT>/readme/`, then delete `assets/evidence/readme/`. The README shows a broken image until you do.
 - Give `RELEASE_PLEASE_TOKEN` Contents write, so the README refresh's push starts the required checks. Without the secret the workflow falls back to the default token, whose push starts none.
 

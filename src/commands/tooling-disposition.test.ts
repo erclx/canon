@@ -22,7 +22,7 @@ import { seedPackage } from '@/process/seeded-package'
 import { stampPath } from '@/sync/stamp'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
-const WORKFLOW = '.github/workflows/readme-screenshot.yml'
+const WORKFLOW = '.github/workflows/verify.yml'
 const CONFIG = '.oxlintrc.json'
 
 interface Run {
