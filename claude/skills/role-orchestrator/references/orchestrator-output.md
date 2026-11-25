@@ -133,6 +133,7 @@ This grant is a standing authorization the operator gave knowing they would be a
 
 - `standing-stale` carries `moved`, the files the base changed that the branch writes or its examples stamp
 - On `standing-stale`, send the branch's session to update it, then wait for CI and re-read the gates before writing the line again
+- On `standing-stale` with `bot: release-please`, no session owns the branch, so run `gh pr update-branch <number>`, wait for CI, and re-read the gates
 - `standing-conflict` takes the same route through a rebase
 - `standing-unknown` means the base could not be read, so report it and run the line again only once the remote answers
 

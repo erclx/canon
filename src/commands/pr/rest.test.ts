@@ -605,6 +605,24 @@ describe('canon pr reads through REST alone', () => {
       return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
     }
 
+    /** The human run, whose refusal line --json keeps quiet. */
+    async function runMergeHuman(args: string[]): Promise<string> {
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'merge', ...args, '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: {
+            PATH: `${join(tempDir, 'bin')}:${process.env.PATH}`,
+            FAKE_DIR: tempDir,
+          },
+        },
+      )
+      return String(result.stderr)
+    }
+
     /** The log from the merge call on, since its multiline message spans lines. */
     function mergeCall(): string | undefined {
       const log = readFileSync(join(tempDir, 'gh.log'), 'utf8')
@@ -675,7 +693,8 @@ describe('canon pr reads through REST alone', () => {
       expect(exit).toBe(1)
     })
 
-    it('should refuse standing-stale naming the file a sibling merged into, and call no merge', async () => {
+    /** Forks the branch and a sibling on one file, so the base moved under a green head. */
+    function stageStalePull(body: string, headRef = 'feat/x'): void {
       writeFileSync(join(repoRoot, 'c.txt'), '1\n2\n3\n4\n5\n')
       git('add', 'c.txt')
       git('commit', '-q', '-m', 'fork')
@@ -694,7 +713,8 @@ describe('canon pr reads through REST alone', () => {
           draft: false,
           state: 'open',
           title: 'feat(pr): add a merge verb',
-          body: '## Summary\n\n- Merge one pull request\n\n## Key changes\n\n- Add `src/a.ts`\n',
+          head: { ref: headRef, sha: tip },
+          body,
         }),
       )
       writeFixture('checks.json', {
@@ -709,6 +729,12 @@ describe('canon pr reads through REST alone', () => {
           },
         ],
       })
+    }
+
+    it('should refuse standing-stale naming the file a sibling merged into, and call no merge', async () => {
+      stageStalePull(
+        '## Summary\n\n- Merge one pull request\n\n## Key changes\n\n- Add `src/a.ts`\n',
+      )
 
       const { record, exit } = await runMerge(['7'])
 
@@ -717,6 +743,35 @@ describe('canon pr reads through REST alone', () => {
         moved: ['c.txt'],
       })
       expect(exit).toBe(1)
+      expect(mergeCall()).toBeUndefined()
+    })
+
+    it('should name gh pr update-branch on a stale release-please pull request', async () => {
+      stageStalePull(
+        [
+          ':robot: I have created a release *beep* *boop*',
+          '---',
+          '',
+          '## [1.0.0](https://example.test/compare/v0.9.0...v1.0.0) (2026-10-24)',
+          '',
+          '### Features',
+          '',
+          '* add a thing',
+          '',
+          '---',
+          'This PR was generated with [Release Please](https://example.test).',
+        ].join('\n'),
+        'release-please--branches--main--components--canon',
+      )
+
+      const { record } = await runMerge(['7'])
+      const stderr = await runMergeHuman(['7'])
+
+      expect(record).toMatchObject({
+        reason: 'standing-stale',
+        bot: 'release-please',
+      })
+      expect(stderr).toContain('gh pr update-branch 7')
       expect(mergeCall()).toBeUndefined()
     })
   })

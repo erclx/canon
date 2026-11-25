@@ -93,6 +93,8 @@ export interface MergeRecord {
   readonly advisory?: readonly string[]
   /** The written or stamped paths the base changed since the fork point, present only on `standing-stale`. */
   readonly moved?: readonly string[]
+  /** The bot a stale pull request comes from, so the refusal can name who refreshes the branch. Present only on `standing-stale`. */
+  readonly bot?: BotKind
   /** The fast-forward of the main worktree, present only on a merge. */
   readonly pull?: MergePullRecord
 }
@@ -221,6 +223,7 @@ function refused(
     title?: string
     description?: string
     moved?: readonly string[]
+    bot?: BotKind
   } = {},
 ): MergeRecord {
   return { reason, isOk: false, number, ...message }
@@ -269,6 +272,7 @@ export async function merge(
     return refused(`standing-${base.standing}`, number, {
       ...message,
       ...(base.moved === undefined ? {} : { moved: base.moved }),
+      ...(base.standing === 'stale' && bot !== undefined ? { bot } : {}),
     })
   }
 

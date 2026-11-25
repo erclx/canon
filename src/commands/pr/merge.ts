@@ -8,6 +8,7 @@ import {
   merge,
   type MergeApi,
   type MergeOutcome,
+  type MergeRecord,
   type MergeRefusal,
   type MergeRequest,
 } from '@/pr/merge'
@@ -100,7 +101,8 @@ export function registerMerge(pr: Command): void {
         '  merged, dry-run (--dry-run)',
         '  pull-closed, pull-draft, missing-summary, missing-key-changes,',
         '  ci-failing, ci-conflicted, ci-stalled, ci-pending, standing-stale',
-        '  (with `moved`), standing-conflict, standing-unknown, head-moved,',
+        '  (with `moved`, and `bot` on a bot pull request, where a release-please',
+        '  branch is told to run `gh pr update-branch`), standing-conflict, standing-unknown, head-moved,',
         '  not-mergeable, gh-failed, rate-limited, bad-input (a number that is not',
         '  a positive whole number), no-pull (a number naming no pull request)',
         '',
@@ -153,6 +155,19 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
   'gh-failed':
     'A read or the merge was refused, so nothing is reported as merged.',
   'no-pull': PULL_REFUSALS['no-pull'],
+}
+
+const RELEASE_STALE_HINT =
+  'The base changed a file this branch writes, or a standard its examples stamp, since the two forked. The release tool will not refresh this branch itself, so run `gh pr update-branch <number>` and wait for CI, rather than retrying the merge.'
+
+/** The line a refusal prints, naming the update command where no bot refreshes the branch. */
+export function refusalText(
+  record: Pick<MergeRecord, 'reason' | 'number' | 'bot'>,
+): string {
+  if (record.reason === 'standing-stale' && record.bot === 'release-please') {
+    return RELEASE_STALE_HINT.replace('<number>', String(record.number))
+  }
+  return MERGE_REFUSALS[record.reason as MergeRefusal]
 }
 
 /**
@@ -294,7 +309,7 @@ async function runMerge(
         ? `#${record.number} would merge with the message below`
         : record.reason === 'rate-limited'
           ? rateLimitMessage(record)
-          : MERGE_REFUSALS[record.reason],
+          : refusalText(record),
   )
   warnAdvisory(record.advisory)
   for (const path of record.moved ?? []) {
