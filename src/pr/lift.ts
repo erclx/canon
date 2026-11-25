@@ -1,4 +1,8 @@
 import type { ChecksState } from '@/targets/pulls'
+import {
+  type PendingMeasurement,
+  pendingMeasurements,
+} from '@/labels/measurement'
 import { EXAMPLES_DIR, EXAMPLES_INDEX, stampedStandards } from '@/gate/examples'
 import type { StalledRun } from '@/pr/checks'
 import {
@@ -54,6 +58,7 @@ export type LiftRefusal =
   | 'evidence-owed'
   | 'painted-uncaptured'
   | 'reel-unsettled'
+  | 'measurement-pending'
   | 'standing-stale'
   | 'standing-conflict'
   | 'standing-unknown'
@@ -67,7 +72,13 @@ export type LiftRefusal =
   | 'gh-failed'
 
 /** The gates a pull request clears, named so a record can report each one. */
-export type GateName = 'review' | 'ui' | 'evidence' | 'standing' | 'ci'
+export type GateName =
+  | 'review'
+  | 'ui'
+  | 'evidence'
+  | 'measurement'
+  | 'standing'
+  | 'ci'
 
 export interface GateResult {
   readonly gate: GateName
@@ -87,6 +98,8 @@ export interface GateResult {
   readonly undrivenWaived?: number
   /** The tip runs queued with no job past the bound, named on a `ci-stalled` refusal. */
   readonly stalled?: readonly StalledRun[]
+  /** The results rows still pending, named on a `measurement-pending` refusal. */
+  readonly pending?: readonly PendingRow[]
   /** The painted paths changed with no capture, reel at the head, or waiver, sorted. */
   readonly uncaptured?: readonly string[]
   /** The uncaptured paths a review waived, sorted. */
@@ -129,6 +142,14 @@ export interface PullState {
   readonly branch: string
   /** The head the pull request object reports, which lags the tip. */
   readonly head: string
+  /** The description, read for a results row still pending. */
+  readonly body: string
+}
+
+/** A results row still pending, with the run it links and, once read, that run's state. */
+export interface PendingRow extends PendingMeasurement {
+  /** The run's `status` or `conclusion` from the API, absent when unread. */
+  readonly state?: string
 }
 
 /** What the evidence check says about the comment the ship chain posts. */
@@ -287,6 +308,8 @@ export interface LiftRecord {
   readonly drivenPaths?: readonly string[]
   /** The tip runs queued with no job past the bound, on a `ci-stalled` refusal. */
   readonly stalled?: readonly StalledRun[]
+  /** The results rows still pending, on a `measurement-pending` refusal. */
+  readonly pending?: readonly PendingRow[]
   /** Failing checks the base does not require, named so a reader sees them before merging. */
   readonly advisory?: readonly string[]
   /**
@@ -369,7 +392,9 @@ function carried(gates: readonly GateResult[]): {
   paintedPaths?: readonly string[]
   drivenPaths?: readonly string[]
   stalled?: readonly StalledRun[]
+  pending?: readonly PendingRow[]
 } {
+  const measurement = gates.find((gate) => gate.gate === 'measurement')
   const review = gates.find((gate) => gate.gate === 'review')
   const ui = gates.find((gate) => gate.gate === 'ui')
   const ci = gates.find((gate) => gate.gate === 'ci')
@@ -381,7 +406,21 @@ function carried(gates: readonly GateResult[]): {
     ...(ui?.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
     ...(ui?.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
     ...(ci?.stalled !== undefined && { stalled: ci.stalled }),
+    ...(measurement?.pending !== undefined && {
+      pending: measurement.pending,
+    }),
   }
+}
+
+/**
+ * Holds the pull request while a results row reads pending, whatever the title.
+ * It sits outside the re-draft gates, since a pending run says nothing about
+ * whether the ready mark was earned.
+ */
+export function measurementGate(body: string): GateResult {
+  const pending = pendingMeasurements(body)
+  if (pending.length === 0) return pass('measurement')
+  return { ...fail('measurement', 'measurement-pending'), pending }
 }
 
 /**
@@ -939,6 +978,7 @@ export async function lift(
       tip,
       await readReelCarry(api, painted, evidence, tip),
     ),
+    measurementGate(pull.body),
     standingGate(standing),
   ]
   if (!pull.isDraft) {

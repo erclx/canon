@@ -267,6 +267,7 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
           nodeId: row.node_id,
           branch: row.head.ref,
           head: row.head.sha ?? '',
+          body: row.body ?? '',
         }
       } catch {
         return undefined

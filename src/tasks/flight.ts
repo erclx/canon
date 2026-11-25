@@ -63,6 +63,7 @@ const STAGE_OF_REASON: Readonly<Record<string, FlightStage>> = {
   'ci-conflicted': 'rebase',
   'ci-stalled': 'checks',
   'ci-timeout': 'checks',
+  'measurement-pending': 'checks',
 }
 
 const REVIEW_PREFIXES = ['review-', 'ui-', 'evidence-', 'painted-', 'reel-']

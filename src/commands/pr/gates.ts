@@ -67,6 +67,8 @@ export const LIFT_REFUSALS: Record<
   'painted-uncaptured':
     'A painted path changed with no capture, no reel at the head, and no waiver in a review. Capture it, or have a review waive it.',
   'reel-unsettled': `The checklist holds a box a driver can run, and a width it owes has no reel filmed at the head, which the gate entry names as \`reelWidths\`. The skip posted for that width, if any, is one a builder can fix. Film the reel, or have a review waive it. A waiver over a ${UNWAIVABLE_REEL_SKIPS.join(' or ')} skip settles nothing, and the gate entry names one it ignored as \`reelWaiverRefused\`.`,
+  'measurement-pending':
+    'A results row in the Outcome table still reads pending, so a measurement is running and its numbers are not in the body yet. Fill the row once the run ends, or write not measured with the reason.',
   'standing-stale':
     'The base moved under a path this branch writes, or a standard its examples stamp, since it branched, so CI measured a tree that is gone.',
   'standing-conflict': 'The head does not merge cleanly into the base.',
