@@ -471,11 +471,9 @@ async function markFloatingChrome(page: Page) {
 }
 
 /**
- * Whether an opaque element paints over this one at any of nine points, being
- * the four corners inset by a pixel, the four edge midpoints, and the center,
- * since a mask drawn there lands across the cover. A point off-window reads
- * uncovered, and the target is made hittable for the test, since the hit test
- * skips it otherwise.
+ * Whether an opaque element covers this one at a corner, edge midpoint, or the
+ * center, since a mask drawn there lands across the cover. A point off-window
+ * reads uncovered.
  */
 async function isCovered(element: Locator): Promise<boolean> {
   return element.evaluate((target: HTMLElement | SVGElement) => {
