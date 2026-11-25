@@ -105,17 +105,22 @@ describe('e2eCliSpawners', () => {
   })
 
   it('should hold that every real suite imports the command module it drives', () => {
+    const drives: Record<string, string> = {
+      'src/take/film-step.e2e.test.ts': '@/commands/take',
+      'src/browser/swipe.e2e.test.ts': '@/commands/browser',
+    }
     const sources = readTestSources(process.cwd())
     const spawners = e2eCliSpawners(sources)
+    const runtimeImport = (command: string): RegExp =>
+      new RegExp(`^import\\s+(?!type\\b)(?:[^'"]*from\\s+)?'${command}'`, 'm')
 
     const unimported = spawners.filter(
       (path) =>
-        !/from '@\/commands\/|import '@\/commands\//.test(
-          sources.get(path) ?? '',
-        ),
+        drives[path] === undefined ||
+        !runtimeImport(drives[path]).test(sources.get(path) ?? ''),
     )
 
-    expect(spawners.length).toBeGreaterThan(0)
+    expect([...spawners].sort()).toEqual(Object.keys(drives).sort())
     expect(unimported).toEqual([])
   })
 })
