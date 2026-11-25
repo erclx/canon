@@ -73,7 +73,7 @@ Five measures report and never set the exit code on their own.
 | Paragraphs | A paragraph past 4 sentences or 350 characters                                       | Gates through the density length       |
 | Cadence    | 3 or more sentences with a spread of 5 words or under, or a word opening more than 2 | Reports                                |
 | Depth      | A run past about 40 rendered lines at 80 columns                                     | Reports                                |
-| Length     | A document past 300 rendered lines, unless it carries `canon-length-exempt`          | Reports, and the gate owns the verdict |
+| Length     | Past 200 rendered lines under `docs/` or 300 elsewhere, unless `canon-length-exempt` | Reports, and the gate owns the verdict |
 
 | Code | Meaning                                                            |
 | ---- | ------------------------------------------------------------------ |

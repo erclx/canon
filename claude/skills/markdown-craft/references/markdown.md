@@ -51,8 +51,8 @@ Every depth number counts rendered lines, each source line wrapped at 80 columns
 
 - Past roughly 40 rendered lines with no heading breaking them, add a subheading at the seam. Measure the longest such run, excluding fenced code. The number is a checkpoint, not a cap.
 - A checkpoint another standard states counts the same unit, so a file measured one way never sits beside a run measured another
-- Keep a whole document at or under 300 rendered lines, frontmatter and fences included, since a session pays for every line it loads. Split it at a seam rather than compressing it.
-- The 300 lines are a ceiling. `canon markdown audit` lists each document past it without failing, and a gate stage reads the same number, so the project's gate decides whether a push fails.
+- Keep a whole document at or under 300 rendered lines, or 200 for a guide under `docs/` a person reads, frontmatter and fences included. Split it at a seam rather than compressing it.
+- Both numbers are ceilings. `canon markdown audit` lists each document past its own without failing, and a gate stage reads the same numbers, so the project's gate decides whether a push fails.
 
 The ceiling exempts a file named `CHANGELOG.md`, which a release tool rewrites. It also exempts a document carrying `<!-- canon-length-exempt: <reason> -->` on its own line outside a fence, and a marker naming no reason exempts nothing.
 
