@@ -61,7 +61,8 @@ The harness reads the `[device-classes]` table in `canon/config/app.toml`, or in
 - `scripts/screenshot.sh` sources `scripts/lib/preview-server.sh`, builds, serves on `PREVIEW_PORT`, waits for the port, and traps the whole process group on exit
 - `scripts/readme-screenshot.sh` captures one case under `SCREENSHOT_FILTER` into `<EVIDENCE_ROOT>/readme/`, and exits 1 until a project fills `README_FILTER`
 - `.github/workflows/readme-screenshot.yml` pushes with `RELEASE_PLEASE_TOKEN` to start the required checks, and exits 1 while its paths hold `REPLACE_WITH_PROJECT_PATHS`
-- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
+- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and two `e2e-shards` started on the build alone, with `e2e-tests` failing unless every shard passed. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
+- Require `🎭 E2E Tests` in the ruleset and never a shard, since a shard's check name changes with the count
 - Read `governance/rules/tooling/ci-workflow.md` for when a workflow's commit-back is right and when a report is
 
 ## Screenshot on a taken port
