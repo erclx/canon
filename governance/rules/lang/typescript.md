@@ -24,7 +24,7 @@ paths:
 
 ## Imports and configuration
 
-- Import through the `@/` alias where tsconfig.json and the bundler both map it to `src/`, over a `../../` chain.
+- Import through the `@/` alias where tsconfig.json and the bundler both map it to the app's source folder, over a `../../` chain.
 - Import from the module's source file directly over barrel `index` re-exports.
 - Use `import type` for type-only imports.
 - Enable `strict: true` in tsconfig.json with no exceptions.

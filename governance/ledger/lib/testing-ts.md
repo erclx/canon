@@ -9,9 +9,9 @@ The field is JavaScript and TypeScript testing. The authorities are the Vitest d
 
 ## End-to-end
 
-| Bullet                        | Source                                                                                                                                                                            | Read       |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Playwright tests under `e2e/` | [Vitest include](https://vitest.dev/config/include) defaults to `**/*.{test,spec}.?(c\|m)[jt]s?(x)`, so a Playwright spec under `src/` is collected by Vitest too, where it fails | 2026-10-18 |
+| Bullet                        | Source                                                                                                                                                                                              | Read       |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Playwright tests under `e2e/` | [Vitest include](https://vitest.dev/config/include) defaults to `**/*.{test,spec}.?(c\|m)[jt]s?(x)`, so a Playwright spec inside the app's source folder is collected by Vitest too, where it fails | 2026-10-18 |
 
 ## Timers and async
 
@@ -48,6 +48,7 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 ### Merged or reworded
 
 - Folded "place all Playwright tests within `e2e/`", "never place Playwright tests inside `src/`", and the scope bullet for a Vitest test driving a browser into one placement bullet.
+- Reworded the placement bullet to say the app's source folder rather than `src/`, since a project whose app root is `web` has no `src/`.
 - Merged "do not make real network calls in unit tests" into the MSW bullet.
 - Merged the two suffix bullets into one.
 - Reworded "use `userEvent` over synthetic events" and the accessible-query bullet to name what each source says the choice prevents.

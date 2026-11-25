@@ -11,7 +11,7 @@ paths:
 
 ## End-to-end
 
-- Place every test the Playwright runner executes under `e2e/`, never `src/`. A Vitest test that drives a browser stays beside its module.
+- Place every test the Playwright runner executes under `e2e/`, never inside the app's source folder. A Vitest test that drives a browser stays beside its module.
 
 ## Timers and async
 
