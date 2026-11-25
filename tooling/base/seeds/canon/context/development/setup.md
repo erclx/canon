@@ -15,10 +15,11 @@ Install [Bun](https://bun.sh) with `curl -fsSL https://bun.sh/install | bash` an
 
 ### `scripts/`
 
-| Command          | Purpose                                                                                  |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| `bun run check`  | Gates locally and writes nothing. Fails on formatting drift until `bun run format` runs. |
-| `bun run format` | Auto-fix oxfmt formatting.                                                               |
+| Command                 | Purpose                                                                 |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `bun run check:changed` | Gates a push on the static checks and the tests tied to the change.     |
+| `bun run check`         | Runs every check and the full suite by hand. Both checks write nothing. |
+| `bun run format`        | Auto-fix oxfmt formatting.                                              |
 
 The synced stacks add more scripts, such as a test runner, a build, or a dev server. Read the `scripts` block in `package.json` for the full set rather than this table.
 
@@ -28,8 +29,9 @@ Holds the git hooks that run the checks before a commit or a push leaves.
 
 - `pre-commit` runs `lint-staged` (oxfmt on staged files)
 - `commit-msg` runs `commitlint` against the conventional commit format
-- `pre-push` runs `bun run check`, and also gates on banned characters across every tracked markdown file except `CHANGELOG.md` when a markdown-bans audit tool is on PATH
+- `pre-push` runs `bun run check:changed`, and also gates on banned characters across every tracked markdown file except `CHANGELOG.md` when a markdown-bans audit tool is on PATH
 
 ## Gotchas
 
+- `bun run check:changed` skips content that already passed, so run it with `--force` after installing packages under an unchanged lockfile
 - A push fails on formatting drift until `bun run format` runs, since the `pre-push` hook writes nothing
