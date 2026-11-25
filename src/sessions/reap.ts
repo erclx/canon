@@ -44,8 +44,8 @@ export type SkipReason =
   | 'open-task'
   | 'recent'
 
-/** Why a session was stopped, where the task alone showed it finished. */
-export type StopReason = 'merged' | 'planned'
+/** Why a session was stopped, where its status alone read as unfinished. */
+export type StopReason = 'merged' | 'planned' | 'shell-dwell'
 
 export type ReapOutcome =
   | 'stopped'
@@ -82,10 +82,24 @@ const IDLE_STATUSES: readonly string[] = ['idle', 'waiting']
 
 /**
  * `shell` holds a background command, such as a preview server or a review
- * wait. It reads as finished only on archived or declined work, since on a
- * live task the command is usually a check the session still waits on.
+ * wait. Alone it reads as finished only on archived or declined work, since on
+ * a live task the command is usually a check the session still waits on.
  */
 const SETTLED_STATUSES: readonly string[] = [...IDLE_STATUSES, 'shell']
+
+/**
+ * The task form's outlasts the 20-minute bound on a verify run and a review
+ * wait, though not a CI watch, which may hold a shell for an hour. The finished
+ * form reaches sessions nobody named, so it waits longer.
+ */
+const IDLE_MINUTES = { task: 30, finished: 60 } as const
+
+export function idleThresholdMs(
+  form: keyof typeof IDLE_MINUTES,
+  minutes: number = IDLE_MINUTES[form],
+): number {
+  return minutes * 60_000
+}
 
 const PLANNER_PREFIX = 'planner-'
 
@@ -104,7 +118,7 @@ export interface ReapGuards {
 interface Candidate {
   readonly sessionId: string
   readonly name: string
-  /** Set where the task, not the status, showed the session finished. */
+  /** Set where the status alone read as unfinished. */
   readonly reason?: StopReason
 }
 
@@ -162,6 +176,7 @@ export function planTaskReap(
   roster: readonly RosterRow[],
   tasks: readonly TaskSessions[],
   guards: ReapGuards,
+  shellIdleMs: number,
 ): ReapPlan {
   const settled: ReapRow[] = []
   const targets: Candidate[] = []
@@ -180,16 +195,15 @@ export function planTaskReap(
     }
 
     const statuses = task.state === 'live' ? IDLE_STATUSES : SETTLED_STATUSES
-    const planner = planned(row, task)
+    const reason = statuses.includes(row.status)
+      ? undefined
+      : stopReason(row, task, shellIdleMs)
     const skip = sharedSkip(
       row,
       guards,
       tasks,
       task.stem,
-      (status) =>
-        task.landed ||
-        statuses.includes(status) ||
-        (planner && status === 'shell'),
+      (status) => statuses.includes(status) || reason !== undefined,
     )
     if (skip) {
       settled.push({
@@ -201,19 +215,34 @@ export function planTaskReap(
       continue
     }
 
-    const reason = task.landed
-      ? 'merged'
-      : planner && row.status === 'shell'
-        ? 'planned'
-        : undefined
     targets.push({
       sessionId: entry.sessionId,
       name: row.name,
-      ...(reason && !statuses.includes(row.status) ? { reason } : {}),
+      ...(reason ? { reason } : {}),
     })
   }
 
   return { settled, targets }
+}
+
+/**
+ * What shows a session finished past a status that reads as unfinished. A zero
+ * threshold turns the dwell reading off, since it would otherwise take every
+ * shell on the task, a check started a second ago among them.
+ */
+function stopReason(
+  row: RosterRow,
+  task: TaskSessions,
+  shellIdleMs: number,
+): StopReason | undefined {
+  if (task.landed) return 'merged'
+  if (row.status !== 'shell') return undefined
+  if (planned(row, task)) return 'planned'
+  const dwelt =
+    shellIdleMs > 0 &&
+    row.statusDwellMs !== null &&
+    row.statusDwellMs > shellIdleMs
+  return dwelt ? 'shell-dwell' : undefined
 }
 
 /**

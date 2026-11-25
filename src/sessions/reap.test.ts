@@ -7,6 +7,7 @@ import {
   type ClientIds,
   clientEffects,
   executeReap,
+  idleThresholdMs,
   type ListenerEffects,
   parseClientIds,
   reapTargets,
@@ -24,6 +25,7 @@ const REVIEWER = '22222222-2222-4222-8222-222222222222'
 const CALLER = '33333333-3333-4333-8333-333333333333'
 const PLANNER = '44444444-4444-4444-8444-444444444444'
 const HOUR = 60 * 60 * 1000
+const HALF_HOUR = HOUR / 2
 
 function row(overrides: Partial<RosterRow>): RosterRow {
   return {
@@ -69,7 +71,7 @@ describe('planTaskReap', () => {
   it('should target an idle background session the task records', () => {
     const merged = task('v1.0-parser', 'archived', [WORKER])
 
-    const plan = planTaskReap(merged, [row({})], [merged], GUARDS)
+    const plan = planTaskReap(merged, [row({})], [merged], GUARDS, HALF_HOUR)
 
     expect(plan.targets).toEqual([
       { sessionId: WORKER, name: 'worker-canon-parser' },
@@ -80,7 +82,7 @@ describe('planTaskReap', () => {
   it('should read a recorded id the roster no longer holds as gone', () => {
     const merged = task('v1.0-parser', 'archived', [WORKER])
 
-    const plan = planTaskReap(merged, [], [merged], GUARDS)
+    const plan = planTaskReap(merged, [], [merged], GUARDS, HALF_HOUR)
 
     expect(plan.settled).toEqual([
       {
@@ -110,7 +112,7 @@ describe('planTaskReap', () => {
     (reason, session, id, detail) => {
       const merged = task('v1.0-parser', 'archived', [id])
 
-      const plan = planTaskReap(merged, [session], [merged], GUARDS)
+      const plan = planTaskReap(merged, [session], [merged], GUARDS, HALF_HOUR)
 
       expect(plan.targets).toEqual([])
       expect(plan.settled[0]).toMatchObject({
@@ -129,6 +131,7 @@ describe('planTaskReap', () => {
       [row({ status: 'shell' })],
       [merged],
       GUARDS,
+      HALF_HOUR,
     )
 
     expect(plan.targets).toHaveLength(1)
@@ -137,10 +140,16 @@ describe('planTaskReap', () => {
   it('should skip a session the caller keeps', () => {
     const merged = task('v1.0-parser', 'archived', [WORKER])
 
-    const plan = planTaskReap(merged, [row({})], [merged], {
-      self: CALLER,
-      keep: [WORKER],
-    })
+    const plan = planTaskReap(
+      merged,
+      [row({})],
+      [merged],
+      {
+        self: CALLER,
+        keep: [WORKER],
+      },
+      HALF_HOUR,
+    )
 
     expect(plan.settled[0]).toMatchObject({ reason: 'kept' })
   })
@@ -149,7 +158,13 @@ describe('planTaskReap', () => {
     const merged = task('v1.0-parser', 'archived', [WORKER])
     const open = task('v1.1-lexer', 'live', [WORKER])
 
-    const plan = planTaskReap(merged, [row({})], [merged, open], GUARDS)
+    const plan = planTaskReap(
+      merged,
+      [row({})],
+      [merged, open],
+      GUARDS,
+      HALF_HOUR,
+    )
 
     expect(plan.settled[0]).toMatchObject({
       reason: 'open-task',
@@ -165,20 +180,12 @@ describe('planTaskReap', () => {
       [row({ sessionId: PLANNER, name: 'planner-canon-plan' })],
       [landed],
       GUARDS,
+      HALF_HOUR,
     )
 
     expect(plan.targets).toEqual([
       { sessionId: PLANNER, name: 'planner-canon-plan' },
     ])
-  })
-
-  it('should skip a session holding a background shell on a live task', () => {
-    const open = task('v1.2-plan', 'live', [WORKER])
-
-    const plan = planTaskReap(open, [row({ status: 'shell' })], [open], GUARDS)
-
-    expect(plan.targets).toEqual([])
-    expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'shell' })
   })
 
   it('should skip a reused planner another live task records', () => {
@@ -190,6 +197,7 @@ describe('planTaskReap', () => {
       [row({ sessionId: PLANNER, name: 'planner-canon-plan' })],
       [landed, next],
       GUARDS,
+      HALF_HOUR,
     )
 
     expect(plan.settled[0]).toMatchObject({
@@ -207,10 +215,65 @@ describe('planTaskReap', () => {
       planned: false,
     }
 
-    const plan = planTaskReap(merged, [row({})], [merged], GUARDS)
+    const plan = planTaskReap(merged, [row({})], [merged], GUARDS, HALF_HOUR)
 
     expect(plan.targets).toEqual([])
     expect(plan.settled[0]).toMatchObject({ outcome: 'gone' })
+  })
+})
+
+describe('planTaskReap on a background shell held on a live task', () => {
+  const open = task('v1.2-plan', 'live', [WORKER])
+
+  it('should target a shell held past the threshold as shell-dwell', () => {
+    const held = row({ status: 'shell', statusDwellMs: HALF_HOUR + 1 })
+
+    const plan = planTaskReap(open, [held], [open], GUARDS, HALF_HOUR)
+
+    expect(plan.targets).toEqual([
+      {
+        sessionId: WORKER,
+        name: 'worker-canon-parser',
+        reason: 'shell-dwell',
+      },
+    ])
+  })
+
+  it.each([
+    ['a shell under the threshold', 'shell', HALF_HOUR - 1, HALF_HOUR],
+    ['a shell at the threshold', 'shell', HALF_HOUR, HALF_HOUR],
+    ['a shell with no measured dwell', 'shell', null, HALF_HOUR],
+    ['a shell at any dwell when the threshold is 0', 'shell', HOUR, 0],
+    ['a session busy past the threshold', 'busy', 2 * HOUR, HALF_HOUR],
+  ])('should read %s as busy', (_name, status, statusDwellMs, idleMs) => {
+    const held = row({ status, statusDwellMs })
+
+    const plan = planTaskReap(open, [held], [open], GUARDS, idleMs)
+
+    expect(plan.targets).toEqual([])
+    expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: status })
+  })
+
+  it('should carry no reason for an idle session past the threshold', () => {
+    const plan = planTaskReap(open, [row({})], [open], GUARDS, HALF_HOUR)
+
+    expect(plan.targets).toEqual([
+      { sessionId: WORKER, name: 'worker-canon-parser' },
+    ])
+  })
+
+  it('should skip a held shell another live task records as open-task', () => {
+    const next = task('v1.3-next', 'live', [WORKER])
+
+    const plan = planTaskReap(
+      open,
+      [row({ status: 'shell' })],
+      [open, next],
+      GUARDS,
+      HALF_HOUR,
+    )
+
+    expect(plan.settled[0]).toMatchObject({ reason: 'open-task' })
   })
 })
 
@@ -223,7 +286,7 @@ describe('planTaskReap on finished work the task shows', () => {
       status: 'busy',
     })
 
-    const plan = planTaskReap(landed, [reviewer], [landed], GUARDS)
+    const plan = planTaskReap(landed, [reviewer], [landed], GUARDS, HALF_HOUR)
 
     expect(plan.targets).toEqual([
       { sessionId: REVIEWER, name: 'reviewer-canon-parser', reason: 'merged' },
@@ -234,7 +297,7 @@ describe('planTaskReap on finished work the task shows', () => {
     const open = task('v1.0-parser', 'live', [REVIEWER])
     const reviewer = row({ sessionId: REVIEWER, status: 'busy' })
 
-    const plan = planTaskReap(open, [reviewer], [open], GUARDS)
+    const plan = planTaskReap(open, [reviewer], [open], GUARDS, HALF_HOUR)
 
     expect(plan.targets).toEqual([])
     expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'busy' })
@@ -249,7 +312,7 @@ describe('planTaskReap on finished work the task shows', () => {
       branch: null,
     })
 
-    const plan = planTaskReap(planned, [planner], [planned], GUARDS)
+    const plan = planTaskReap(planned, [planner], [planned], GUARDS, HALF_HOUR)
 
     expect(plan.targets).toEqual([
       { sessionId: PLANNER, name: 'planner-canon-parser', reason: 'planned' },
@@ -262,10 +325,11 @@ describe('planTaskReap on finished work the task shows', () => {
       sessionId: PLANNER,
       name: 'planner-canon-parser',
       status: 'shell',
+      statusDwellMs: HALF_HOUR - 1,
       branch: null,
     })
 
-    const plan = planTaskReap(bare, [planner], [bare], GUARDS)
+    const plan = planTaskReap(bare, [planner], [bare], GUARDS, HALF_HOUR)
 
     expect(plan.settled[0]).toMatchObject({ reason: 'busy', detail: 'shell' })
   })
@@ -276,10 +340,11 @@ describe('planTaskReap on finished work the task shows', () => {
       sessionId: PLANNER,
       name: 'planner-canon-parser',
       status: 'shell',
+      statusDwellMs: HALF_HOUR - 1,
       branch: 'feat/parser',
     })
 
-    const plan = planTaskReap(planned, [planner], [planned], GUARDS)
+    const plan = planTaskReap(planned, [planner], [planned], GUARDS, HALF_HOUR)
 
     expect(plan.settled[0]).toMatchObject({ reason: 'busy' })
   })
@@ -294,11 +359,26 @@ describe('planTaskReap on finished work the task shows', () => {
     })
     const session = row({ sessionId: REVIEWER, name, status: 'busy' })
 
-    const plan = planTaskReap(landed, [session], [landed], GUARDS)
+    const plan = planTaskReap(landed, [session], [landed], GUARDS, HALF_HOUR)
 
     expect(plan.targets).toEqual([])
     expect(plan.settled[0]).toMatchObject({ reason })
   })
+})
+
+describe('idleThresholdMs', () => {
+  it.each([
+    ['task', undefined, HALF_HOUR],
+    ['finished', undefined, HOUR],
+    ['task', 45, 45 * 60 * 1000],
+    ['finished', 45, 45 * 60 * 1000],
+    ['task', 0, 0],
+  ] as const)(
+    'should read the %s form given %s minutes as %s ms',
+    (form, minutes, expected) => {
+      expect(idleThresholdMs(form, minutes)).toBe(expected)
+    },
+  )
 })
 
 describe('planFinishedReap', () => {
