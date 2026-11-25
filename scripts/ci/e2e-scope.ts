@@ -6,6 +6,7 @@ import { execaSync } from 'execa'
 import { appendFileSync } from 'node:fs'
 import { relative } from 'node:path'
 
+import { cliBootstrap } from '@/gate/cli-bootstrap'
 import {
   e2eCliSpawners,
   e2eReadersOf,
@@ -19,10 +20,32 @@ export interface E2eScope {
   readonly files: readonly string[]
 }
 
-/** A source here changes what the CLI a suite spawns does, through no import. */
-const CLI_SOURCE = /^src\/.*\.tsx?$/
+/**
+ * What the suites that spawn the CLI entry reach through no import: the entry
+ * and the modules it loads outside a command, which every command runs through,
+ * and whether `package.json` moved its `version` and nothing else.
+ */
+export interface CliScope {
+  readonly spawners?: readonly string[]
+  readonly bootstrap?: readonly string[]
+  readonly versionOnly?: boolean
+}
 
 const FULL: E2eScope = { e2e: true, full: true, files: [] }
+
+/** Whether two `package.json` texts differ in `version` alone. */
+export function versionOnly(base: string, head: string): boolean {
+  const withoutVersion = (text: string): string => {
+    const parsed = JSON.parse(text) as Record<string, unknown>
+    delete parsed.version
+    return JSON.stringify(parsed)
+  }
+  try {
+    return withoutVersion(base) === withoutVersion(head)
+  } catch {
+    return false
+  }
+}
 
 /**
  * An empty changed set is a read that failed, since a pull request always
@@ -32,12 +55,16 @@ export function scopeFor(
   changed: readonly string[],
   affected: readonly string[],
   readersOf: (file: string) => readonly string[],
-  cliSpawners: readonly string[] = [],
+  cli: CliScope = {},
 ): E2eScope {
   if (changed.length === 0) return FULL
-  if (changed.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL
-  const spawners = changed.some((file) => CLI_SOURCE.test(file))
-    ? cliSpawners
+  const triggers = cli.versionOnly
+    ? changed.filter((file) => file !== 'package.json')
+    : changed
+  if (triggers.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL
+  const bootstrap = new Set(cli.bootstrap ?? [])
+  const spawners = changed.some((file) => bootstrap.has(file))
+    ? (cli.spawners ?? [])
     : []
   const readers = changed.flatMap(readersOf)
   const files = [...new Set([...affected, ...readers, ...spawners])].sort()
@@ -73,8 +100,18 @@ function measure(base: string): E2eScope {
     changed,
     affected,
     (file) => e2eReadersOf(file, sources),
-    e2eCliSpawners(sources),
+    {
+      spawners: e2eCliSpawners(sources),
+      bootstrap: cliBootstrap(root),
+      versionOnly: changed.includes('package.json')
+        ? versionOnly(show(base), show('HEAD'))
+        : false,
+    },
   )
+}
+
+function show(ref: string): string {
+  return execaSync('git', ['show', `${ref}:package.json`]).stdout
 }
 
 function main(base: string | undefined): void {
