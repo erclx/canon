@@ -147,7 +147,7 @@ export function collapseChecks(
   tip: string,
   listing: CheckRunListing,
   required?: ReadonlySet<string>,
-  statuses: readonly RawStatus[] = [],
+  statuses: readonly RawStatus[] | null = [],
 ): ChecksReading {
   const runs = listing.check_runs ?? []
   const matched = runs.filter((run) => run.head_sha === tip)
@@ -166,20 +166,25 @@ export function collapseChecks(
   // A count above the rows returned is a partial listing, which could hide a failing run.
   if (reading.reported > runs.length) return { ...reading, state: 'pending' }
 
-  const statusRows: RawCheck[] =
-    required === undefined || required.size === 0
-      ? []
-      : statuses.map((status) => ({
-          ...(status.context !== undefined && { name: status.context }),
-          state: (status.state ?? '').toUpperCase(),
-        }))
-  const rows = [...kept.map(adapt), ...statusRows]
+  const gatesByName = required !== undefined && required.size > 0
+  // A required set reads an unread list as none, and nothing required holds a pass back on it.
+  const statusRows: RawCheck[] = (statuses ?? []).map((status) => ({
+    ...(status.context !== undefined && { name: status.context }),
+    state: (status.state ?? '').toUpperCase(),
+  }))
+  const runRows = kept.map(adapt)
+  const rows = [...runRows, ...statusRows]
   if (rows.length === 0) return { ...reading, state: 'pending' }
+  // A status can land before any workflow is listed, which must not read as CI passing.
+  if (!gatesByName && runRows.length === 0) {
+    return { ...reading, state: 'pending' }
+  }
 
   const { state, advisory, running } = rollupRequired(rows, required)
+  const unreadHolds = !gatesByName && statuses === null && state === 'passing'
   return {
     ...reading,
-    state: state ?? 'pending',
+    state: unreadHolds ? 'pending' : (state ?? 'pending'),
     ...(required !== undefined && { advisory, running }),
   }
 }

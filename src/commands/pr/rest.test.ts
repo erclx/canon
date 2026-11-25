@@ -184,6 +184,37 @@ describe('canon pr reads through REST alone', () => {
     expect(record).toMatchObject({ conflicted: true, mergeState: 'DIRTY' })
   })
 
+  it('should read a pending status beside a passing run as pending', async () => {
+    writeFixture('checks.json', {
+      total_count: 1,
+      check_runs: [
+        {
+          head_sha: tip,
+          status: 'completed',
+          conclusion: 'success',
+          name: 'check',
+          id: 1,
+        },
+      ],
+    })
+    writeFixture('status.json', {
+      total_count: 1,
+      statuses: [{ context: 'vercel', state: 'pending' }],
+    })
+
+    const record = await runVerb('checks', ['7'])
+
+    expect(record).toMatchObject({ state: 'pending', statuses: 1 })
+  })
+
+  it('should refuse runs-unreadable when the statuses cannot be read', async () => {
+    writeFixture('status-fail', '')
+
+    const record = await runVerb('checks', ['7'])
+
+    expect(record.reason).toBe('runs-unreadable')
+  })
+
   it('should not read an unknown merge state as conflicted', async () => {
     writeFixture('pull.json', pullRow({ mergeable_state: 'unknown' }))
 
@@ -502,6 +533,7 @@ describe('canon pr reads through REST alone', () => {
       // An unread status list could hide a pending context, so the record cannot read as settled.
       it('should name the unread commit statuses as running when that read fails', async () => {
         stageMacRunning()
+        writeFixture('status-fail', '')
 
         const { record } = await runLift(['7', '--check'])
 
@@ -510,6 +542,30 @@ describe('canon pr reads through REST alone', () => {
           running: ['macOS', 'commit statuses (unread)'],
         })
       })
+    })
+
+    it('should refuse ci-failing on a failed status when the rules require nothing', async () => {
+      stageClearPull()
+      writeFixture('status.json', {
+        total_count: 1,
+        statuses: [{ context: 'vercel', state: 'failure' }],
+      })
+
+      const { record } = await runLift(['7', '--check'])
+
+      expect(record).toMatchObject({ reason: 'ci-failing' })
+    })
+
+    it('should read the same failing state off the checks verb over that head', async () => {
+      stageClearPull()
+      writeFixture('status.json', {
+        total_count: 1,
+        statuses: [{ context: 'vercel', state: 'failure' }],
+      })
+
+      const record = await runVerb('checks', ['7'])
+
+      expect(record).toMatchObject({ state: 'failing', statuses: 1 })
     })
 
     it('should read the posted reel skip off the evidence check into the gate', async () => {

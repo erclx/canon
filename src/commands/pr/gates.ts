@@ -230,6 +230,33 @@ function readReelSkips(skips: unknown): Map<number, string> {
   )
 }
 
+/**
+ * Reads the commit statuses on a tip from `commits/<sha>/status`, newest per
+ * context. Undefined on a failed read, a body that does not parse, or a partial
+ * one whose `total_count` exceeds the rows, since each could hide a failure.
+ */
+export async function readStatuses(
+  root: string,
+  tip: string,
+): Promise<readonly RawStatus[] | undefined> {
+  const text = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/commits/${tip}/status?per_page=100`,
+  ])
+  if (text === null) return undefined
+  try {
+    const body = JSON.parse(text) as {
+      statuses?: unknown
+      total_count?: number
+    }
+    if (!Array.isArray(body.statuses)) return undefined
+    if ((body.total_count ?? 0) > body.statuses.length) return undefined
+    return body.statuses as readonly RawStatus[]
+  } catch {
+    return undefined
+  }
+}
+
 const UNREAD_STATUSES = 'commit statuses (unread)'
 
 export async function readChecksGate(
@@ -238,26 +265,19 @@ export async function readChecksGate(
   tip: string,
 ): Promise<ChecksGate | undefined> {
   // A failed status read leaves a required context unseen, which reads pending.
-  const [listed, pulled, combined] = await Promise.all([
+  const [listed, pulled, read] = await Promise.all([
     gh(root, [
       'api',
       `repos/{owner}/{repo}/commits/${tip}/check-runs?per_page=100`,
     ]),
     gh(root, ['api', `repos/{owner}/{repo}/pulls/${number}`]),
-    gh(root, [
-      'api',
-      `repos/{owner}/{repo}/commits/${tip}/status?per_page=100`,
-    ]),
+    readStatuses(root, tip),
   ])
   if (listed === null) return undefined
   try {
     const row = pulled === null ? undefined : (JSON.parse(pulled) as RestPull)
     const required = await readRequiredChecks(root, row?.base?.ref)
-    const statuses =
-      combined === null
-        ? []
-        : ((JSON.parse(combined) as { statuses?: readonly RawStatus[] })
-            .statuses ?? [])
+    const statuses = read ?? null
     const listing = JSON.parse(listed) as CheckRunListing
     const reading = withMergeState(
       mergeStateOf(row?.mergeable_state),
@@ -267,12 +287,12 @@ export async function readChecksGate(
     const stalled =
       reading.state === 'pending' &&
       !reading.conflicted &&
-      missesGatingCheck(tip, listing, required, statuses)
+      missesGatingCheck(tip, listing, required, statuses ?? [])
         ? await readStalledRuns(root, tip)
         : []
     // An unread status list may hide a pending context, so it holds whoever waits on `running`.
     const running =
-      reading.running === undefined || combined !== null
+      reading.running === undefined || read !== undefined
         ? reading.running
         : [...reading.running, UNREAD_STATUSES]
     return {
