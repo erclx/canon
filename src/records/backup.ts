@@ -3,7 +3,11 @@ import { basename, join, relative, resolve } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 import { RECORD_ROOTS, recordRoot, SCRATCH } from '@/roots/record'
-import { type BlockedPath, guardPayload } from '@/records/push-guard'
+import {
+  type BlockedPath,
+  guardPayload,
+  type SkippedPath,
+} from '@/records/push-guard'
 import { type LockTiming, withLock } from '@/records/push-lock'
 
 /**
@@ -176,7 +180,7 @@ export interface BackupRefused {
   readonly ok: false
   readonly reason: BackupRefusal
   readonly message: string
-  /** Every pending path the payload guard refused, carried on `unsafe-payload` only. */
+  /** Every pending path carrying a credential, carried on `unsafe-payload` only. */
   readonly blocked?: readonly BlockedPath[]
 }
 
@@ -190,6 +194,8 @@ export interface PushReport {
   readonly added: readonly string[]
   /** An excluded name the records index still tracked, removed from the history going forward. */
   readonly dropped: readonly string[]
+  /** An oversized file this push left behind, at its last backed-up version where it has one. */
+  readonly skipped: readonly SkippedPath[]
   readonly changed: number
   readonly commit?: string
   readonly pushed: boolean
@@ -485,12 +491,12 @@ function refuseBlocked(blocked: readonly BlockedPath[]): BackupRefused {
     ...refuse(
       'unsafe-payload',
       [
-        `${blocked.length} record(s) cannot be backed up, so nothing was staged or pushed:`,
+        `${blocked.length} record(s) carry a credential, so nothing was staged or pushed:`,
         ...blocked.map(
           (finding) =>
             `  ${finding.path} (${finding.cause}: ${finding.detail})`,
         ),
-        'Move each out of the record folders, such as into .canon/tmp/, or remove the credential, then push again.',
+        'Remove the credential, or move the file out of the record folders, such as into .canon/tmp/, then push again.',
       ].join('\n'),
     ),
     blocked,
@@ -519,8 +525,9 @@ async function undoCommit(
 
 /**
  * Stages, commits when anything changed, and pushes. The payload guard runs
- * before the stage, the push runs even with no new commit to reach an older
- * one, and a commit this call made is undone when the push fails.
+ * before the stage, leaving an oversized file out and refusing on a credential.
+ * The push runs even with no new commit to reach an older one, and a commit
+ * this call made is undone when the push fails.
  */
 export async function pushRecords(
   root: string,
@@ -569,8 +576,11 @@ async function pushUnlocked(root: string): Promise<PushOutcome> {
   const files = await pendingFiles(root, scope)
   if ('ok' in files) return files
 
-  const blocked = await guardPayload(workTree(root), files.pending)
-  if (blocked.length > 0) return refuseBlocked(blocked)
+  const verdict = await guardPayload(workTree(root), files.pending)
+  if (verdict.credentials.length > 0) return refuseBlocked(verdict.credentials)
+
+  const skipped = verdict.oversized
+  const skippedPaths = new Set(skipped.map((entry) => entry.path))
 
   if (scope.length > 0) {
     // `-f` carries the ignored payload, and the pathspecs bound what enters the index.
@@ -581,6 +591,7 @@ async function pushUnlocked(root: string): Promise<PushOutcome> {
       '--',
       ...scope,
       ...MEDIA_PATHSPECS,
+      ...skipped.map((entry) => `:(exclude,literal)${entry.path}`),
     ])
     if (!staged.ok) return failed('add', staged)
   }
@@ -635,8 +646,9 @@ async function pushUnlocked(root: string): Promise<PushOutcome> {
     root,
     folders: presentFolders(root),
     firstSeen,
-    added: files.added,
+    added: files.added.filter((path) => !skippedPaths.has(path)),
     dropped,
+    skipped,
     changed,
   } as const
   const head = await records(root, ['rev-parse', '--short', 'HEAD'])

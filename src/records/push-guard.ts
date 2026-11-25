@@ -11,13 +11,20 @@ export const MAX_RECORD_BYTES = 25 * 1024 * 1024
 
 export interface BlockedPath {
   readonly path: string
-  readonly cause: 'oversized' | 'credential'
-  /** A size or `<label> at line <n>`, never the matched value or a preview of it. */
+  readonly cause: 'credential'
+  /** `<label> at line <n>`, never the matched value or a preview of it. */
   readonly detail: string
 }
 
-function megabytes(bytes: number): string {
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+export interface SkippedPath {
+  readonly path: string
+  readonly bytes: number
+}
+
+/** Kept apart, since a credential refuses the push and an oversized file only stays behind. */
+export interface PayloadVerdict {
+  readonly credentials: readonly BlockedPath[]
+  readonly oversized: readonly SkippedPath[]
 }
 
 /**
@@ -28,8 +35,9 @@ function megabytes(bytes: number): string {
 export async function guardPayload(
   tree: string,
   paths: readonly string[],
-): Promise<BlockedPath[]> {
-  const blocked: BlockedPath[] = []
+): Promise<PayloadVerdict> {
+  const credentials: BlockedPath[] = []
+  const oversized: SkippedPath[] = []
 
   for (const path of paths) {
     const full = join(tree, path)
@@ -37,11 +45,7 @@ export async function guardPayload(
     if (!stats?.isFile()) continue
 
     if (stats.size > MAX_RECORD_BYTES) {
-      blocked.push({
-        path,
-        cause: 'oversized',
-        detail: `${megabytes(stats.size)}, over the ${megabytes(MAX_RECORD_BYTES)} ceiling`,
-      })
+      oversized.push({ path, bytes: stats.size })
       continue
     }
 
@@ -50,7 +54,7 @@ export async function guardPayload(
 
     const [first] = scanText(path, text)
     if (first) {
-      blocked.push({
+      credentials.push({
         path,
         cause: 'credential',
         detail: `${first.label} at line ${first.line}`,
@@ -58,5 +62,5 @@ export async function guardPayload(
     }
   }
 
-  return blocked
+  return { credentials, oversized }
 }
