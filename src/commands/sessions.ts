@@ -16,6 +16,7 @@ import { machineListenerReader } from '@/listeners/machine'
 import { type StopReport, stopListeners } from '@/listeners/stop'
 import {
   clientEffects,
+  idleThresholdMs,
   planFinishedReap,
   planTaskReap,
   type ReapPlan,
@@ -316,8 +317,7 @@ export function register(program: Command): void {
     )
     .option(
       '--idle-minutes <n>',
-      'With --finished, how long a session no task records must sit idle',
-      '60',
+      "How long a status must hold: a live task's held shell (default: 65), or with --finished an idle session no task records (default: 60)",
     )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
@@ -327,6 +327,8 @@ export function register(program: Command): void {
         "The task form reads one task's Sessions: line, live or archived, and",
         'matches each entry to the roster by its full sessionId. No name or',
         'prefix ever selects a session. Run it after a merge or a landed plan.',
+        'A session on a live task holding a background shell past',
+        '--idle-minutes reads as finished, and 0 turns that reading off.',
         '',
         'The --finished form reads every background session in this repository',
         'and takes one recorded on archived or declined tasks alone, or one no',
@@ -354,18 +356,23 @@ export function register(program: Command): void {
         '  talk         a name carrying -talk, which waits on the operator',
         '  busy         a status other than idle or waiting, named in "detail".',
         '               A held background shell counts as finished only on',
-        "               archived or declined work, or a planned task's planner",
+        "               archived or declined work, for a planned task's planner,",
+        '               or past --idle-minutes on the live task named',
         '  usage-limit  stopped at a usage limit, which the operator resumes',
         '  open-task    a live task also records it, named in "detail"',
         '  recent       --finished only: no task records it and it has not sat',
         '               idle past the threshold, or its dwell is unmeasured',
         '',
-        'Stops the task alone showed finished, read off the same "reason":',
+        'Stops of a session its status alone read as unfinished, read off the',
+        'same "reason":',
         "  merged       the task's recorded pull request landed on the trunk this",
         '               clone holds, so any status is taken, a busy reviewer',
         '               included',
         '  planned      a planner- session holding no branch, on a task whose',
         '               Plan: line links a plan, taken on a held shell',
+        '  shell-dwell  a held shell on the live task named, with a dwell past',
+        '               --idle-minutes, so a command it still waits on ends.',
+        '               Time the machine slept counts toward that dwell',
         '',
         'Outcomes, read off each row\'s "outcome":',
         '  stopped, removed            the client ran and the roster dropped it',
@@ -405,7 +412,7 @@ interface ReapCommandOptions {
   readonly dryRun?: boolean
   readonly write?: boolean
   readonly keep: string[]
-  readonly idleMinutes: string
+  readonly idleMinutes?: string
   readonly json?: boolean
 }
 
@@ -443,7 +450,8 @@ async function runReap(
   task: string | undefined,
   opts: ReapCommandOptions,
 ): Promise<number> {
-  const idleMinutes = Number(opts.idleMinutes)
+  const idleMinutes =
+    opts.idleMinutes === undefined ? undefined : Number(opts.idleMinutes)
   if ((task === undefined) === !opts.finished) {
     return refuseReap(
       opts.json,
@@ -451,7 +459,10 @@ async function runReap(
       'Name a task stem or pass --finished, and not both.',
     )
   }
-  if (!Number.isFinite(idleMinutes) || idleMinutes < 0) {
+  if (
+    idleMinutes !== undefined &&
+    (!Number.isFinite(idleMinutes) || idleMinutes < 0)
+  ) {
     return refuseReap(
       opts.json,
       'bad-input',
@@ -506,7 +517,13 @@ async function runReap(
         `No task ${stem} on the board, in the archive, or among the declined at ${root}.`,
       )
     }
-    plan = planTaskReap(found, roster, tasks, guards)
+    plan = planTaskReap(
+      found,
+      roster,
+      tasks,
+      guards,
+      idleThresholdMs('task', idleMinutes),
+    )
   } else {
     const repository = await repositoryOf(process.cwd())
     if (repository === null) {
@@ -521,7 +538,7 @@ async function runReap(
       tasks,
       guards,
       repository,
-      idleMinutes * 60_000,
+      idleThresholdMs('finished', idleMinutes),
     )
   }
 
