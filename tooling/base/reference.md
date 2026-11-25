@@ -38,6 +38,25 @@ The root run calls each nested runner after its own stages, so one `bun run chec
 - A nested run discovers nothing, and a folder outside a git repository finds no nested root.
 - Discovery reads files rather than a list, since `verify.json` is golden and a list kept in it is lost on sync.
 
+### Changed mode
+
+`bun run check:changed` is the gate a push runs. It checks the whole tree with typecheck, lint, format, shell, and the canon checks, then runs the tests tied to the change. It runs no build, no full suite, and neither check that reads the build.
+
+- It compares against the merge base with `origin/HEAD`, then `origin/main`, then `origin/master`, and refuses with a fetch hint when none resolves.
+- A first push runs every phase instead, since `origin` holds no branch to compare with and no fetch can bring one.
+- It ties a test that changed, and one in a changed file's folder under its stem with `.test.`, `.spec.`, or `_test`. A `test_<stem>.py` ties from any folder.
+- Past 40 tied files it runs none, since a change that wide is a sweep.
+- It passes the tied paths to `test:changed`, and a nested root runs in changed mode with the root, under its own `test:changed`.
+
+### The remembered pass
+
+A changed run that passes is remembered, so the ship skills and the hook gate one tree once. A repeat at the same content prints one skip line, and `--force` runs it again.
+
+- The pass sits in the worktree's own git directory, so a pass in one worktree never skips another.
+- Its key holds the content git would track, untracked files included, the merge base, the folder, whether `CI` is set, and the version of `canon`, `bun`, `node`, and each tool the phases probe.
+- A run keeps no pass when it fails, when a check measured nothing, when a tool reports no version, when the content moved while it ran, or when the tree holds another repository.
+- Ignored files stay out of the key, so run with `--force` after installing packages under an unchanged lockfile.
+
 ## What ships as user-owned seeds
 
 Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and never overwrites it, so a project extends them freely.
@@ -80,7 +99,7 @@ Hooks live in `.husky/` and seeded context docs in `canon/context/`. That locati
 
 - `pre-commit` runs `bunx lint-staged`.
 - `commit-msg` runs `bunx commitlint --edit "$1"`.
-- `pre-push` runs `bun run check`.
+- `pre-push` runs `bun run check:changed`.
 - `post-rewrite` delegates to `post-merge` on `rebase`, so a `pull.rebase=true` machine still gets the check.
 - `post-merge` runs `canon hooks post-merge`, which archives the task a merged pull request closed, pushes the records, reclaims merged worktrees, reinstalls the CLI, and updates the plugin.
 
@@ -108,12 +127,13 @@ Negative knowledge that costs a failed run to relearn.
 
 ## CLI
 
-| Script                 | What it does                                                  |
-| ---------------------- | ------------------------------------------------------------- |
-| `bun run check`        | Gates a checkout through `scripts/verify.ts`, writing nothing |
-| `bun run check:format` | Asserts oxfmt formatting without writing                      |
-| `bun run format`       | Writes oxfmt formatting in place                              |
-| `bun run prepare`      | Initializes husky hooks, run automatically on `bun install`   |
+| Script                  | What it does                                                       |
+| ----------------------- | ------------------------------------------------------------------ |
+| `bun run check`         | Gates a checkout through `scripts/verify.ts`, writing nothing      |
+| `bun run check:changed` | Gates a push on the static checks and the tests tied to the change |
+| `bun run check:format`  | Asserts oxfmt formatting without writing                           |
+| `bun run format`        | Writes oxfmt formatting in place                                   |
+| `bun run prepare`       | Initializes husky hooks, run automatically on `bun install`        |
 
 ### The check script
 
@@ -130,7 +150,7 @@ The `Canon checks` stage of `scripts/verify.ts` makes one call, `canon gate run 
 
 The shared set covers markdown bans and dead links, embedded programs, file length, the document ceiling, the canonical records, the design record's prose budget, the comment caps, and the context audit.
 
-- A failed stage fails `bun run check` and the `pre-push` hook. Run `canon gate run` to read each finding.
+- A failed stage fails `bun run check`, `bun run check:changed`, and the `pre-push` hook. Run `canon gate run` to read each finding.
 - The markdown stage leaves `CHANGELOG.md` out, since a generated changelog carries commit subjects nobody wrote against the ban set.
 - The context stage skips a project with no context folder, and adds `--gate` where `canon/config/context.toml` declares `gated` or sets `gate-length = true`.
 - Output with no gate record, or a record naming another root, means an older canon or a failed fetch. A local run logs a skip, and CI fails the stage.

@@ -30,6 +30,7 @@ packages = [
 [scripts]
 "test" = "vitest"
 "test:run" = "vitest run --reporter=verbose"
+"test:changed" = "vitest run --reporter=verbose"
 "test:ui" = "vitest --ui"
 "test:coverage" = "vitest run --coverage"
 "test:e2e" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && playwright test"
