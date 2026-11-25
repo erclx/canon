@@ -57,7 +57,7 @@ The seeded runner reads the phases the nearest `scripts/verify.json` requires. I
 - A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`
 - The canon checks stage takes `canon` from `PATH` first, then under `CI=true` a `bunx` pinned to `domains.tooling.version` in `canon/config/config.json`
 - Under CI a missing stamp version or an exit 1, which `bunx` returns on a failed fetch, fails the stage, and a local run with no `canon` skips it with an install hint
-- The stage reads the record of one `canon gate run --nested --json` call, and a record naming another root means a canon older than the shared set, so it skips locally and fails under CI
+- The stage reads one `canon gate run --nested --json` record and prints each failed stage. A record naming another root means an older canon, so it skips locally and fails under CI
 
 ### `tooling/base/seeds/`
 
