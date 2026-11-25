@@ -106,6 +106,31 @@ describe('web verify.yml unit-tests job', () => {
   })
 })
 
+describe('web verify.yml build-verify job', () => {
+  const buildSteps = (): WorkflowStep[] => readJobs()['build-verify'].steps
+
+  it.each([
+    ['Check Card Exclusion', 'scripts/check-card-exclusion.sh'],
+    ['Check Head Tags', 'scripts/check-head-meta.sh'],
+  ])('should run %s where its script is installed', (name, script) => {
+    const step = stepNamed(buildSteps(), name)
+
+    expect(step.run).toBe(`bash ${script}`)
+    expect(step.if).toBe(`hashFiles('${script}') != ''`)
+  })
+
+  it('should read the build only after it exists', () => {
+    const names = buildSteps().map((step) => step.name)
+
+    expect(names.slice(names.indexOf('Build'))).toEqual([
+      'Build',
+      'Check Card Exclusion',
+      'Check Head Tags',
+      'Upload Build Output',
+    ])
+  })
+})
+
 describe('web verify.yml e2e-shards job', () => {
   const shards = (): WorkflowJob => readJobs()['e2e-shards']
 

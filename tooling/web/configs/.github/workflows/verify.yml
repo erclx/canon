@@ -115,6 +115,15 @@ jobs:
       - name: Build
         run: bun run build
 
+      # A scoped push skips both, and a stack that ships neither holds no script.
+      - name: Check Card Exclusion
+        if: hashFiles('scripts/check-card-exclusion.sh') != ''
+        run: bash scripts/check-card-exclusion.sh
+
+      - name: Check Head Tags
+        if: hashFiles('scripts/check-head-meta.sh') != ''
+        run: bash scripts/check-head-meta.sh
+
       - name: Upload Build Output
         uses: actions/upload-artifact@v7
         with:
