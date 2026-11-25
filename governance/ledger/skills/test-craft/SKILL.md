@@ -71,8 +71,9 @@ The field is software testing practice. Software Engineering at Google carries t
 
 ## Read the reference for the layer
 
-| Bullet                         | Source                                                                                                                                                                | Read       |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Unit and integration reference | House choice: a unit test written without `unit.md` reaches for a mock before a real collaborator or a fake, and skips the mutation check that finds its missing case | 2026-10-24 |
-| Component reference            | House choice: a component test written without `component.md` queries by test id and fires synthetic events, so it passes on markup a user cannot reach               | 2026-10-24 |
-| End to end reference           | House choice: a first spec written without `e2e.md` pauses for a fixed time and runs with motion on, the two causes of the flakes its worked failures record          | 2026-10-24 |
+| Bullet                         | Source                                                                                                                                                                                                         | Read       |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Unit and integration reference | House choice: a unit test written without `unit.md` reaches for a mock before a real collaborator or a fake, and skips the mutation check that finds its missing case                                          | 2026-10-24 |
+| Component reference            | House choice: a component test written without `component.md` queries by test id and fires synthetic events, so it passes on markup a user cannot reach                                                        | 2026-10-24 |
+| Measuring reference            | House choice: a speed claim written without `measure.md` compares one run of each side on a shared machine and reads the noise as the result, as one worker's numbers did when parallel builds ran beside them | 2026-11-25 |
+| End to end reference           | House choice: a first spec written without `e2e.md` pauses for a fixed time and runs with motion on, the two causes of the flakes its worked failures record                                                   | 2026-10-24 |

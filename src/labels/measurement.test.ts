@@ -120,17 +120,23 @@ describe('checkMeasuredResults', () => {
     expect(result).toEqual({ checked: false, missing: [] })
   })
 
-  it.each(['eval', 'latency', 'p50', 'p95', 'median', 'timed run'])(
-    'should read %s in Verification as a measurement',
-    (word) => {
-      const result = checkMeasuredResults(
-        body('none'),
-        plan(`- Take the ${word}`),
-      )
+  it.each([
+    'eval',
+    'latency',
+    'p50',
+    'p95',
+    'median',
+    'timed run',
+    'frame time',
+    'frames per second',
+  ])('should read %s in Verification as a measurement', (word) => {
+    const result = checkMeasuredResults(
+      body('none'),
+      plan(`- Take the ${word}`),
+    )
 
-      expect(result.checked).toBe(true)
-    },
-  )
+    expect(result.checked).toBe(true)
+  })
 
   it('should not read a word that only contains a trigger as one', () => {
     const result = checkMeasuredResults(

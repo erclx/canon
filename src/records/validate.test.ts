@@ -1138,6 +1138,85 @@ describe('validateRecords', () => {
     })
   })
 
+  describe('measured-run placement', () => {
+    function withVerification(...entries: string[]): string {
+      return `# Feature: x\n\nBody.\n\n## Summary\n\n- a\n\n## Files to touch\n\n- \`a.ts\`: b\n\n## Verification\n\n${entries.join('\n')}\n\n## Risks\n\nNone identified.\n\n## Review focus\n\nNone identified.\n\n## Questions\n\n1. Which check reaches a gitignored folder?\n   - Suggested: a validate verb, since it reports without writing\n   - Answer:\n`
+    }
+
+    async function measuredRuns(...entries: string[]) {
+      await seedPlan('feature-a-b.md', withVerification(...entries))
+      const outcome = await validateRecords(ROOT, 'plans')
+      if (!outcome.ok) throw new Error('refused')
+      return outcome
+    }
+
+    it('should report a measured-run bullet that names no place and leave findings empty', async () => {
+      const outcome = await measuredRuns(
+        '- Score the p95 latency of the scan: `bun run bench`',
+      )
+
+      expect(outcome.structure).toMatchObject([
+        { criterion: 'measured-run-unplaced', line: 15 },
+      ])
+      expect(outcome.findings).toEqual([])
+    })
+
+    it.each(['test', 'CI', 'operator'])(
+      'should pass a measured-run bullet placed on `%s`',
+      async (place) => {
+        const outcome = await measuredRuns(
+          `- Score the p95 latency of the scan on \`${place}\`: \`bun run bench\``,
+        )
+
+        expect(outcome.structure).toEqual([])
+      },
+    )
+
+    it('should not read a time limit as a measured-run', async () => {
+      const outcome = await measuredRuns(
+        '- The suite ends inside its `timeout` of 30 seconds: `bun run test`',
+      )
+
+      expect(outcome.structure).toEqual([])
+    })
+
+    it.each([
+      'A test that timed out at 5 seconds reports the cause: `bun run test`',
+      'The run hits its timeout of 30 seconds and reports it: `bun run test`',
+    ])(
+      'should not read a time limit in prose as a measured-run: %s',
+      async (entry) => {
+        const outcome = await measuredRuns(`- ${entry}`)
+
+        expect(outcome.structure).toEqual([])
+      },
+    )
+
+    it('should read a measured-run word only in Verification', async () => {
+      await seedPlan(
+        'feature-a-b.md',
+        withVerification('- Plain: `bun run test`').replace(
+          '- a\n',
+          '- the latency of the scan\n',
+        ),
+      )
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome).toMatchObject({ ok: true, structure: [] })
+    })
+
+    it('should judge a nested measured-run bullet on its own line', async () => {
+      const outcome = await measuredRuns(
+        '- Placed on `CI`: `bun run check`',
+        '  - Median frame time of the redraw: `bun run bench`',
+      )
+
+      expect(outcome.structure).toMatchObject([
+        { criterion: 'measured-run-unplaced', line: 16 },
+      ])
+    })
+  })
+
   it('should read only the plan a record names, by its stem', async () => {
     await seedPlan('feature-plan-standards.md', conformingPlan())
     await seedPlan('feature-broken.md', '# Broken\n')

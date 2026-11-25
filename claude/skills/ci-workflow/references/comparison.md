@@ -13,7 +13,7 @@ description: The shape of a hand-started workflow that compares two commits, and
 
 ## The shape
 
-A comparison workflow answers how two commits differ, such as in speed. It holds the triggers, the two sides, and the call into the project's harness. How the harness measures, repeats, and reports a run stays out of the workflow file.
+A comparison workflow answers how two commits differ, such as in speed. It holds the triggers, the two sides, and the call into the project's harness. How the harness measures, repeats, and reports a run stays out of the workflow file, and sits in `${CLAUDE_SKILL_DIR}/../test-craft/references/measure.md`.
 
 - Start it by hand alone, with `workflow_dispatch` as its only trigger. It answers a question somebody asked, so no pull request waits on it.
 - Gate nothing on it. No job names it in `needs`, and no ruleset requires it.

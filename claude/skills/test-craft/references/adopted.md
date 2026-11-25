@@ -56,6 +56,12 @@ From `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://githu
 
 This reverses an earlier decline of the excuses table, which objected to arguments against imagined objections. Each row here rebuts an excuse this skill's requirement records a session acting on, such as extending the open end to end spec or adding a pause for a run that flakes under load.
 
+### Measuring a timing
+
+The hyperfine README at `sharkdp/hyperfine` adds the uncounted warm-up and the warning that other programs interfere with a run, and the Go `benchstat` documentation adds idle machines, interleaved runs, medians, and a round count fixed ahead. Adopted in `measure.md`, which leaves the workflow's shape to the `ci-workflow` comparison reference.
+
+hyperfine's own command runner was left out, since the reference teaches the method and a project picks its harness.
+
 ### Per layer
 
 Each layer reference takes its rules from the tool's own guidance.

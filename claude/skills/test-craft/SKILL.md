@@ -81,11 +81,12 @@ Every test carries these too:
 
 ## Read the reference for the layer
 
-Read the one reference matching the layer the table picked, before writing the first test at it. Skip the other two.
+Read the one reference matching the layer the table picked, before writing the first test at it. Skip the other two. A timing claim reads `measure.md` as well, at any layer.
 
 - Unit and integration: `${CLAUDE_SKILL_DIR}/references/unit.md`
 - Component: `${CLAUDE_SKILL_DIR}/references/component.md`
 - End to end: `${CLAUDE_SKILL_DIR}/references/e2e.md`
+- A timing measurement at any layer: `${CLAUDE_SKILL_DIR}/references/measure.md`
 
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external patterns were adopted, which declined, and why.
 
