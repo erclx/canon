@@ -61,7 +61,7 @@ export const LIFT_REFUSALS: Record<
   'ui-behind':
     'The newest UI review closed on an earlier commit than the head.',
   'ui-undriven':
-    'The newest UI review closed having driven no box, so it looked at nothing. Re-drive the checklist on an address that answers.',
+    'The newest UI review closed with boxes not driven, and it drove none at all or carries no `Waived undriven:` line whose count matches. Re-drive the checklist on an address that answers, waiving only a box skipped for a cause off the page.',
   'evidence-owed':
     'The evidence check reads owed, so the ship chain left a step undone.',
   'painted-uncaptured':

@@ -20,7 +20,10 @@ const WAIVER_LINE = /^- \*\*Waived capture:\*\* `([^`]+)`:\s*(\S.*)$/
  */
 const REEL_WAIVER_LINE = /^- \*\*Waived reel:\*\*\s*(\S.*)$/
 
-const FENCE = /^\s*(```|~~~)/
+/** Counts the boxes `review-ui` left undriven rather than naming any, since numbers shift. */
+const UNDRIVEN_WAIVER_LINE = /^- \*\*Waived undriven:\*\* (\d+):\s*\S/
+
+const FENCE = /^\s*(`{3,}|~{3,})(.*)$/
 
 /**
  * Every line of the review bodies outside a fenced block, in order, trailing
@@ -31,14 +34,16 @@ function unfencedLines(reviews: readonly ReviewRow[]): string[] {
   const lines: string[] = []
   for (const review of reviews) {
     let fence: string | undefined
-    for (const line of (review.body ?? '').split('\n')) {
-      const opener = FENCE.exec(line)?.[1]
-      if (opener !== undefined) {
-        if (fence === undefined) fence = opener
-        else if (opener === fence) fence = undefined
+    for (const raw of (review.body ?? '').split('\n')) {
+      const line = raw.trimEnd()
+      const [, run, info = ''] = FENCE.exec(line) ?? []
+      if (run !== undefined) {
+        if (fence === undefined) fence = run
+        // A shorter run, or one with an info string, is text inside the block.
+        else if (run.startsWith(fence) && info.trim() === '') fence = undefined
         continue
       }
-      if (fence === undefined) lines.push(line.trimEnd())
+      if (fence === undefined) lines.push(line)
     }
   }
   return lines
@@ -61,5 +66,13 @@ export function readReelWaivers(reviews: readonly ReviewRow[]): string[] {
   return unfencedLines(reviews).flatMap((line) => {
     const reason = REEL_WAIVER_LINE.exec(line)?.[1]
     return reason === undefined ? [] : [reason]
+  })
+}
+
+/** The box count on every undriven waiver in the review bodies, in order. */
+export function readUndrivenWaivers(reviews: readonly ReviewRow[]): number[] {
+  return unfencedLines(reviews).flatMap((line) => {
+    const count = UNDRIVEN_WAIVER_LINE.exec(line)?.[1]
+    return count === undefined ? [] : [Number(count)]
   })
 }

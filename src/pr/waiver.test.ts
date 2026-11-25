@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readReelWaivers, readWaivers } from '@/pr/waiver'
+import { readReelWaivers, readUndrivenWaivers, readWaivers } from '@/pr/waiver'
 
 function review(body: string): { body: string } {
   return { body }
@@ -117,5 +117,114 @@ describe('readReelWaivers', () => {
     const body = ['- **Waived reel:**', '- **Waived reel:**    '].join('\n')
 
     expect(readReelWaivers([review(body)])).toEqual([])
+  })
+})
+
+describe('readUndrivenWaivers', () => {
+  it('reads the count off an undriven waiver line', () => {
+    const body = [
+      '## UI review closed',
+      '',
+      '- **Waived undriven:** 2: `(local only)` boxes on a hosted preview',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([2])
+  })
+
+  it('takes only the undriven line from a pass carrying every waiver kind', () => {
+    const body = [
+      '- **Waived capture:** `src/a.tsx`: focus order only',
+      '- **Waived reel:** hover-only change',
+      '- **Waived undriven:** 1: local only',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([1])
+    expect(readReelWaivers([review(body)])).toEqual(['hover-only change'])
+  })
+
+  it('never counts an undriven waiver inside a fenced code block', () => {
+    const body = [
+      '```markdown',
+      '- **Waived undriven:** 2: sample',
+      '```',
+      '~~~',
+      '- **Waived undriven:** 3: sample',
+      '~~~',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('never counts an undriven waiver after a shorter fence inside a longer one', () => {
+    const body = [
+      '````markdown',
+      '```text',
+      '- **Waived undriven:** 9: sample',
+      '```',
+      '- **Waived undriven:** 8: sample',
+      '````',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('never reads a fence line with an info string as closing a fence', () => {
+    const body = [
+      '```text',
+      '```json',
+      '- **Waived undriven:** 9: sample',
+      '```',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('reads an undriven waiver after a fence closed by a longer run', () => {
+    const body = [
+      '```text',
+      'sample',
+      '````',
+      '- **Waived undriven:** 2: local only',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([2])
+  })
+
+  it('reads no waiver kind inside a fence in a body with CRLF line endings', () => {
+    const body = [
+      '```text',
+      '- **Waived capture:** `src/a.tsx`: sample',
+      '- **Waived reel:** sample',
+      '- **Waived undriven:** 9: sample',
+      '```',
+    ].join('\r\n')
+
+    expect(readWaivers([review(body)])).toEqual([])
+    expect(readReelWaivers([review(body)])).toEqual([])
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
+  })
+
+  it('reads an undriven waiver after a fence in a body with CRLF line endings', () => {
+    const body = [
+      '```text',
+      'sample',
+      '```',
+      '- **Waived undriven:** 2: local only',
+    ].join('\r\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([2])
+  })
+
+  it('skips an undriven waiver with no count or no reason', () => {
+    const body = [
+      '- **Waived undriven:** local only boxes',
+      '- **Waived undriven:** all: local only boxes',
+      '- **Waived undriven:** 2',
+      '- **Waived undriven:** 2:   ',
+      '- **Waived undriven:** 2 boxes: local only',
+      'Waived undriven: 2: no bold',
+    ].join('\n')
+
+    expect(readUndrivenWaivers([review(body)])).toEqual([])
   })
 })

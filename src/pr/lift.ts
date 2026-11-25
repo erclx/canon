@@ -19,7 +19,7 @@ import {
   reelMoves,
 } from '@/pr/carry'
 import { DEFAULT_REEL_WIDTH } from '@/pr/evidence'
-import { readReelWaivers, readWaivers } from '@/pr/waiver'
+import { readReelWaivers, readUndrivenWaivers, readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
@@ -84,6 +84,8 @@ export interface GateResult {
   readonly paintedPaths?: readonly string[]
   /** Every path a box can observe that kept a UI close from carrying forward. */
   readonly drivenPaths?: readonly string[]
+  /** The boxes the newest UI verdict left undriven and waived, on a passing `ui` gate. */
+  readonly undrivenWaived?: number
   /** The tip runs queued with no job past the bound, named on a `ci-stalled` refusal. */
   readonly stalled?: readonly StalledRun[]
   /** The painted paths changed with no capture, reel at the head, or waiver, sorted. */
@@ -383,6 +385,21 @@ function droveNothing(counts: UiCounts | undefined): boolean {
 }
 
 /**
+ * Whether the newest UI verdict waives exactly the boxes it left undriven. Only
+ * that verdict's own body is read, since an older one waived a different pass.
+ */
+function waivesUndriven(
+  reviews: readonly ReviewRow[],
+  notDriven: number,
+): boolean {
+  const verdict = reviews.findLast(
+    (row) => resolveUiScope({ reviews: [row] }).state !== 'none',
+  )
+  const standing = verdict === undefined ? [] : standingPasses([verdict])
+  return readUndrivenWaivers(standing).includes(notDriven)
+}
+
+/**
  * Binds only where the evidence record carries a checklist to drive. A close
  * behind the head holds across what `readUiCarry` carries, and a refusal names
  * every observable path in `drivenPaths` with the painted subset beside it.
@@ -402,7 +419,14 @@ export async function uiGate(
   if (scope.source !== 'marker') return fail('ui', 'ui-unmarked')
   if (scope.commit === undefined) return fail('ui', 'ui-behind')
   // Before the head test, so a carried close is refused too. An unparsed count reads unchecked.
-  if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
+  const notDriven = scope.counts?.notDriven ?? 0
+  if (
+    notDriven > 0 &&
+    (droveNothing(scope.counts) || !waivesUndriven(reviews, notDriven))
+  ) {
+    return fail('ui', 'ui-undriven')
+  }
+  const waived = notDriven > 0 && { undrivenWaived: notDriven }
 
   const carry = await readUiCarry(
     {
@@ -412,12 +436,12 @@ export async function uiGate(
     scope.commit,
     head,
   )
-  if (carry.kind === 'covered') return pass('ui')
+  if (carry.kind === 'covered') return { ...pass('ui'), ...waived }
   if (carry.kind === 'failed') return fail('ui', 'gh-failed')
   if (carry.kind === 'behind') return fail('ui', 'ui-behind')
   if (carry.kind === 'carried') {
     const { carriedFrom, carriedAcross } = carry
-    return { ...pass('ui'), carriedFrom, carriedAcross }
+    return { ...pass('ui'), carriedFrom, carriedAcross, ...waived }
   }
 
   const paintedPaths = carry.drivenPaths.filter((path) =>

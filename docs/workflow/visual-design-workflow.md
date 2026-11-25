@@ -87,7 +87,7 @@ Two reviews run beside each other and finish on their own clocks.
 
 - `canon:review-pr` reads the code and the stills in the evidence comment, and posts under `## Review`.
 - `canon:review-ui` never reads the diff. It drives each checklist box in the running app through `canon browser`, which runs the pinned `@playwright/cli`, and posts under `## UI review`.
-- Every box gets one verdict, being pass, fail, needs eyes, or not driven.
+- Every box gets one verdict, being pass, fail, needs eyes, or not driven. A close with boxes not driven holds the lift until its own body waives that count.
 - A page that shows its start state only behind a token or a signed-in route names that path as `access` in the `[drive]` table of `canon/config/app.toml`, and the pass opens its address behind it.
 - The pass refuses rather than download a browser. Install it once per machine with `canon browser install-browser chromium` yourself, since the seeded settings deny that command to a session.
 
