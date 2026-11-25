@@ -256,7 +256,7 @@ export interface StandingWaitOptions {
 }
 
 /**
- * Holds until the base moves a path the branch writes, the two stop merging,
+ * Holds until the base moves a path the branch writes or stamps, the two stop merging,
  * the pull request closes, or the deadline. Every ending reads the open state
  * first, since a squash merge reads as stale against the base it landed on.
  */

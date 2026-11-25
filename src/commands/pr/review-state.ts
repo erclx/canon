@@ -65,7 +65,7 @@ export function registerReviewState(pr: Command): void {
     )
     .option(
       '--wait-standing <seconds>',
-      'Hold until the base moves a path the branch writes, the two conflict, or the pull request closes',
+      'Hold until the base moves a path the branch writes or a standard its examples stamp, the two conflict, or the pull request closes',
     )
     .addHelpText(
       'after',
@@ -145,7 +145,8 @@ export function registerReviewState(pr: Command): void {
         'a squash merge reads as stale against the base it landed on. It',
         'refuses beside `--wait`. The record carries `head`, `reason`, and',
         '`waitedSeconds` in place of the review fields:',
-        '  stale     the base changed a path the branch writes, named in `moved`',
+        '  stale     the base changed a path the branch writes, or a standard',
+        '            its examples stamp, named in `moved`',
         '  conflict  the branch no longer merges cleanly onto the base',
         '  closed    the pull request merged or closed, so nothing is owed',
         '  timeout   the deadline passed with the base `standing` still',

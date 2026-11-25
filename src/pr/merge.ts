@@ -91,7 +91,7 @@ export interface MergeRecord {
   readonly sha?: string
   /** Failing checks the base does not require, which the merge went past. */
   readonly advisory?: readonly string[]
-  /** The branch paths the base changed since the fork point, present only on `standing-stale`. */
+  /** The written or stamped paths the base changed since the fork point, present only on `standing-stale`. */
   readonly moved?: readonly string[]
   /** The fast-forward of the main worktree, present only on a merge. */
   readonly pull?: MergePullRecord

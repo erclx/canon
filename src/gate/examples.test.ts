@@ -8,7 +8,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { recordExamples } from '@/gate/examples'
+import { recordExamples, stampedStandards } from '@/gate/examples'
 import type { MeasureContext } from '@/gate/measures'
 
 const STANDARD = 'claude/skills/demo/references/demo.md'
@@ -245,5 +245,32 @@ describe('recordExamples', () => {
 
       expect(report.unmeasured).toContain('examples/index.md')
     })
+  })
+})
+
+describe('stampedStandards', () => {
+  const PLAN_STANDARD = 'claude/skills/demo/references/plan.md'
+  const BODY_STANDARD = 'claude/skills/demo/references/body.md'
+
+  it('should name a standard two entries cite once', () => {
+    const source = [
+      `- [Plan](planning/plan.md): a plan. Read against \`${PLAN_STANDARD}\` at \`11b4687c\`.`,
+      `- [Body](shipping/body.md): a body. Read against \`${BODY_STANDARD}\` at \`cb10464a\`.`,
+      `- [Perf](shipping/perf.md): a body. Read against \`${BODY_STANDARD}\` at \`cb10464a\`.`,
+    ].join('\n')
+
+    expect(stampedStandards(source)).toEqual([PLAN_STANDARD, BODY_STANDARD])
+  })
+
+  it('should name every standard one entry cites', () => {
+    const source = `- [Plan](planning/plan.md): a plan. Read against \`${PLAN_STANDARD}\` at \`11b4687c\` and \`${BODY_STANDARD}\` at \`cb10464a\`.`
+
+    expect(stampedStandards(source)).toEqual([PLAN_STANDARD, BODY_STANDARD])
+  })
+
+  it('should leave out a stamp no entry carries, which the stage never checks', () => {
+    const source = `Each entry reads \`${PLAN_STANDARD}\` at \`11b4687c\`.`
+
+    expect(stampedStandards(source)).toEqual([])
   })
 })

@@ -15,7 +15,7 @@ import {
 } from '@/records/validate'
 
 export const EXAMPLES_DIR = 'examples'
-const INDEX = join(EXAMPLES_DIR, 'index.md')
+export const EXAMPLES_INDEX = join(EXAMPLES_DIR, 'index.md')
 
 /**
  * A stamp is the first eight hex digits of the standard's sha256, so any edit
@@ -49,6 +49,12 @@ function readEntries(source: string): Entry[] {
     }))
     return [{ target, stamps }]
   })
+}
+
+/** Each standard an index entry stamps, once, in index order. */
+export function stampedStandards(source: string): string[] {
+  const stamps = readEntries(source).flatMap((entry) => entry.stamps)
+  return [...new Set(stamps.map((stamp) => stamp.standard))]
 }
 
 async function listFiles(dir: string, prefix = ''): Promise<string[]> {
@@ -121,7 +127,7 @@ async function stampFindings(
 ): Promise<string[]> {
   if (stamps.length === 0) {
     return [
-      `${rel} names no standard at a stamp in ${INDEX}, so no edit to its standard reaches it.`,
+      `${rel} names no standard at a stamp in ${EXAMPLES_INDEX}, so no edit to its standard reaches it.`,
     ]
   }
   const perStamp = await Promise.all(
@@ -134,7 +140,7 @@ async function stampFindings(
       )
       if (current === stamp) return []
       return [
-        `${standard} changed since ${rel} was stamped at ${stamp}. Reread ${rel} against it, then set its stamp in ${INDEX} to ${current}.`,
+        `${standard} changed since ${rel} was stamped at ${stamp}. Reread ${rel} against it, then set its stamp in ${EXAMPLES_INDEX} to ${current}.`,
       ]
     }),
   )
@@ -145,7 +151,7 @@ async function entryFindings(root: string, entry: Entry): Promise<string[]> {
   // `join` keeps a trailing slash, so a folder target stays one here.
   const rel = join(EXAMPLES_DIR, entry.target)
   if (!existsSync(join(root, rel))) {
-    return [`${INDEX} links ${rel}, which does not exist.`]
+    return [`${EXAMPLES_INDEX} links ${rel}, which does not exist.`]
   }
   const validate = VALIDATORS.find(([pattern]) => pattern.test(entry.target))
   const [stamps, shape] = await Promise.all([
@@ -164,12 +170,12 @@ export const recordExamples: Measure = async (ctx) => {
   let source: string
   let files: string[]
   try {
-    source = await readFile(join(ctx.root, INDEX), 'utf8')
+    source = await readFile(join(ctx.root, EXAMPLES_INDEX), 'utf8')
     files = await listFiles(join(ctx.root, EXAMPLES_DIR))
   } catch {
     return {
       emissions: [],
-      unmeasured: `${INDEX} could not be read, so no example was checked.`,
+      unmeasured: `${EXAMPLES_INDEX} could not be read, so no example was checked.`,
     }
   }
 
@@ -186,7 +192,7 @@ export const recordExamples: Measure = async (ctx) => {
     )
     .map(
       (file) =>
-        `${join(EXAMPLES_DIR, file)} has no entry in ${INDEX}, so no standard holds it.`,
+        `${join(EXAMPLES_DIR, file)} has no entry in ${EXAMPLES_INDEX}, so no standard holds it.`,
     )
 
   const perEntry = await Promise.all(
@@ -199,7 +205,7 @@ export const recordExamples: Measure = async (ctx) => {
     emissions: [
       {
         kind: 'info',
-        text: `${plural(entries.length, 'example')} held to ${plural(new Set(entries.flatMap((entry) => entry.stamps.map((stamp) => stamp.standard))).size, 'standard')}`,
+        text: `${plural(entries.length, 'example')} held to ${plural(stampedStandards(source).length, 'standard')}`,
       },
     ],
   }

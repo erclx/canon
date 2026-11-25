@@ -75,10 +75,11 @@ export function registerMerge(pr: Command): void {
         'verb reads the draft flag and not the reviews. It reads the standing',
         '`canon pr lift` gates on again once the checks pass, since a sibling',
         'merged after the lift can leave the head stale. Stale means the base',
-        'changed a file the branch writes since the two forked, and the record',
-        'names those files as `moved`. A stale, conflicted, or unread base',
-        'refuses, and the branch updates and reruns CI before it lands. No',
-        'flag merges past it. It does not wait on checks or delete the branch.',
+        'changed a file the branch writes, or a standard its examples stamp,',
+        'since the two forked, and the record names those files as `moved`. A',
+        'stale, conflicted, or unread base refuses, and the branch updates and',
+        'reruns CI before it lands. No flag merges past it. It does not wait on',
+        'checks or delete the branch.',
         '',
         'After a merge lands, the verb fast-forwards the checkout at --root when',
         'it is the main worktree on the trunk, which fires the `post-merge` hook',
@@ -141,7 +142,7 @@ const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
   'ci-pending':
     'A check run on the head has yet to conclude. Run the verb again once it does.',
   'standing-stale':
-    'The base changed a file this branch writes since the two forked. Update the branch and wait for CI, rather than retrying the merge.',
+    'The base changed a file this branch writes, or a standard its examples stamp, since the two forked. Update the branch and wait for CI, rather than retrying the merge.',
   'standing-conflict':
     'The head no longer merges cleanly into the base. Rebase the branch and wait for CI.',
   'standing-unknown':
