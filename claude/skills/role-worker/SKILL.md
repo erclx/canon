@@ -134,7 +134,7 @@ This rung stays here rather than in the relay because it differs between roles. 
 
 A launch whose brief says it is a talk session puts the operator in this one. Everything above holds, and the clause below changes where a judgment call goes and when the role ends. A launch carrying no such sentence takes none of this.
 
-- Ask the operator in the session through the structured question surface at a judgment call, rather than halting toward the controller
+- Ask the operator at a judgment call, never halting toward the controller, and write each answer to a slot per `${CLAUDE_SKILL_DIR}/references/talk-answers.md`
 - Put a plan question written as needing the operator's call to them directly
 - Sort a late ask from the operator in place under the scope rule above, and send the controller the follow-up row rather than relaying the ask
 - Send the controller a close message when the operator ends the conversation, beside the announcements the channel above owes.
