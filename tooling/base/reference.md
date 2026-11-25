@@ -162,7 +162,7 @@ The `Canon checks` stage of `scripts/verify.ts` makes one call, `canon gate run 
 
 The shared set covers markdown bans and dead links, embedded programs, file length, the document ceiling, the canonical records, the design record's prose budget, the comment caps, and the context audit.
 
-- A failed stage fails `bun run check`, `bun run check:changed`, and the `pre-push` hook. Run `canon gate run` to read each finding.
+- A failed stage fails `bun run check`, `bun run check:changed`, and the `pre-push` hook, and the canon checks print every failed stage before they fail. Run `canon gate run` to read each finding.
 - The markdown stage leaves `CHANGELOG.md` out, since a generated changelog carries commit subjects nobody wrote against the ban set.
 - The context stage skips a project with no context folder, and adds `--gate` where `canon/config/context.toml` declares `gated` or sets `gate-length = true`.
 - Output with no gate record, or a record naming another root, means an older canon or a failed fetch. A local run logs a skip, and CI fails the stage.
