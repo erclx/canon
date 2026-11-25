@@ -51,7 +51,7 @@ Four rules govern how a session reads the table.
 - Leave each full suite to CI, on machines of its own. A repeat on the push costs the machine parallel sessions share, and a timeout under that load reads as a failed test.
 - Read a tied selection as a heuristic that misses tests. Its pass clears the push, and the suite's pass clears the merge.
 - Add a tied test when CI catches a break the push let through, so the next one fails before it leaves the machine.
-- Keep the full suite on the push in a project whose CI runs no tests on a pull request, since nothing else runs it.
+- Keep on the push any suite, or any platform a suite covers, that CI runs on no pull request, since nothing else runs it.
 
 ## Keep test code readable over clever
 
