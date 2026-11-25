@@ -33,13 +33,22 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 ### `🎬 E2E Suites`
 
-A third job runs `bun run test:e2e` for the `*.e2e.test.ts` suites, and a Markdown-only pull request skips it. `scripts/ci/e2e-scope.ts` limits a pull request to the suites its imports reach, and a trigger file, a failed read, or a push runs all. The operator makes it required after 20 consecutive green runs.
+One check over a matrix that runs each group of `*.e2e.test.ts` suites on its own runner, skipped whole by a Markdown-only pull request. `scripts/ci/e2e-scope.ts` limits a pull request to the suites its imports reach, and a trigger file, a failed read, or a push runs all.
 
 - FFmpeg comes from apt with `Acquire::Retries=3` and a 5-minute step bound, since the runner image lists none, once `prefer-archive-mirror.sh` has run
 - `bunx playwright install chromium` lands the engine's browsers, and `canon browser install-browser chromium` the agent CLI's own revision, which the swipe suite launches
 - The browser cache keys on `bun.lock` and `src/browser/agent-cli.ts` under its own prefix, since a hit on the capture job's cache would skip the agent CLI install
 - `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run first, so a missing revision or `libwebp_anim` encoder, or a Chromium that cannot launch, reddens the job
 - A sysctl clears `kernel.apparmor_restrict_unprivileged_userns`, since Ubuntu 24.04 kills every product launch of Chromium, which all run with the sandbox on
+
+### `scripts/ci/e2e-groups.ts`
+
+Holds the groups, balanced by each suite's mean time on a runner. Vitest's `--shard` balances by file count, which puts a half-second suite level with a four-minute one. A leg the scope leaves empty passes with no setup.
+
+- `src/gate/e2e-groups.test.ts` fails on a suite in no group or in two, and on a timed suite sharing its group. A new suite takes a line in the script.
+- `src/gate/e2e-workflow.test.ts` fails on a group the matrix does not run, and runs the summary step over each result pair
+- The summary job fails on a failed or cancelled leg and on a failed `🔍 Changes` job, and passes on a skipped matrix only where the scope reached no suite
+- The ruleset requires the check once the operator adds it by hand, after 10 consecutive green runs on `main`
 
 ### `scripts/ci/docs-only.sh`
 
@@ -108,5 +117,5 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. With no merge queue, a sibling merge leaves it stale until a worker's standing wait or the poll reads it.
 - The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
-- `vitest.config.ts` keeps every `*.e2e.test.ts` out of `🛡️ Static Checks`. Only `🎬 E2E Suites` runs them, minus the probe tests under `src/driver/probes/` and `src/take/target.test.ts`.
+- `vitest.config.ts` keeps every `*.e2e.test.ts` out of `🛡️ Static Checks`. Only the `🎬 E2E Suites` groups run them, minus the probe tests under `src/driver/probes/` and `src/take/target.test.ts`.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
