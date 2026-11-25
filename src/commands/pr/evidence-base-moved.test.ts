@@ -5,6 +5,7 @@ import { execa, execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   CLI,
+  REEL_LINK,
   RUN_TIMEOUT_MS,
   WEB_ONLY_DEPLOY,
   initBranchRepo,
@@ -289,6 +290,62 @@ describe('canon pr evidence --check across a rebase or a merge of the base', () 
     expect(record).toMatchObject({
       reason: 'settled',
       previewHead: { reason: 'stale', built, servedSinceBuilt: false },
+    })
+  })
+  describe('beside a reel filmed before a merge of the base', () => {
+    async function renderAtHead(): Promise<Record<string, unknown>> {
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+        },
+      )
+      return JSON.parse(result.stdout)
+    }
+
+    beforeEach(() => {
+      const filmed = git('rev-parse', 'HEAD').trim().slice(0, 7)
+      writeFileSync(
+        join(tempDir, 'base-tree.json'),
+        JSON.stringify({
+          truncated: false,
+          tree: [{ path: 'e2e/evidence/dark/board.png', type: 'blob' }],
+        }),
+      )
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+      writeFileSync(
+        join(tempDir, 'comments.json'),
+        JSON.stringify({
+          comments: [
+            {
+              url: 'https://github.com/o/r/pull/7#issuecomment-100',
+              body: `## Evidence\n\n**Reel** filmed at \`${filmed}\`:<br><img src="${REEL_LINK}" width="960" alt="reel filmed at ${filmed}">\n\n## What to look at\n\n<!-- pr-evidence: head=${filmed} -->`,
+            },
+          ],
+        }),
+      )
+    })
+
+    it('should list no uncaptured path after a clean merge of the base', async () => {
+      git('merge', '-q', '--no-edit', 'main')
+      git('push', '-q', '-f', 'origin', 'feat/x')
+
+      const record = await renderAtHead()
+
+      expect(record.body).not.toContain('Uncaptured')
+    })
+
+    it('should list the uncaptured path once the branch commits a painted path after the merge', async () => {
+      git('merge', '-q', '--no-edit', 'main')
+      push('feat/x', 'src/client/a.css', 'a { color: red }\n')
+
+      const record = await renderAtHead()
+
+      expect(record.body).toContain('**Uncaptured:** `src/client/a.css`')
     })
   })
 })

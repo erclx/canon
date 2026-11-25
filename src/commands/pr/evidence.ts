@@ -31,8 +31,13 @@ import {
   SHORT_SHA_LENGTH,
 } from '@/pr/evidence'
 import { isWithinTolerance } from '@/pr/pixels'
-import { readCarry, reelMoves } from '@/pr/carry'
-import { type GitRunner, readChangedPaths, readRebasedPaths } from '@/pr/lift'
+import { readReelCarry } from '@/pr/carry'
+import {
+  type GitRunner,
+  readChangedPaths,
+  readRebasedPaths,
+  readUnmergedCommits,
+} from '@/pr/lift'
 import { isPainted, loadPaintedPatterns } from '@/pr/painted'
 import { resolveTip, type TipRefusal } from '@/pr/head'
 import {
@@ -1023,13 +1028,26 @@ async function runEvidence(
   )
   // Covered exactly when `canon pr lift` would carry the reel to the head.
   const renderHead = identity.head
+  const baseRef =
+    identity.base === undefined ? undefined : `origin/${identity.base}`
+  const git = gitRunner(root)
   const carries = await Promise.all(
     reels.map((reel) =>
-      readCarry(
-        (from, to) => readChangedPaths(gitRunner(root), from, to),
+      readReelCarry(
+        {
+          readChanged: (from, to) => readChangedPaths(git, from, to),
+          readRebased: (from, to) =>
+            baseRef === undefined
+              ? Promise.resolve(undefined)
+              : readRebasedPaths(git, baseRef, from, to),
+          readUnmerged: (from, to) =>
+            baseRef === undefined
+              ? Promise.resolve(undefined)
+              : readUnmergedCommits(git, baseRef, from, to),
+        },
+        painted,
         reel.head,
         renderHead,
-        reelMoves(painted),
       ),
     ),
   )
