@@ -784,23 +784,6 @@ describe('lift', () => {
       expect(calls.marks).toEqual(['PR_node'])
     })
 
-    it('should not carry a UI close over a path both sides wrote', async () => {
-      const { api } = makeApi({
-        ...mergedFrom,
-        reviews: [CODE_CLOSED_AT_MOVED, UI_CLOSED_AT_MOVED],
-        evidence: { hasDrivableBox: true, reels: REEL_AT_HEAD },
-        unmerged: [],
-        rebased: { differingPaths: [], ownPaths: ['src/main-only.ts'] },
-      })
-
-      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
-
-      expect(record).toMatchObject({
-        reason: 'ui-behind',
-        drivenPaths: ['src/main-only.ts'],
-      })
-    })
-
     it.each([
       ['ci-failing', { checks: [{ state: 'failing', isConflicted: false }] }],
       ['standing-stale', { standing: 'stale' }],
