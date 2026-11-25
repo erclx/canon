@@ -4,7 +4,7 @@ Read before the first `frameboard` verb a `design-pick` run sends. It carries wh
 
 ## Reaching the board
 
-Take `<board>` as `.canon/board/` and name `<project>` for the surface per `${CLAUDE_SKILL_DIR}/references/project-name.md`.
+Take `<board>` as `.canon/board/` and name `<project>` per `${CLAUDE_SKILL_DIR}/references/project-name.md`.
 
 - Stop before starting a board when `.canon/board/` is absent and `.canon/canvas/` exists
 - Report `❌ The board is still at .canon/canvas/. Run canon migrate record-layout --write, then re-run.` on that stop
@@ -41,13 +41,13 @@ The board's home lists every project, and a home folder gathers the projects of 
 | ------------------ | -------------------------------------------------------------------- |
 | `app-drive`        | The `board-folder` key of the `[drive]` table, `Drives` when absent  |
 | A groundwork track | `Groundwork`, holding each drawing track's `groundwork-<nn>` project |
-| A pick round       | None, since a round draws in its one project, opened by name         |
+| A standalone pick  | `Picks`, holding each `pick-<nn>-<topic>` project                    |
 
-A run that takes a folder files its project there once the project exists, whether this run added it or found it on the board.
+A pick inside a drive or a track files nothing, since its project already sits in that run's folder. Any other run files its project once the project exists, whether this run added it or found it on the board.
 
 - File it with `frameboard project group <project> <folder> --root <board> --json`, which takes the project as its name rather than through `--project`, and makes the folder when no project holds it yet
 - Run the call on a found project too, since a project made before the folder existed sits loose on home
-- Skip the call when the folder resolves empty, which a config sets to keep a project on home
+- Skip the call when the folder resolves empty, which a config sets to keep a project on home, and on a project an earlier round named for its surface
 - Report a refused group's `error.code` and draw on, since a loose project costs the operator a scroll and never a frame
 
 ## Drawing on the board
@@ -61,8 +61,8 @@ A round draws on the `references` page in `<project>`, which the `design-referen
 - Reuse a `references` page that holds frames, since an earlier `design-references` run left it
 - Otherwise invoke `canon:design-references` with the sites the ask names, or bare when it names none
 - Draft on when that skill refuses or does not resolve, or the operator declines references, and say no reference backs the arms
-- Never put `references` on the run's list of pages, so the close archives it beside the picked round and leaves it standing for the next round
-- Find a reference's images in `<project>/assets/references/`, since Frameboard serves nothing from a page folder's subfolders. The close's capture renders them into each frame.
+- Never put `references` on the run's list of pages, so a selection on it reads as no answer. It stays on the board after the close, as every page does.
+- Find a reference's images in `<project>/assets/references/`, since Frameboard serves nothing from a page folder's subfolders
 
 ## Reading the selection
 
@@ -76,5 +76,7 @@ Read `frameboard selection --root <board> --json` when the operator's answer poi
 | Several entries in `frames`                                       | Ask which one rather than taking the first               |
 | Empty `frames`, another project, or a page the run never made     | No answer, so ask again rather than guess                |
 | `tabs: 0`, or a `server-not-running` refusal                      | No board is open, so hand the address over and ask again |
+
+On a drive's topic page every round shares one page, so read a frame's `<arm>` as the arm, and one in an earlier round's row as a revert.
 
 Pass the element's `hash` to `frameboard edit --hash` with its `index`. A frame rewritten since the operator picked refuses with `stale-address` rather than landing on another element, so ask for the pick again on that refusal.

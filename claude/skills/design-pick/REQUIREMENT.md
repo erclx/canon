@@ -9,7 +9,11 @@ description: Why a decision settled by looking needs its own surface, and where 
 
 Without this skill, a session facing a decision settled by looking describes the options in prose or ships one answer to a taste call. The operator never sees what they chose between. A drafted set varies several properties or the wrong layer, sits in the real surface, and mixes themes and widths, so no pick names what decided it.
 
-The evidence fails as well. Arms get reported unrendered or unjudged, a driver finding reads as a verdict, and the pick question arrives with no address to look at. Renders land in scratch, each round overwrites the last, and the losing arms vanish with the run's pages. Rounds drafted off the synced board need redrawing.
+### What a round leaves
+
+The evidence fails as well. Arms get reported unrendered or unjudged, a driver finding reads as a verdict, and the pick question arrives with no address to look at.
+
+Nothing of a round lasts either. Renders land in scratch and each round overwrites the last. A pick for a drive finding lands in another project with nothing written back, and each standalone pick leaves a folder of its own. Rounds drafted off the synced board need redrawing.
 
 ## Must
 
@@ -29,8 +33,15 @@ The pick lands only once it holds at every width, and the run leaves a record of
 
 - No pick folds into the surface while any of its frames scrolls sideways at the width it was drawn at or at 320, and the hold names that width
 - The pick comes through the structured question surface with the recommendation first and every option's cost, and the winner lands in one change
-- Rounds sit on `.canon/board/`, each openable until the pick
-- The picked arms and the references page are archived at the main root before the run's pages go
+- Rounds sit on `.canon/board/` and every one stays there after the close, with no copy made elsewhere
+
+### Where a pick lives
+
+A pick's frames sit beside what they answer, and one page shows what won.
+
+- A pick started from a drive finding or an intake item draws in that drive's or pass's project and writes the decision back where it came from
+- A pick inside a groundwork track draws in the track's project
+- A standalone pick draws in a `pick-<nn>-<topic>` project filed under `Picks`, reused for the same topic, with its winners on `00-next`
 
 ### The prototype
 
@@ -46,11 +57,12 @@ An app pick is judged by clicking it, and a hand-built prototype grows by reques
 - Draft candidates for a decision the operator has not asked to make, or for a request that already names one answer
 - Write into the real surface before the pick is final, or copy a referenced product's text, accounts, logo, or numbers into an arm
 - Restate the mechanics Frameboard and `canon drive` own, or read a drive finding as a gate over the arms
-- Delete a board page or stop a server the run did not start, or remove a page by any route but a `frameboard` verb
+- Delete a board page that holds a frame, stop a server the run did not start, or remove a page by any route but a `frameboard` verb
 
 ## Out of scope
 
 - Planning the work once the answer is settled, which `plan-feature` owns
+- Trying a built app for what is wrong with it, which `app-drive` owns
 - Finding roughness by reading source, which `ui-audit` owns
 - Measuring what a running interface costs to paint, which `ui-measure` owns
 - Listing what to look at on a change already made, which `ui-checklist` owns

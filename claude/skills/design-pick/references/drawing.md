@@ -18,10 +18,13 @@ Draw every frame at the widths `widths.md` beside this file resolves, one per de
 
 A page is what the operator opens, so its name and its place in the order say what it holds.
 
-| Run          | Pages                                                                                    |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| A pick round | `<slug>` for the first round, then `<slug>-2`, `<slug>-3`, and on, in the run's project  |
-| A drive      | `00-current`, then one `<nn>-<section>` page per topic, then `00-next` once picks settle |
+| Run               | Pages                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| A standalone pick | `00-next` once a pick settles, then `<slug>` per question, with `<slug>-2` and on        |
+| A drive           | `00-current`, then one `<nn>-<section>` page per topic, then `00-next` once picks settle |
+| A track's pick    | The question's `q<n>-<topic>` page, then `q<n>-<topic>-2` and on                         |
+
+Every page stays on the board after the run closes, so a losing round is still there to reopen. A pick on a drive finding draws on that drive's topic page, as `from-finding.md` beside this file states.
 
 A drive numbers and orders its pages by the findings they serve.
 
@@ -29,7 +32,7 @@ A drive numbers and orders its pages by the findings they serve.
 - A second finding on a section adds a row to its page rather than a page of its own
 - Run `frameboard page move <page> --index <n>` after each `page add`, so `00-current` and `00-next` lead and the topic pages follow by number
 
-`00-current` and `00-next` belong to a drive alone. A pick round decides one section and keeps its own page per round, so it draws neither.
+`00-current` belongs to a drive's project alone, since a standalone pick has no shipped page to hold.
 
 ### The empty page a project starts with
 
@@ -50,6 +53,15 @@ A drive draws the shipped surface whole on `00-current` before the first finding
 
 Copy both pages' captures into the drive's `evidence/baseline/` as its whole-page comparison.
 
+## A standalone pick's next page
+
+A standalone pick draws `00-next` once its pick settles, so the operator opens one page and sees what won. The page gains a row per question and is never redrawn whole.
+
+- Copy the winning arm's frames there at each width, named `<slug>-next-<px>` after the question's slug, with no arm label drawn inside
+- Give each frame no device and fit it, as a drive's whole page does
+- Put a question picked again in its old row, replacing the frames there
+- Run `frameboard page move 00-next --index 0` after adding the page, so it leads the project
+
 ## Layout
 
 Down is page order and across is what is compared. Each design on a page is one group, being a pick round's arm, a drive's current set or option, or a reference site, and the groups sit side by side, left to right.
@@ -68,7 +80,7 @@ A group runs its widths as columns and its sections as rows, so one row reads as
 
 The desktop to tablet gap is the laptop body's reach, `20 + round((width + 40) * 0.06)` past the desktop frame, plus 44px for the tablet body, and never under 160px. That is 143px at 1280, which the floor raises to 160, and 182px at 1920. The phone gap stays 80px, since tablet to phone needs 64px.
 
-A page set on `00-current` or `00-next` is one group at x 0.
+A page set on `00-current` or `00-next` is one group at x 0, in a drive and a standalone pick alike.
 
 ### A pick round
 
@@ -88,11 +100,12 @@ A topic page opens with the section as shipped and puts each round of options to
 
 ## Names
 
-A frame's name carries its width in pixels, so a reader finds the phone frame by name on the board and in an archive alike.
+A frame's name carries its width in pixels, so a reader finds the phone frame by name on the board and in a capture alike.
 
 | Frame                     | Name                     |
 | ------------------------- | ------------------------ |
 | A pick round's arm        | `arm-<id>-<px>`          |
+| A pick's winner           | `<slug>-next-<px>`       |
 | A drive's shipped section | `<section>-current-<px>` |
 | A drive's section, picked | `<section>-next-<px>`    |
 | A drive's option          | `<section>-<arm>-<px>`   |
@@ -103,7 +116,7 @@ The parts of a drive's names come from the drive itself.
 - `<arm>` is a short kebab name for what the option does, such as `pill-row`, unique on its page across every round
 - Write the label drawn inside a frame from the frame's name when the frame is written, and rewrite it in the same step as any `frame rename`, since the label is content the rename leaves alone
 
-`design-pick` reads its selection and keys its archive on `arm-<id>-<px>`, so a pick round keeps that form.
+`design-pick` reads its selection on `arm-<id>-<px>`, so a pick round keeps that form on every page but a drive's topic page.
 
 ## Heights
 
