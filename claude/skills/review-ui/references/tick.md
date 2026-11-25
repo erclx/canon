@@ -5,7 +5,7 @@ description: Step 8 of review-ui, which ticks each box that passed through canon
 
 # Tick the passed boxes
 
-Step 8 of `review-ui`. The verdict has posted, so the ticks and the verdict name the same `<head>`.
+Step 8 of `review-ui`. The verdict has posted, so the ticks and the verdict name the same `<head>`, and the verb refuses unless the verdict's marker says so.
 
 Tick every box that took a `pass` verdict at this head, whatever the heading, so a partly passed checklist shows its progress. A re-drive ticks all of them again, including a box whose verdict did not change, since a new head clears the ticks stamped at an older one.
 
@@ -25,7 +25,15 @@ A push that landed while this pass drove carries the ticks to the tip when it ch
 
 A rebase carries the ticks the same way, with `carriedAcross` reading `rebase`, when every path whose branch diff differs at the two commits is one no box observes. A merge of the base carries them under `merge` by the same test, unless the base and the branch both changed a path a box observes.
 
-The verb refuses a taste box and a head the tip moved past in any other way, writing nothing in either case. Branch on the record's `reason`.
+The verb refuses a verdict that does not name `<head>`, a taste box, and a head the tip moved past in any other way, writing nothing in each case.
+
+### When the verdict names another commit
+
+`verdict-behind` means the newest UI verdict carries no marker for `<head>`, or none was posted, and a missing post is the usual cause. Post the verdict for the commit this pass drove, then run the tick again. Never change `--head` to match the verdict that stands.
+
+### Every other refusal
+
+Branch on the record's `reason`.
 
 - `count-mismatch`: nothing was written. With `ticked` below `passed`, re-run once with every passed box. With it above, a box ticked earlier has failed, so report it on `Ticks:` for the operator.
 - `redrive-owed`: a push, a rebase, or a merge since `<head>` changed a path a box can observe. Report `driven`, `head`, and `drivenPaths` on the `Ticks:` line of Step 10, and never retry at the tip.
@@ -37,6 +45,6 @@ A binary whose `canon pr` lacks `tick` predates the verb. Report that on the `Ti
 
 ## What a tick reports
 
-The record's `countCheck` reads `matched` when the verdict's passed count agreed with the ticks, and `unchecked` when the verdict covered neither the tip nor the head a carry came from, or carried no count line. Report an `unchecked` on the `Ticks:` line.
+The record's `countCheck` reads `matched` when the verdict's passed count agreed with the ticks, and `unchecked` when the verdict carried no count line. Report an `unchecked` on the `Ticks:` line.
 
 The same call also writes the one UI pass line in the body's `## Testing`, such as `UI pass, 17 of 17 boxes passed at <sha>, 1 taste box left to the operator`, so the operator sees the result without opening the evidence comment. Never edit that line by hand.
