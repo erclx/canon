@@ -33,10 +33,11 @@ When a caller asks for a file, write it as Full mode does and name the mode, sin
 
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
+   - Evidence: `<command or path>` <what it shows>, or none, <reason>
    - Answer:
 ```
 
-Keep `## Questions` only for a real question, each with its `- Suggested:` line and `- Answer:` slot. Small mode carries no `## Review focus`, since its Risks came out empty. Omit empty sections, and print no `None identified.` in chat.
+Keep `## Questions` only for a real question, each with its `- Suggested:` line, its `- Evidence:` line, and its `- Answer:` slot. Small mode carries no `## Review focus`, since its Risks came out empty. Omit empty sections, and print no `None identified.` in chat.
 
 ### Full mode
 
