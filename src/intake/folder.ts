@@ -268,10 +268,9 @@ export async function readFolder(
 }
 
 /**
- * Lands a batch of selections in one cluster file, in one read-modify-write, since a
- * call per selection races on the read and drops every answer but the last. A
- * `decided` label that reaches no decision refuses the whole call, as does a filled
- * slot, a pending pick aside.
+ * Lands a batch in one cluster file in one read-modify-write, since a call per
+ * selection races on the read. A `decided` label reaching no decision refuses the
+ * whole call, as does a filled slot, a pending pick aside.
  */
 export async function answerItems(
   root: string,
