@@ -901,10 +901,8 @@ const readEvidence = async (
 
 /**
  * Branches on `reason`, since the verb exits 1 on a refusal it still prints.
- * `already-ready` alone is a ready pull request every gate clears at the head,
- * but the lift gates CI on the required set, so a `running` name holds it at
- * `not` until every check settles. A failed read is unread rather than not
- * ready, so it reprints nothing.
+ * The lift gates CI on the required set, so `already-ready` reads `not` while it
+ * names a check `running`. A failed read is unread, so it reprints nothing.
  */
 export const readinessFromLift = (
   record: unknown,
