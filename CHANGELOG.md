@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.123.0](https://github.com/erclx/canon/compare/v5.122.0...v5.123.0) (2026-11-25)
+
+
+### Features
+
+* **docs:** read context entries one folder deeper ([#3528](https://github.com/erclx/canon/issues/3528)) ([a8d0079](https://github.com/erclx/canon/commit/a8d00799950c2be9d19a094d3b029986f4680505))
+* **examples:** add Tidewell record examples held by a gate stage ([#3526](https://github.com/erclx/canon/issues/3526)) ([96cf84f](https://github.com/erclx/canon/commit/96cf84f2390981763d4609ae6eb2eeffc7bee15c))
+* **readme:** rework the opening and gate every section on the landing ([#3530](https://github.com/erclx/canon/issues/3530)) ([bcbe860](https://github.com/erclx/canon/commit/bcbe860c56b1a2ae12be4f82cea5c5b460c541da))
+
 ## [5.122.0](https://github.com/erclx/canon/compare/v5.121.0...v5.122.0) (2026-11-24)
 
 
