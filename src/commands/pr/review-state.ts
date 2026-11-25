@@ -65,7 +65,7 @@ export function registerReviewState(pr: Command): void {
     )
     .option(
       '--wait-standing <seconds>',
-      'Hold until the base moves a path the branch writes, the two conflict, or the pull request closes',
+      'Hold until the base moves a path the branch writes or a standard its examples stamp, the two conflict, or the pull request closes',
     )
     .addHelpText(
       'after',
