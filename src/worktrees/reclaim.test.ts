@@ -1,5 +1,6 @@
 import { execaSync } from 'execa'
 import {
+  mkdirSync,
   mkdtempSync,
   realpathSync,
   rmSync,
@@ -13,6 +14,7 @@ import { gitEnv } from '@/git/env'
 import {
   repositoryOf,
   type ResolvedSession,
+  resolveSessions,
   type SessionReport,
 } from '@/sessions/resolve'
 import {
@@ -457,7 +459,9 @@ describe('reclaimReport', () => {
   })
 
   describe('when foreign records are listed', () => {
-    function stranded(cwd: string): SessionReport {
+    function stranded(
+      cwd: string,
+    ): Extract<SessionReport, { kind: 'resolved' }> {
       return {
         kind: 'resolved',
         dir: '/registry',
@@ -595,6 +599,116 @@ describe('reclaimReport', () => {
       expect(report.kind === 'unreadable' && report.detail).toContain(
         join(ROOT, 'wt-parser'),
       )
+    })
+
+    it('should count the merged worktrees held back and leave out one it would refuse anyway', async () => {
+      linked('wt-parser', 'feat/parser')
+      linked('wt-verdicts', 'docs/verdicts')
+      linked('wt-open', 'feat/open')
+      writeFileSync(join(linked('wt-dirty', 'feat/dirty'), 'work.txt'), 'work')
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(ROOT),
+        mergedPullRequests: async () =>
+          merged(['feat/parser', 1], ['docs/verdicts', 2], ['feat/dirty', 3]),
+      })
+
+      expect(report.kind === 'unreadable' && report.detail).toContain(
+        '2 merged worktrees are held back',
+      )
+    })
+
+    it('should word a single merged worktree held back as one', async () => {
+      linked('wt-parser', 'feat/parser')
+
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => stranded(ROOT),
+        mergedPullRequests: async () => merged(['feat/parser', 1]),
+      })
+
+      expect(report.kind === 'unreadable' && report.detail).toContain(
+        '1 merged worktree is held back',
+      )
+    })
+
+    it('should state no held count when the worktree listing is empty', async () => {
+      const report = await reclaimReport({
+        cwd: ROOT,
+        listWorktrees: async () => [],
+        resolve: async () => stranded(ROOT),
+        mergedPullRequests: async () => merged(['feat/parser', 1]),
+      })
+
+      expect(report.kind === 'unreadable' && report.detail).not.toContain(
+        'held back',
+      )
+    })
+
+    it('should say how many records from before the boot were set aside', async () => {
+      const report = await reclaimReport({
+        cwd: ROOT,
+        resolve: async () => ({
+          ...stranded(ROOT),
+          foreignPreBoot: stranded(ROOT).foreign,
+        }),
+        mergedPullRequests: async () => merged(),
+      })
+
+      expect(report.kind === 'unreadable' && report.detail).toContain(
+        '1 further record was set aside',
+      )
+    })
+  })
+
+  describe('when a foreign record sits inside a worktree', () => {
+    const BOOT = 1_795_410_604_000
+
+    async function reading(startedAt: number): Promise<ReclaimReport> {
+      const path = linked('wt-parser', 'feat/parser')
+      const dir = join(ROOT, 'registry')
+      mkdirSync(dir)
+      writeFileSync(
+        join(dir, '9.json'),
+        JSON.stringify({
+          pid: 9,
+          cwd: path,
+          name: 'canon-9',
+          startedAt,
+          pidDomain: 'linux:abc:pid:[4026532999]',
+        }),
+      )
+
+      return reclaimReport({
+        cwd: ROOT,
+        resolve: () =>
+          resolveSessions({
+            dir,
+            probes: {
+              procStartOf: () => null,
+              responds: () => false,
+              ownDomain: () => 'pid:[4026532221]',
+            },
+            bootTime: () => BOOT,
+          }),
+        mergedPullRequests: async () => merged(['feat/parser', 673]),
+      })
+    }
+
+    it('should refuse on a record started one second after boot', async () => {
+      const report = await reading(BOOT + 1_000)
+
+      expect(report).toMatchObject({
+        kind: 'unreadable',
+        reason: 'sessions-unchecked',
+      })
+    })
+
+    it('should reclaim past a record started before boot', async () => {
+      const report = await reading(BOOT - 1_000)
+
+      expect(verdictFor(report, join(ROOT, 'wt-parser')).reclaimable).toBe(true)
     })
   })
 

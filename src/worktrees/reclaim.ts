@@ -45,10 +45,7 @@ export type Refusal =
 
 /** Why the whole reading was refused, so no verdict was produced at all. */
 export type Unreadable =
-  | 'gh-missing'
-  | 'gh-failed'
-  | 'sessions-unreadable'
-  | 'sessions-unchecked'
+  'gh-missing' | 'gh-failed' | 'sessions-unreadable' | 'sessions-unchecked'
 
 /**
  * Which removal shape applies. `session` removes the background session and its
@@ -362,6 +359,20 @@ function blockingForeign(
 }
 
 function uncheckedDetail(
+  sessions: Extract<SessionReport, { kind: 'resolved' }>,
+  blocking: readonly ForeignRecord[],
+  worktrees: readonly WorktreeVerdict[],
+): string {
+  return [
+    uncheckedRecords(sessions.foreignDead, blocking),
+    heldBack(worktrees),
+    setAside(sessions.foreignPreBoot?.length ?? 0),
+  ]
+    .filter((sentence) => sentence !== null)
+    .join(' ')
+}
+
+function uncheckedRecords(
   count: number,
   blocking: readonly ForeignRecord[],
 ): string {
@@ -372,6 +383,22 @@ function uncheckedDetail(
     .map((record) => `${record.path} (working folder ${record.cwd})`)
     .join('; ')
   return `${blocking.length} session records from another pid namespace have no answering socket and a working folder inside this repository, so nothing was read about whether they still hold a worktree: ${named}.`
+}
+
+/** Null on an empty listing, which is a failed read rather than nothing held. */
+function heldBack(worktrees: readonly WorktreeVerdict[]): string | null {
+  if (worktrees.length === 0) return null
+  const held = worktrees.filter((entry) => entry.reclaimable).length
+  return held === 1
+    ? '1 merged worktree is held back by this refusal.'
+    : `${held} merged worktrees are held back by this refusal.`
+}
+
+function setAside(count: number): string | null {
+  if (count === 0) return null
+  return count === 1
+    ? '1 further record was set aside as ended, since it started before the last boot.'
+    : `${count} further records were set aside as ended, since they started before the last boot.`
 }
 
 /**
@@ -416,16 +443,6 @@ export async function reclaimReport(
     }
   }
 
-  // A foreign record whose socket is gone may be a live holder this reader cannot see, so refuse.
-  const blocking = blockingForeign(sessions, entries)
-  if (blocking !== null) {
-    return {
-      kind: 'unreadable',
-      reason: 'sessions-unchecked',
-      detail: uncheckedDetail(sessions.foreignDead, blocking),
-    }
-  }
-
   const byBranch = new Map(
     merged.merged.map((request) => [request.branch, request.number]),
   )
@@ -446,6 +463,16 @@ export async function reclaimReport(
       agentIds,
     ),
   )
+
+  // A foreign record whose socket is gone may be a live holder this reader cannot see, so refuse.
+  const blocking = blockingForeign(sessions, entries)
+  if (blocking !== null) {
+    return {
+      kind: 'unreadable',
+      reason: 'sessions-unchecked',
+      detail: uncheckedDetail(sessions, blocking, worktrees),
+    }
+  }
 
   // An empty listing is a failed read, since every repository lists its main worktree.
   const branches: BranchReport =
