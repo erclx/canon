@@ -300,6 +300,48 @@ describe('inject with dispositions', () => {
   })
 })
 
+describe('inject over recorded files no stack ships', () => {
+  it('should leave the config, the script file, and the package.json script in place', async () => {
+    captureStderr()
+    const workflow = '.github/workflows/retired.yml'
+    const script = 'scripts/retired.sh'
+    const pkg =
+      '{"name":"mine","scripts":{"retired":"bash scripts/retired.sh"}}\n'
+    mkdirSync(join(target, '.github', 'workflows'), { recursive: true })
+    mkdirSync(join(target, 'scripts'))
+    writeFileSync(join(target, workflow), 'name: Retired\n')
+    writeFileSync(join(target, script), 'echo retired\n')
+    writeFileSync(join(target, 'package.json'), pkg)
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: {
+          tooling: {
+            syncedAt: 'then',
+            files: { [workflow]: 'sha256:a', [script]: 'sha256:b' },
+            chain: ['base'],
+            dispositions: {},
+          },
+        },
+      }),
+    )
+    const chain = resolveChain(PROJECT_ROOT, 'base')
+
+    await injectConfigs(chain, target)
+    await injectSeeds(chain, target)
+    await injectManifest([scriptsOnly({ lint: 'oxlint' })], target)
+
+    expect(readFileSync(join(target, workflow), 'utf8')).toBe('name: Retired\n')
+    expect(readFileSync(join(target, script), 'utf8')).toBe('echo retired\n')
+    expect(readManifest().scripts).toEqual({
+      retired: 'bash scripts/retired.sh',
+      lint: 'oxlint',
+    })
+  })
+})
+
 describe('injectSeeds with a config at the same path', () => {
   it('should leave the path to the config the chain ships', async () => {
     captureStderr()
