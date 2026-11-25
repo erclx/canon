@@ -485,6 +485,10 @@ function reportWaves(outcome: WavesOutcome, emitJson: boolean): number {
       const after =
         row.after.length > 0 ? `, after ${row.after.join(', ')}` : ''
       logInfo(`${row.stem} (${row.plan}${after})`)
+      if (row.parse.length < 2) continue
+      for (const read of row.parse) {
+        logInfo(`  ${read.blocks ? 'blocks' : 'beside'}: "${read.clause}"`)
+      }
     }
   }
 

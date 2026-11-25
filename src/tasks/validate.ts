@@ -1329,36 +1329,64 @@ export function isOperatorHeld(cell: string): boolean {
   return OPERATOR_HELD.test(cell)
 }
 
-/** A verb saying the row sits beside a task, never behind it. */
+/** A verb saying the row sits beside a task, never behind it. A bare `with` is one, since a blocker never opens on it. */
 const BESIDE_VERB = new RegExp(
-  `${RANK_VERB.source}|\\bshares\\b|\\brebases\\b|\\blaunches\\s+with\\b`,
+  `${RANK_VERB.source}|\\branked\\s+(?:above|below)\\b|\\bshares\\b|\\brebases\\b|\\bwith\\b`,
   'i',
 )
 
+/** A word that keeps a clause a blocker where the clause before it only placed the row. */
+const BLOCKER_WORD = /\b(?:after|behind|waits\s+on|blocked\s+by)\b|\bmerging\b/i
+
+/** One clause of a `Waiting on` cell as read, and the tasks it blocks on. */
+export interface BlockerClause {
+  readonly clause: string
+  readonly stems: readonly string[]
+}
+
 /**
- * The tasks a `Waiting on` cell cites as blockers. Each clause is read up to
- * a ranking, sharing, or launches-with verb, since those place a row and never
- * gate it. Links are held aside so a filename's dot is no clause break.
+ * Reads each clause of a `Waiting on` cell up to a placing verb, which never
+ * gates. A clause on `and` after a placing one stays placing unless it carries
+ * a blocker word. Links are masked so a filename's dot is no break.
  */
-export async function readBlockerStems(
+export async function readBlockerClauses(
   cell: string,
   root: string,
-): Promise<string[]> {
+): Promise<BlockerClause[]> {
   const links: string[] = []
   const masked = cell.replace(/\[[^\]]*\]\([^)]*\)/g, (link) => {
     links.push(link)
     return `\uE000${links.length - 1}\uE001`
   })
-  const blockers = masked
-    .split(BLOCKER_BREAK)
-    .map((clause) => {
-      const at = clause.search(BESIDE_VERB)
-      return at < 0 ? clause : clause.slice(0, at)
-    })
-    .join(', ')
-    .replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
+  const restore = (text: string) =>
+    text.replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)])
 
-  return readCitedStems(blockers, root)
+  let placing: boolean = false
+  const clauses: BlockerClause[] = []
+  for (const raw of masked.split(BLOCKER_BREAK)) {
+    const clause = raw.trim()
+    if (!clause) continue
+
+    const inherits: boolean =
+      placing && /^and\b/i.test(clause) && !BLOCKER_WORD.test(clause)
+    const at = clause.search(BESIDE_VERB)
+    placing = at >= 0 || inherits
+
+    const kept = inherits ? '' : at < 0 ? clause : clause.slice(0, at)
+    const stems = kept ? await readCitedStems(restore(kept), root) : []
+    clauses.push({ clause: restore(clause), stems })
+  }
+
+  return clauses
+}
+
+/** The tasks a `Waiting on` cell cites as blockers, across the clauses `readBlockerClauses` reads. */
+export async function readBlockerStems(
+  cell: string,
+  root: string,
+): Promise<string[]> {
+  const clauses = await readBlockerClauses(cell, root)
+  return [...new Set(clauses.flatMap((read) => read.stems))]
 }
 
 /** What one blocker citation produced, since a row can be neither settled nor open. */

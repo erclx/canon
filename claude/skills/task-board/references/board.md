@@ -129,6 +129,8 @@ The `Waiting on` column under `## Up next` carries the reason in one of three fo
 | Sibling task       | That task                                                                     |
 | External condition | The condition and what would satisfy it                                       |
 
+`canon tasks waves` reads a cited task as a blocker unless a ranking, sharing, or `with` verb precedes it in its clause, and prints each clause's reading. A clause after `and` stays beside the task unless it carries `after`, `behind`, `waits on`, `blocked by`, or `merging`. The plans hold a shared file, not the cell.
+
 Naming what would satisfy a condition separates a blocked row from one nobody examined, so a condition with no way out fails the test. The header text is the contract, since a reader resolves the column by header rather than position. A cell renders at most 120 characters, a link counting as its label alone, and the verbs refuse a longer one.
 
 ### The needs-a-plan cell

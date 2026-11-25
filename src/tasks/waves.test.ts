@@ -161,6 +161,71 @@ describe('planWaves', () => {
     expect(third?.after).toEqual(['v1.2-second'])
   })
 
+  it('records each clause of a cell with whether it blocks, for the parse', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting: 'shares a.ts with v1.1, and after v1.2 merging',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    const third = report.waves
+      .flatMap((wave) => wave.rows)
+      .find((row) => row.stem === 'v1.3-third')
+    expect(third?.parse).toEqual([
+      { clause: 'shares a.ts with v1.1', blocks: false },
+      { clause: 'and after v1.2 merging', blocks: true },
+    ])
+    expect(third?.after).toEqual(['v1.2-second'])
+  })
+
+  it('places a row beside the tasks a joined share and a ranked-above cell name', async () => {
+    await board([
+      {
+        stem: 'v1.3-third',
+        paths: ['src/a.ts'],
+        waiting: 'shares a.ts with v1.1 and v1.2, and cli.md with v1.4',
+      },
+      {
+        stem: 'v1.4-fourth',
+        paths: ['src/d.ts'],
+        waiting: 'product, plan ready; ranked above v1.1',
+      },
+      { stem: 'v1.2-second', paths: ['src/b.ts'] },
+      { stem: 'v1.1-first', paths: ['src/c.ts'] },
+    ])
+
+    const report = await read()
+    const afters = report.waves
+      .flatMap((wave) => wave.rows)
+      .map((row) => [row.stem, row.after])
+    expect(afters).toEqual(
+      expect.arrayContaining([
+        ['v1.3-third', []],
+        ['v1.4-fourth', []],
+      ]),
+    )
+  })
+
+  it('keeps a row held for the operator out of every wave', async () => {
+    await board([
+      {
+        stem: 'v1.2-second',
+        paths: ['src/a.ts'],
+        waiting: 'product; launch on the operator’s word, after v1.1',
+      },
+      { stem: 'v1.1-first', paths: ['src/b.ts'] },
+    ])
+
+    const report = await read()
+    expect(report.held).toEqual(['v1.2-second'])
+    expect(stems(report)).toEqual([['v1.1-first']])
+  })
+
   it('leaves a task its cell only shares a file with out of after', async () => {
     await board([
       {

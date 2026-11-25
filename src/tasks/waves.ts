@@ -9,7 +9,7 @@ import {
   isOperatorHeld,
   orderingPath,
   readBoard,
-  readBlockerStems,
+  readBlockerClauses,
 } from '@/tasks/validate'
 
 const UP_NEXT = 'Up next'
@@ -32,6 +32,13 @@ export interface WaveRow {
   readonly plan: string
   /** Live tasks the row's `Waiting on` cell cites, so a row held by a sentence reads empty. */
   readonly after: readonly string[]
+  /** Each clause of the `Waiting on` cell as read, and whether it blocks the row, so a misread shows. */
+  readonly parse: readonly WaveParse[]
+}
+
+export interface WaveParse {
+  readonly clause: string
+  readonly blocks: boolean
 }
 
 export interface Wave {
@@ -208,17 +215,23 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
   const queuedStems = new Set(queued.map((holder) => holder.stem))
 
   const after = new Map<string, string[]>()
+  const parses = new Map<string, WaveParse[]>()
+  const live = (holder: Holder, stem: string) =>
+    stem !== holder.stem &&
+    (queuedStems.has(stem) ||
+      running.some((run) => run.stem === stem) ||
+      existsSync(join(tasksDir(root), `${stem}.md`)))
+
   for (const holder of planned) {
-    const cited = await readBlockerStems(holder.waiting, root)
-    after.set(
+    const clauses = await readBlockerClauses(holder.waiting, root)
+    const read = clauses.map(({ clause, stems }) => ({
+      clause,
+      stems: stems.filter((stem) => live(holder, stem)),
+    }))
+    after.set(holder.stem, [...new Set(read.flatMap((entry) => entry.stems))])
+    parses.set(
       holder.stem,
-      cited.filter(
-        (stem) =>
-          stem !== holder.stem &&
-          (queuedStems.has(stem) ||
-            running.some((run) => run.stem === stem) ||
-            existsSync(join(tasksDir(root), `${stem}.md`))),
-      ),
+      read.map(({ clause, stems }) => ({ clause, blocks: stems.length > 0 })),
     )
   }
 
@@ -280,6 +293,7 @@ export async function planWaves(root: string): Promise<WavesOutcome> {
       stem: holder.stem,
       plan: holder.plan as string,
       after: after.get(holder.stem) ?? [],
+      parse: parses.get(holder.stem) ?? [],
     }
     grouped.set(wave, [...(grouped.get(wave) ?? []), row])
   }
