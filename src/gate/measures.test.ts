@@ -1475,6 +1475,17 @@ describe('documentCeiling', () => {
       expect(report.emissions).toEqual([])
     })
 
+    it('holds a docs folder under a subfolder gate root to the ceiling, as the repository root reads it', async () => {
+      write('pkg/docs/a.md', 250)
+
+      const report = await documentCeiling({
+        ...context(),
+        root: join(root, 'pkg'),
+      })
+
+      expect(report.failure).toBeUndefined()
+    })
+
     it('passes a tree whose only long document is exempt, counting it', async () => {
       write(
         'scripts/record.md',

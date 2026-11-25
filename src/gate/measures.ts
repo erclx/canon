@@ -23,6 +23,7 @@ import { CONFIG_DIR_REL, checkConfigFolder } from '@/config/check'
 import { readDeviceConfig } from '@/design/device-classes'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { listRepositoryFiles } from '@/git/files'
+import { currentWorktreeRoot } from '@/git/worktree'
 import { ceilingFindings, isChangelog } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
 import { CHECKPOINTS } from '@/markdown/structure'
@@ -535,9 +536,14 @@ export const documentCeiling: Measure = async (ctx) => {
     }
   }
 
+  // Named from the repository root, so a gate run from a subfolder reads the docs cap as the audit does.
+  const checkout = await currentWorktreeRoot(ctx.root)
   const documents = scope.files.flatMap((rel) => {
+    const path = join(ctx.root, rel)
     try {
-      return [{ rel, source: readFileSync(join(ctx.root, rel), 'utf8') }]
+      return [
+        { rel: relative(checkout, path), source: readFileSync(path, 'utf8') },
+      ]
     } catch {
       return []
     }
