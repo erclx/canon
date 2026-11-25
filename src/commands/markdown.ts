@@ -69,6 +69,7 @@ import {
   pipeOutput,
   plural,
 } from '@/cli/ui'
+import { currentWorktreeRoot } from '@/git/worktree'
 import { isOwnCheckout } from '@/roots/project'
 
 /** A config the audit cannot read refuses rather than gating nothing. */
@@ -102,6 +103,8 @@ interface FileReport {
   readonly referenceShape: readonly GatedReferenceShapeFinding[]
   readonly structure: StructureReport
   readonly renderedLines: number
+  /** Read off the path from the document's own repository root, as the gate reads it. */
+  readonly ceiling: number
   /** The stated reason, or null where the document is not exempt. */
   readonly exempt: string | null
 }
@@ -370,9 +373,17 @@ async function runAudit(
   const empty = emptyBanSets(bans)
   const checkpoints = CHECKPOINTS
 
+  const checkouts = new Map<string, Promise<string>>()
+  const checkoutOf = (dir: string): Promise<string> => {
+    const known = checkouts.get(dir) ?? currentWorktreeRoot(dir)
+    checkouts.set(dir, known)
+    return known
+  }
+
   const reports: FileReport[] = await Promise.all(
     scope.files.map(async (rel) => {
       const abs = resolve(root, rel)
+      const checkout = await checkoutOf(dirname(abs))
       const source = await readFile(abs, 'utf8')
       const lines = bodyLines(source)
       // The release tool writes a changelog, so neither advisory reads it.
@@ -401,6 +412,7 @@ async function runAudit(
         ),
         structure: measureStructure(rel, lines, checkpoints),
         renderedLines: documentHeight(source, checkpoints.renderWidth),
+        ceiling: ceilingFor(relative(checkout, abs)),
         exempt: lengthExemption(rel, source),
       }
     }),
@@ -1153,9 +1165,7 @@ function reportLength(
   )
 
   const caps = `the ${checkpoints.ceiling}-line ceiling or the ${checkpoints.docsCeiling}-line docs/ cap`
-  const past = reports.filter(
-    (report) => report.renderedLines > ceilingFor(report.rel),
-  )
+  const past = reports.filter((report) => report.renderedLines > report.ceiling)
   const over = past
     .filter((report) => report.exempt === null)
     .sort((a, b) => b.renderedLines - a.renderedLines)
@@ -1169,7 +1179,7 @@ function reportLength(
       over
         .map(
           (report) =>
-            `${report.rel}  ${report.renderedLines} rendered lines past ${ceilingFor(report.rel)}`,
+            `${report.rel}  ${report.renderedLines} rendered lines past ${report.ceiling}`,
         )
         .join('\n'),
     )
