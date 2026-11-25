@@ -12,6 +12,7 @@ import { $ } from 'bun'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
+import { machineId } from '@/sessions/boot'
 import { encodeProjectPath } from '@/sessions/transcript'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
@@ -162,7 +163,12 @@ describe('canon sessions list from another pid namespace', () => {
   const FOREIGN_DOMAIN = 'linux:test:pid:[1]'
   const readable = existsSync('/proc/self/ns/pid')
 
-  function seed(socket: string, socketPresent: boolean, cwd = REPO): void {
+  function seed(
+    socket: string,
+    socketPresent: boolean,
+    cwd = REPO,
+    fields: Record<string, unknown> = {},
+  ): void {
     const registry = join(CONFIG, 'sessions')
     mkdirSync(registry, { recursive: true })
     if (socketPresent) writeFileSync(socket, '')
@@ -179,6 +185,7 @@ describe('canon sessions list from another pid namespace', () => {
         procStart: '1',
         pidDomain: FOREIGN_DOMAIN,
         messagingSocketPath: socket,
+        ...fields,
       }),
     )
   }
@@ -192,6 +199,22 @@ describe('canon sessions list from another pid namespace', () => {
 
       expect(JSON.parse(result.stdout)).toMatchObject({
         foreignDead: 1,
+        sessions: [],
+      })
+    },
+  )
+
+  it.skipIf(!readable || machineId() === undefined)(
+    'should leave a foreign record from before the boot out of the count',
+    async () => {
+      seed(join(DIR, 'gone.sock'), false, REPO, {
+        pidDomain: `linux:${machineId()}:pid:[1]`,
+      })
+
+      const result = await runSessions(['list', '--json'])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        foreignDead: 0,
         sessions: [],
       })
     },

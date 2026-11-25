@@ -1,6 +1,7 @@
 import { basename, join } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
+import { lastBoot, machineId } from '@/sessions/boot'
 import {
   type Confidence,
   liveness,
@@ -82,9 +83,9 @@ export type SessionReport =
        */
       readonly confidence: Confidence
       /**
-       * Foreign-namespace records whose socket is gone. They read dead, but their
-       * pid could not be checked, so an empty roster beside a count above zero
-       * is a roster that could not be checked rather than one that ended.
+       * Foreign records with no socket, less those in `foreignPreBoot`. Their pid
+       * could not be checked, so an empty roster beside a count above zero is a
+       * roster that could not be checked rather than one that ended.
        */
       readonly foreignDead: number
       /**
@@ -92,6 +93,12 @@ export type SessionReport =
        * still types, and a caller reads its absence as every record unplaced.
        */
       readonly foreign?: readonly ForeignRecord[]
+      /**
+       * Foreign records from this machine whose every stamp predates its boot,
+       * ended since no process outlives a reboot. Optional as `foreign` is, and
+       * a caller reads its absence as none set aside.
+       */
+      readonly foreignPreBoot?: readonly ForeignRecord[]
       readonly sessions: readonly ResolvedSession[]
     }
 
@@ -117,6 +124,10 @@ export interface ResolveOptions {
   readonly locate?: (cwd: string) => Promise<Located>
   /** The instant the dwell is computed against. Defaults to `Date.now`. */
   readonly now?: () => number
+  /** Undefined keeps every foreign record counted. Defaults to `lastBoot`. */
+  readonly bootTime?: () => number | undefined
+  /** Undefined keeps every foreign record counted. Defaults to `machineId`. */
+  readonly machineId?: () => string | undefined
 }
 
 export interface Located {
@@ -249,12 +260,12 @@ export async function resolveSessions(
     via: ResolvedSession['via']
     confidence: Confidence
   }[] = []
-  const foreign: ForeignRecord[] = []
+  const unanswered: SessionRecord[] = []
 
   for (const record of registry.records) {
     const state = liveness(record, probes)
     if (!state.alive) {
-      if (state.foreign) foreign.push(foreignOf(record, registry.dir))
+      if (state.foreign) unanswered.push(record)
       continue
     }
     live.push({
@@ -288,14 +299,47 @@ export async function resolveSessions(
     ),
   )
 
+  const boot = (opts.bootTime ?? lastBoot)()
+  const machine = (opts.machineId ?? machineId)()
+  const foreign: ForeignRecord[] = []
+  const foreignPreBoot: ForeignRecord[] = []
+  for (const record of unanswered) {
+    const list = predates(record, boot, machine) ? foreignPreBoot : foreign
+    list.push(foreignOf(record, registry.dir))
+  }
+
   return {
     kind: 'resolved',
     dir: registry.dir,
     confidence: confidenceOf(sessions),
     foreignDead: foreign.length,
     foreign,
+    foreignPreBoot,
     sessions,
   }
+}
+
+/**
+ * Another kernel's boot says nothing about this record, so it must carry this
+ * machine's identifier. A stamp at or after the boot is a write by a live
+ * session, so it disproves a boot time that a clock step moved.
+ */
+function predates(
+  record: SessionRecord,
+  boot: number | undefined,
+  machine: string | undefined,
+): boolean {
+  if (boot === undefined || machine === undefined) return false
+  if (!record.pidDomain?.startsWith(`linux:${machine}:`)) return false
+  if (!isStamp(record.startedAt)) return false
+  return [record.startedAt, record.updatedAt, record.statusUpdatedAt]
+    .filter(isStamp)
+    .every((stamp) => stamp < boot)
+}
+
+/** The registry checks no type on a stamp, and a null or zero compares as 1970. */
+function isStamp(value: unknown): value is number {
+  return typeof value === 'number' && value > 0
 }
 
 function foreignOf(record: SessionRecord, dir: string): ForeignRecord {

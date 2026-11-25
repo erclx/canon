@@ -346,6 +346,7 @@ describe('resolveSessions from another pid namespace', () => {
       dir: DIR,
       probes: reader(false),
       locate: locating('feat/parser'),
+      bootTime: () => undefined,
     })
 
     expect(report).toMatchObject({
@@ -362,6 +363,7 @@ describe('resolveSessions from another pid namespace', () => {
       dir: DIR,
       probes: reader(false),
       locate: locating('feat/parser'),
+      bootTime: () => undefined,
     })
 
     expect(report.kind === 'resolved' && report.foreign).toEqual([
@@ -375,6 +377,120 @@ describe('resolveSessions from another pid namespace', () => {
     ])
   })
 
+  it('should set a foreign row started before the boot aside as ended', async () => {
+    seed(100, { ...FOREIGN, startedAt: 59_999 })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(false),
+      locate: locating('feat/parser'),
+      bootTime: () => 60_000,
+      machineId: () => 'abc',
+    })
+
+    expect(report).toMatchObject({
+      foreignDead: 0,
+      foreign: [],
+      foreignPreBoot: [{ pid: 100, startedAt: new Date(59_999).toISOString() }],
+    })
+  })
+
+  it.each([
+    ['one second after boot', 61_000],
+    ['exactly at boot', 60_000],
+    ['without a start time, whatever the boot', undefined],
+    ['with a null start time, whatever the boot', null],
+    ['with a zero start time, whatever the boot', 0],
+  ])('should keep counting a foreign row started %s', async (_, startedAt) => {
+    seed(100, { ...FOREIGN, startedAt })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(false),
+      locate: locating('feat/parser'),
+      bootTime: () => 60_000,
+      machineId: () => 'abc',
+    })
+
+    expect(report).toMatchObject({
+      foreignDead: 1,
+      foreign: [{ pid: 100 }],
+      foreignPreBoot: [],
+    })
+  })
+
+  it.each([
+    ['updatedAt', { updatedAt: 60_000 }],
+    ['statusUpdatedAt', { statusUpdatedAt: 60_000 }],
+  ])(
+    'should keep counting a foreign row whose %s reaches the boot',
+    async (_, stamps) => {
+      seed(100, { ...FOREIGN, startedAt: 59_999, ...stamps })
+
+      const report = await resolveSessions({
+        dir: DIR,
+        probes: reader(false),
+        locate: locating('feat/parser'),
+        bootTime: () => 60_000,
+        machineId: () => 'abc',
+      })
+
+      expect(report).toMatchObject({ foreignDead: 1, foreignPreBoot: [] })
+    },
+  )
+
+  it.each([
+    ['another machine', 'linux:other:pid:[4026532999]', 'abc'],
+    ['a platform that stamps no machine', 'linux', 'abc'],
+    ['a machine this reader cannot name', FOREIGN.pidDomain, undefined],
+  ])(
+    'should keep counting a pre-boot foreign row from %s',
+    async (_, pidDomain, machine) => {
+      seed(100, { ...FOREIGN, pidDomain, startedAt: 59_999 })
+
+      const report = await resolveSessions({
+        dir: DIR,
+        probes: reader(false),
+        locate: locating('feat/parser'),
+        bootTime: () => 60_000,
+        machineId: () => machine,
+      })
+
+      expect(report).toMatchObject({ foreignDead: 1, foreignPreBoot: [] })
+    },
+  )
+
+  it('should keep counting a foreign row where the boot time is unreadable', async () => {
+    seed(100, { ...FOREIGN, startedAt: 59_999 })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(false),
+      locate: locating('feat/parser'),
+      bootTime: () => undefined,
+      machineId: () => 'abc',
+    })
+
+    expect(report).toMatchObject({ foreignDead: 1, foreignPreBoot: [] })
+  })
+
+  it('should keep a foreign row whose socket exists whatever the boot time', async () => {
+    seed(100, { ...FOREIGN, startedAt: 59_999 })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(true),
+      locate: locating('feat/parser'),
+      bootTime: () => 60_000,
+      machineId: () => 'abc',
+    })
+
+    expect(report).toMatchObject({
+      sessions: [{ pid: 100, via: 'socket' }],
+      foreignPreBoot: [],
+    })
+  })
+
   it('should leave a same-namespace dead row out of the foreign list', async () => {
     seed(100, { ...FOREIGN, pidDomain: 'linux:abc:pid:[4026532221]' })
 
@@ -382,6 +498,7 @@ describe('resolveSessions from another pid namespace', () => {
       dir: DIR,
       probes: { ...reader(true), procStartOf: () => 'other' },
       locate: locating('feat/parser'),
+      bootTime: () => undefined,
     })
 
     expect(report.kind === 'resolved' && report.foreign).toEqual([])
@@ -394,6 +511,7 @@ describe('resolveSessions from another pid namespace', () => {
       dir: DIR,
       probes: { ...reader(true), procStartOf: () => 'other' },
       locate: locating('feat/parser'),
+      bootTime: () => undefined,
     })
 
     expect(report).toMatchObject({
