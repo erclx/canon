@@ -21,6 +21,7 @@ A `--wait` run ends on a line that routes to an act and holds every other line f
 
 A held line routes by its own rule in the block, a wake later than the pass that posted it.
 
+- A held line waits at most the 1200 second cap by choice, since the worker's message reaches the reviewer and the controller reaches the rest, and `held.txt` keeps it until printed
 - An `OPENED` with no live reviewer waits for the next exit, at most the wait cap, since the script reads no roster. The worker's announcement already starts the reviewer.
 - A `MOVED` waits the same way, since the re-review request comes from the worker's message
 
