@@ -122,6 +122,8 @@ A planned rewrite can reach a line that names an old spelling on purpose, such a
 
 The record tree is untracked, so a `record-tree` rewrite has no undo. Run `canon records push --json` before its write. When that reports no backup repository, copy `.canon/` to a dated folder outside the project and name the path in the report. On `busy`, another push holds the lock, so run it once more and take the copy if it refuses again.
 
+Take the copy too when the record's `skipped` list is not empty, since the push left those files out.
+
 ## Step 5: sync
 
 Run `canon sync .`, then `canon tooling sync <stack> . --write` when the tooling diff named files to change. The write holds every config the preview listed under tooling holds.
