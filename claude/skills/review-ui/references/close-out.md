@@ -44,7 +44,7 @@ gh api -X PUT repos/{owner}/{repo}/pulls/<number>/reviews/<review-id> -F body=@<
 The body ends on `<!-- review-ui: head=<head> -->` at the full head this pass drove, with no line below it. `PUT` leaves the review's `commit.oid` pinned at the head the close was first posted against, so `resolveUiScope`, the lift gate, and the orchestrator poll read the marker in its place.
 
 - A body missing it reads as the pinned stamp, so the lift refuses `ui-behind` and the poll reports the close as behind
-- That refusal holds unless a push or a rebase changing no path a box observes carries the stamp to the head
+- That refusal holds unless a push, a rebase, or a merge of the base changing no path a box observes carries the stamp to the head
 - `PUT` keeps the comment's timestamp and place, so the poll's age test reads a rewritten close as old, the reading the code review accepts
 - A submitted review cannot be deleted, which is why this rewrites the standing close rather than posting a fresh one
 - The standing verdict's frames sit under their own pass stamp on the frames branch, so the new body links this pass's frames and the old stay reachable by path
