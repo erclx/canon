@@ -8,6 +8,7 @@ import {
   SHORT_SHA_LENGTH,
   writeBoxLine,
 } from '@/pr/evidence'
+import { coversHead, type UiScope } from '@/pr/review-scope'
 
 export const UI_PASS_MARKER = '<!-- pr-ui-pass -->'
 const TESTING_HEADING = /^## Testing\s*$/
@@ -66,6 +67,20 @@ export function countTicksAtHead(
       box.stamp !== undefined &&
       head.startsWith(box.stamp),
   ).length
+}
+
+/**
+ * Whether the newest UI verdict's own marker names the head. A fallback stamp
+ * is GitHub's submission commit, which moves onto a commit pushed mid-drive,
+ * so it never names what a pass drove. A short sha on either side matches.
+ */
+export function verdictNamesHead(scope: UiScope, head: string): boolean {
+  const { commit } = scope
+  return (
+    scope.source === 'marker' &&
+    commit !== undefined &&
+    (coversHead(commit, head) || coversHead(head, commit))
+  )
 }
 
 /** The short sha the marked line names, absent when the body carries no such line. */

@@ -91,6 +91,24 @@ describe('canon pr tick', () => {
     )
   }
 
+  const verdict = (counts: string, head: string) => ({
+    body: `## UI review closed\n\n${counts}\nDriven.\n\n<!-- review-ui: head=${head} -->`,
+    commit_id: head,
+    submitted_at: '2026-10-19T10:00:00Z',
+  })
+
+  function postVerdict(row: ReturnType<typeof verdict>): void {
+    writeFileSync(join(tempDir, 'ui-reviews.json'), JSON.stringify([row]))
+  }
+
+  /** A verdict with no count line, naming the commit this pass drove. */
+  function postVerdictAt(head: string): void {
+    postVerdict({
+      ...verdict('', head),
+      body: `## UI review closed\n\nDone.\n\n<!-- review-ui: head=${head} -->`,
+    })
+  }
+
   beforeEach(() => {
     tempDir = mkdtempSync(join(tmpdir(), 'canon-pr-tick-'))
     repoRoot = join(tempDir, 'repo')
@@ -113,6 +131,7 @@ describe('canon pr tick', () => {
   })
 
   it('should tick and stamp the named boxes through a PATCH', async () => {
+    postVerdictAt(tip)
     const outcome = await runTick(['--boxes', '1', '--head', tip.slice(0, 7)])
 
     expect(outcome).toEqual({
@@ -127,16 +146,7 @@ describe('canon pr tick', () => {
   })
 
   describe('count check', () => {
-    const verdict = (counts: string, head: string) => ({
-      body: `## UI review closed\n\n${counts}\nDriven.\n\n<!-- review-ui: head=${head} -->`,
-      commit_id: head,
-      submitted_at: '2026-10-19T10:00:00Z',
-    })
     const TWO_PASSED = '0 failed · 1 need your eyes · 2 passed · 0 not driven'
-
-    function postVerdict(row: ReturnType<typeof verdict>): void {
-      writeFileSync(join(tempDir, 'ui-reviews.json'), JSON.stringify([row]))
-    }
 
     it('should refuse a tick that leaves fewer ticks than the verdict passed and write nothing', async () => {
       postVerdict(verdict(TWO_PASSED, tip))
@@ -205,14 +215,20 @@ describe('canon pr tick', () => {
       )
     })
 
-    it('should read a verdict that covers an older head as unchecked', async () => {
+    it('should refuse a verdict that names an older commit and write nothing', async () => {
       postVerdict(verdict(TWO_PASSED, 'a'.repeat(40)))
 
       const outcome = await runTick(['--boxes', '1', '--head', tip])
 
-      expect(outcome.record).toEqual(
-        expect.objectContaining({ reason: 'ticked', countCheck: 'unchecked' }),
-      )
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'verdict-behind',
+          head: tip,
+          verdict: 'a'.repeat(40),
+        }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
     })
 
     it('should read a verdict with no count line as unchecked', async () => {
@@ -228,12 +244,62 @@ describe('canon pr tick', () => {
       )
     })
 
-    it('should read a thread with no UI verdict as unchecked', async () => {
+    it('should refuse a thread with no UI verdict and write nothing', async () => {
       const outcome = await runTick(['--boxes', '1', '--head', tip])
 
-      expect(outcome.record).toEqual(
-        expect.objectContaining({ reason: 'ticked', countCheck: 'unchecked' }),
-      )
+      expect(outcome).toEqual({
+        record: expect.objectContaining({ reason: 'verdict-behind', head: tip }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
+    })
+
+    it('should refuse a verdict with no marker, since only GitHub stamped its commit', async () => {
+      postVerdict({
+        ...verdict('', tip),
+        body: '## UI review closed\n\nDone.\n',
+      })
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome.record.reason).toBe('verdict-behind')
+      expect(existsSync(apiLog)).toBe(false)
+    })
+
+    it('should refuse gh-failed when the reviews cannot be read', async () => {
+      writeFileSync(join(tempDir, 'ui-reviews-fail'), '')
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({ reason: 'gh-failed' }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
+    })
+
+    it('should read a short marker and a full head as naming one commit, and the reverse', async () => {
+      postVerdictAt(tip.slice(0, 7))
+      const full = await runTick(['--boxes', '1', '--head', tip])
+
+      postVerdictAt(tip)
+      const short = await runTick(['--boxes', '1', '--head', tip.slice(0, 7)])
+
+      expect([full.record.reason, short.record.reason]).toEqual([
+        'ticked',
+        'ticked',
+      ])
+    })
+
+    it('should tick on an open verdict that names the head', async () => {
+      postVerdict({
+        ...verdict('', tip),
+        body: `## UI review\n\nDriving.\n\n<!-- review-ui: head=${tip} -->`,
+      })
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome.record.reason).toBe('ticked')
     })
   })
 
@@ -242,6 +308,7 @@ describe('canon pr tick', () => {
 
     it('should write the pass count into the body beside what is there', async () => {
       writeFileSync(join(tempDir, 'pr-body'), BODY)
+      postVerdictAt(tip)
 
       await runTick(['--boxes', '1,2', '--head', tip])
 
@@ -254,6 +321,7 @@ describe('canon pr tick', () => {
 
     it('should not count a box ticked by hand or at another head as passed by this pass', async () => {
       writeFileSync(join(tempDir, 'pr-body'), BODY)
+      postVerdictAt(tip)
       writeMarkedComment(
         [
           '- [ ] the hero settles',
@@ -271,6 +339,7 @@ describe('canon pr tick', () => {
 
     it('should leave the line unchecked while a driven box is still empty', async () => {
       writeFileSync(join(tempDir, 'pr-body'), BODY)
+      postVerdictAt(tip)
 
       await runTick(['--boxes', '1', '--head', tip])
 
@@ -281,6 +350,7 @@ describe('canon pr tick', () => {
 
     it('should report the comment as ticked and the body as refused when the body edit fails', async () => {
       writeFileSync(join(tempDir, 'pr-body'), BODY)
+      postVerdictAt(tip)
       writeFileSync(join(tempDir, 'body-fail'), '')
 
       const outcome = await runTick(['--boxes', '1', '--head', tip])
@@ -297,6 +367,7 @@ describe('canon pr tick', () => {
 
     it('should write no body line when the tick is refused', async () => {
       writeFileSync(join(tempDir, 'pr-body'), BODY)
+      postVerdictAt(tip)
 
       await runTick(['--boxes', '1,3', '--head', tip])
 
@@ -307,6 +378,7 @@ describe('canon pr tick', () => {
   describe('carry', () => {
     it('should stamp the boxes at the tip across a push no box observes', async () => {
       const driven = tip
+      postVerdictAt(driven)
       const pushed = pushCommit('src/hero.test.ts')
 
       const outcome = await runTick(['--boxes', '1', '--head', driven])
@@ -326,6 +398,7 @@ describe('canon pr tick', () => {
 
     it('should refuse redrive-owed across a push to a source file and write nothing', async () => {
       const driven = tip.slice(0, 7)
+      postVerdictAt(driven)
       const pushed = pushCommit('src/hero.ts')
 
       const outcome = await runTick(['--boxes', '1', '--head', driven])
@@ -344,6 +417,7 @@ describe('canon pr tick', () => {
 
     it('should stamp the boxes at the tip across a clean merge of main', async () => {
       const driven = pushCommit('src/hero.ts')
+      postVerdictAt(driven)
       const git = (...args: string[]) =>
         execaSync('git', ['-C', repoRoot, ...args], IDENTITY)
       git('checkout', '-q', 'main')
@@ -367,6 +441,23 @@ describe('canon pr tick', () => {
         }),
         exit: 0,
       })
+    })
+
+    it('should refuse verdict-behind across a source push when --head is moved to the tip', async () => {
+      postVerdictAt(tip)
+      const pushed = pushCommit('src/hero.ts')
+
+      const outcome = await runTick(['--boxes', '1', '--head', pushed])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'verdict-behind',
+          head: pushed,
+          verdict: tip,
+        }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
     })
 
     it('should refuse stale-head when the driven head was rewritten away', async () => {

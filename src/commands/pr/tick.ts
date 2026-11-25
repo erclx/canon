@@ -12,13 +12,14 @@ import {
   readUnmergedCommits,
 } from '@/pr/lift'
 import { readUiCarry } from '@/pr/carry'
-import { coversHead, resolveUiScope } from '@/pr/review-scope'
+import { resolveUiScope } from '@/pr/review-scope'
 import {
   countTicksAtHead,
   type TickRefusal,
   tickBoxes,
   tickCarryOf,
   type UiPassSummary,
+  verdictNamesHead,
   writeUiPassLine,
 } from '@/pr/tick'
 import { reviewRowOf } from '@/pr/rest'
@@ -48,6 +49,7 @@ type TickReason =
   | 'count-mismatch'
   | 'stale-head'
   | 'redrive-owed'
+  | 'verdict-behind'
   | 'bad-boxes'
   | 'no-comment'
   | 'body-refused'
@@ -59,6 +61,8 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
     'The head named is not the branch tip on the remote, and neither the gap since it nor the branch diff across a rebase or a merge of the base could be read, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
   'redrive-owed':
     'A push, a rebase, or a merge since the driven head changed a path a box can observe, so the pass does not carry to the tip. Nothing was written. Re-drive the checklist at the tip rather than retrying the tick there.',
+  'verdict-behind':
+    'The newest UI verdict does not name this head in its own marker, or there is none. Nothing was written. Post the verdict for the commit this pass drove, and never change --head to match an older one.',
   'bad-boxes':
     '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
   'count-mismatch':
@@ -121,11 +125,14 @@ export function registerTick(pr: Command): void {
         'base and the same comparison holds. A path the base and the branch',
         'both changed owes a re-drive however cleanly it merged.',
         '',
-        'Before writing it reads the newest UI verdict. One that covers the tip,',
-        'or the driven head on a carry, and carries a count line must match the',
-        'ticks this call leaves at the tip, so a re-drive passes every box that',
-        'passed, since a new head clears the older ticks. Any other verdict',
-        'leaves the check unrun.',
+        'Before writing it reads the newest UI verdict, whose own marker must',
+        'name --head, a short sha matching a full one either way. A verdict at',
+        'another commit, one with no marker, or none refuses, so a tick is',
+        'never written for a commit nobody posted a verdict for. The tip a',
+        '--head carries to is not named by it. A verdict naming --head that',
+        'carries a count line must match the ticks this call leaves at the',
+        'tip, so a re-drive passes every box that passed, since a new head',
+        'clears the older ticks. One with no count line leaves the check unrun.',
         '',
         'Read `reason` on the JSON record:',
         '  ticked       the boxes were ticked and the body line written, with the',
@@ -142,6 +149,10 @@ export function registerTick(pr: Command): void {
         '  redrive-owed a push, a rebase, or a merge since --head changed a path',
         '               a box can observe, nothing written, with `driven`,',
         '               `head`, and `drivenPaths`',
+        '  verdict-behind the newest UI verdict does not name --head in its own',
+        '               marker, or there is none, nothing written, with `head`',
+        '               and `verdict` when it names a commit',
+        '  gh-failed    the reviews or the comment could not be read or edited',
         '  stale-head   --head is behind the tip and neither the linear gap nor',
         '               the branch diff comparison could be read, nothing',
         '               written',
@@ -261,26 +272,31 @@ async function runTick(
     reading.tip,
   )
   const reviews = await listReviews(root, String(identity.number))
-  const verdict = resolveUiScope({
-    reviews: reviews.kind === 'read' ? reviews.rows.map(reviewRowOf) : [],
-  })
-  const isCounted =
-    verdict.counts !== undefined &&
-    verdict.commit !== undefined &&
-    (coversHead(verdict.commit, reading.tip) ||
-      (carriedFrom !== undefined &&
-        (coversHead(verdict.commit, carriedFrom) ||
-          coversHead(carriedFrom, verdict.commit))))
-  if (isCounted && verdict.counts.passed !== ticked) {
+  if (reviews.kind === 'refused') return refuseTick('gh-failed')
+  const verdict = resolveUiScope({ reviews: reviews.rows.map(reviewRowOf) })
+  if (!verdictNamesHead(verdict, head)) {
+    return refuseWith(
+      'verdict-behind',
+      TICK_REFUSALS['verdict-behind'],
+      emitJson,
+      root,
+      {
+        head,
+        ...(verdict.commit !== undefined && { verdict: verdict.commit }),
+      },
+    )
+  }
+  const counts = verdict.counts
+  if (counts !== undefined && counts.passed !== ticked) {
     return refuseWith(
       'count-mismatch',
       TICK_REFUSALS['count-mismatch'],
       emitJson,
       root,
-      { passed: verdict.counts.passed, ticked },
+      { passed: counts.passed, ticked },
     )
   }
-  const countCheck = isCounted ? 'matched' : 'unchecked'
+  const countCheck = counts === undefined ? 'unchecked' : 'matched'
 
   if (result.body !== marked.body) {
     const patched = await gh(root, [
