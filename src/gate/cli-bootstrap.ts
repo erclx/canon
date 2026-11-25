@@ -21,9 +21,8 @@ function resolveLocal(root: string, from: string, spec: string): string {
 }
 
 /**
- * The CLI entry and every module it loads outside a command, which each spawned
- * command runs through before its own code, so a change to one reaches every
- * command and no command's import graph. A read that fails throws, since a
+ * The CLI entry and what it loads outside a command, which every command runs
+ * through and no command's import graph holds. A failed read throws, since a
  * missing answer must not narrow the scope.
  */
 export function cliBootstrap(root: string): readonly string[] {
