@@ -7,6 +7,7 @@ import {
   readFileSync,
   rmSync,
   symlinkSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -371,7 +372,8 @@ describe('tools and preconditions', () => {
 })
 
 // Stands in for canon or bunx, logging each call's argv on its own line and
-// printing a gate record whose root is the directory it runs in, or `root`.
+// printing a gate record whose root is the directory it runs in, or `root`. A
+// --version call reads bin/canon.version and logs nothing.
 const argvLog = (): string => join(fixture, 'canon-argv.log')
 
 const writeGate = (
@@ -385,6 +387,7 @@ const writeGate = (
     join(bin, name),
     [
       '#!/usr/bin/env bash',
+      `if [ "$1" = --version ]; then echo "v$(< ${join(bin, 'canon.version')})"; exit; fi`,
       `echo "$*" >> ${argvLog()}`,
       `printf '{"ok":${ok},"root":"%s","stages":${stages}}\\n' "${root}"`,
       `exit ${exitCode}`,
@@ -871,12 +874,12 @@ describe('changed mode', () => {
     expect(readTests()).toEqual([])
   })
 
-  it('should close by naming what it left to CI', () => {
+  it('should close by naming what it did not run', () => {
     setUpChanged()
 
     const result = runChanged()
 
-    expect(result.stdout).toContain('left to CI')
+    expect(result.stdout).toContain('The full suites and the build did not run')
     expect(result.stdout).not.toContain('Verification passed')
   })
 })
@@ -1136,11 +1139,35 @@ describe('changed mode in a nested root', () => {
 
   it('should read its own folder under a hook that exports GIT_DIR', () => {
     writeService({ 'test:run': 'exit 1', 'test:changed': 'log-tests' })
-    writeSource('service/cart.ts', 'edited')
 
-    runChanged({ GIT_DIR: join(fixture, '.git') })
+    const result = runChanged({ GIT_DIR: join(fixture, '.git') })
 
-    expect(readTests()).toEqual(['cart.test.ts'])
+    expect(result.status).toBe(0)
+    expect(readTests()).toEqual([])
+  })
+
+  it('should tie none of its tests to a change at the root', () => {
+    writeService({ 'test:run': 'exit 1' })
+    writeSource('service/tests/test_tax.py')
+    commit()
+    pushTrunk()
+    writeSource('tax.py')
+
+    runChanged()
+
+    expect(readTests()).toEqual([])
+  })
+
+  it('should tie no test at the root to its own change', () => {
+    writeService({ 'test:run': 'exit 1' })
+    writeSource('tests/test_tax.py')
+    commit()
+    pushTrunk()
+    writeSource('service/tax.py')
+
+    runChanged()
+
+    expect(readTests()).toEqual([])
   })
 
   it('should run in full under a plain check', () => {
@@ -1151,5 +1178,288 @@ describe('changed mode in a nested root', () => {
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('service failed')
+  })
+})
+
+describe('the remembered pass', () => {
+  const gateRuns = (): number =>
+    readArgv().filter((argv) => argv.startsWith('gate run')).length
+
+  const writeNested = (dir: string, list: string): void => {
+    writeSource(`${dir}/package.json`, '{"scripts":{}}')
+    writeSource(`${dir}/scripts/verify.json`, list)
+    copyFileSync(RUNNER, join(fixture, dir, 'scripts/verify.ts'))
+    commit()
+  }
+
+  const runIn = (dir: string): SpawnSyncReturns<string> =>
+    spawnSync(process.execPath, [RUNNER, '--changed'], {
+      cwd: join(fixture, dir),
+      encoding: 'utf8',
+      env: { ...process.env, CI: '', PATH: `${bin}:${process.env.PATH}` },
+    })
+
+  describe('a repeat', () => {
+    beforeEach(() => {
+      setUpChanged(['src/cart.ts'])
+      runChanged()
+    })
+
+    it('should be skipped on unchanged content', () => {
+      const result = runChanged()
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('already passed')
+      expect(gateRuns()).toBe(1)
+    })
+
+    it('should run under --force', () => {
+      runChanged({}, '--force')
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should be skipped once the same content is committed', () => {
+      writeSource('src/cart.ts', 'edited')
+      runChanged()
+      commit()
+
+      expect(runChanged().stdout).toContain('already passed')
+    })
+
+    it('should run after a tracked edit', () => {
+      writeSource('src/cart.ts', 'edited')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should run after an untracked file lands', () => {
+      writeSource('src/new.ts')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should run in full under a plain check', () => {
+      writePackage(declare(STACK_SCRIPTS.web))
+
+      runVerify()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should run in a linked worktree at the same commit', () => {
+      runGit('worktree', 'add', '-q', '--detach', 'bin/linked')
+
+      runIn('bin/linked')
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should leave the staged set as it was', () => {
+      writeSource('src/new.ts')
+
+      runChanged()
+
+      expect(runGit('diff', '--cached', '--name-only').stdout).toBe('')
+    })
+  })
+
+  describe('the key', () => {
+    const writeVersion = (name: string, version: string): void => {
+      writeFileSync(
+        join(bin, name),
+        `#!/usr/bin/env bash\necho ${version}\nexit 0\n`,
+        { mode: 0o755 },
+      )
+    }
+
+    it('should see an edit in the same second as the index write', () => {
+      const then = new Date('2020-01-01T00:00:00Z')
+      setUpChanged(['src/cart.ts'])
+      // Without ctime, only the content tells an edit of one size in one second.
+      runGit('config', 'core.trustctime', 'false')
+      writeSource('src/cart.ts', 'aaaa')
+      utimesSync(join(fixture, 'src/cart.ts'), then, then)
+      commit()
+      runChanged()
+      writeSource('src/cart.ts', 'bbbb')
+      utimesSync(join(fixture, 'src/cart.ts'), then, then)
+      utimesSync(join(fixture, '.git/index'), then, then)
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should change with the merge base', () => {
+      setUpChanged()
+      writeSource('src/cart.ts')
+      commit()
+      runChanged()
+      pushTrunk()
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should change with the canon version', () => {
+      setUpChanged()
+      writeFileSync(join(bin, 'canon.version'), '5.0.0')
+      runChanged()
+      writeFileSync(join(bin, 'canon.version'), '5.1.0')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should change when canon is installed after a pass without it', () => {
+      setUpChanged()
+      rmSync(join(bin, 'canon'))
+      linkTool('bun')
+      linkTool('git')
+      linkTool('bash')
+      runChanged({ PATH: bin })
+      writeGate('canon', 0, PASSED)
+
+      runChanged({ PATH: bin })
+
+      expect(gateRuns()).toBe(1)
+    })
+
+    it('should change with the version of a tool the phase list names', () => {
+      setUpChanged()
+      writeList('python')
+      writeVersion('uv', '1.0.0')
+      runChanged()
+      writeVersion('uv', '2.0.0')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should change with the version of a tool a phase probes', () => {
+      setUpChanged()
+      writePackage({ ...WEB_CHANGED, 'check:shell': 'true' })
+      writeVersion('shfmt', '1.0.0')
+      runChanged()
+      writeVersion('shfmt', '2.0.0')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should change with the version of a tool a nested root names', () => {
+      setUpChanged()
+      writeNested('service', '{"tools":[{"name":"uv"}]}')
+      writeVersion('uv', '1.0.0')
+      runChanged()
+      const ran = gateRuns()
+      writeVersion('uv', '2.0.0')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(ran * 2)
+    })
+
+    it('should change with the folder the run starts in', () => {
+      setUpChanged()
+      writeSource('service/package.json', JSON.stringify({ scripts: {} }))
+      writeSource('service/scripts/verify.json', '{}')
+      runChanged()
+
+      runIn('service')
+
+      expect(gateRuns()).toBe(2)
+    })
+  })
+
+  describe('a run no pass is kept for', () => {
+    const expectNoPass = (): void => {
+      runChanged()
+      const ran = gateRuns()
+
+      runChanged()
+
+      expect(gateRuns()).toBe(ran * 2)
+    }
+
+    beforeEach(() => {
+      setUpChanged(['src/cart.ts'])
+    })
+
+    it('should be one that failed', () => {
+      writeGate('canon', 1, PASSED)
+
+      expectNoPass()
+    })
+
+    it('should be one whose gate refused', () => {
+      writeGate('canon', 0, PASSED, '/opt/canon')
+
+      expectNoPass()
+    })
+
+    it('should be one whose gate measured nothing in a stage', () => {
+      writeGate('canon', 0, '[{"label":"Markdown","status":"unmeasured"}]')
+
+      expectNoPass()
+    })
+
+    it('should be one whose content changed while it ran', () => {
+      writePackage({ ...WEB_CHANGED, lint: 'echo edit > src/cart.ts' })
+      runChanged()
+      writeSource('src/cart.ts')
+
+      runChanged()
+
+      expect(gateRuns()).toBe(2)
+    })
+
+    it('should be one whose nested root measured nothing', () => {
+      writeNested('service', '{}')
+      writeGate(
+        'canon',
+        0,
+        PASSED,
+        '$([[ $PWD == */service ]] && echo /opt/canon || pwd -P)',
+      )
+
+      expectNoPass()
+    })
+
+    it('should be one with a tool that reports no version', () => {
+      writeList('python')
+      writeStub('uv', 1)
+
+      expectNoPass()
+    })
+
+    it('should be one over a nested repository the tree cannot hold', () => {
+      mkdirSync(join(fixture, 'other'))
+      runGit('-C', 'other', 'init', '-q')
+      runGit('-C', 'other', 'commit', '-q', '--allow-empty', '-m', 'first')
+
+      expectNoPass()
+    })
+  })
+
+  it('should drop the last pass when a forced run fails', () => {
+    setUpChanged()
+    runChanged()
+    writeGate('canon', 1, PASSED)
+    runChanged({}, '--force')
+    writeGate('canon', 0, PASSED)
+
+    runChanged()
+
+    expect(gateRuns()).toBe(3)
   })
 })
