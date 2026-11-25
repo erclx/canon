@@ -24,4 +24,5 @@
 
 1. Does sync run on a metered connection?
    - Suggested: no, wait for wifi
+   - Evidence: none, a preference the operator holds
    - Answer:

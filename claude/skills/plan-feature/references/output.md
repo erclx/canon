@@ -33,10 +33,11 @@ When a caller asks for a file, write it as Full mode does and name the mode, sin
 
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
+   - Evidence: `<command or path>` <what it shows>, or none, <reason>
    - Answer:
 ```
 
-Keep `## Questions` only for a real question, each with its `- Suggested:` line and `- Answer:` slot. Small mode carries no `## Review focus`, since its Risks came out empty. Omit empty sections, and print no `None identified.` in chat.
+Keep `## Questions` only for a real question, each with its `- Suggested:` line, its `- Evidence:` line, and its `- Answer:` slot. Small mode carries no `## Review focus`, since its Risks came out empty. Omit empty sections, and print no `None identified.` in chat.
 
 ### Full mode
 
@@ -49,8 +50,8 @@ The plan is a main-root write, from a linked worktree and from a background sess
 Two commands check the file once it lands, and both write nothing.
 
 - Run `canon records validate plans feature-<slug>` when the CLI is on PATH. Its `findings` name a section, a filename, or an answer slot that does not hold.
-- Fix each entry its `structure` array names before reporting, against `### Structure` in `${CLAUDE_SKILL_DIR}/references/plan.md`
-- Read that array rather than the exit code, since a structure entry never sets the exit
+- Fix each entry its `structure` and `evidence` arrays name before reporting, against `### Structure` and `## The suggested-and-answer contract` in `${CLAUDE_SKILL_DIR}/references/plan.md`
+- Read those arrays rather than the exit code, since neither sets the exit
 - Say the check did not run when the binary refuses the plan argument or carries no `structure` key, rather than reporting the plan clean
 - Run `canon markdown audit .canon/plans/feature-<slug>.md`, naming the file, since the gitignored plan reaches no other gate. Rewrite a hit's sentence rather than swapping the token.
 

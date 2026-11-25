@@ -76,9 +76,11 @@ A prompt dismissed without an answer leaves the permission at `default`, so the 
 
 1. Where does the permission prompt appear?
    - Suggested: on the first save, since a prompt with no action behind it is the one most people decline
+   - Evidence: none, the groundwork decision settles it, and no command in this tree measures a decline
    - Answer:
 2. Does a push carry the surge height?
    - Suggested: yes, the height and the effective time, since the height is what someone acts on
+   - Evidence: `src/alerts/feed.ts` carries the height and the effective time on each advisory record
    - Answer:
 
 ## Sources

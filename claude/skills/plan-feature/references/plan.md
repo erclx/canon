@@ -316,11 +316,12 @@ A source earns an entry only once someone opened it.
 
 ## The suggested-and-answer contract
 
-Every question carries a `- Suggested:` line and an empty `- Answer:` slot below it.
+Every question carries a `- Suggested:` line, an `- Evidence:` line, and an empty `- Answer:` slot below them.
 
 ```markdown
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
+   - Evidence: `<command or path>` <what it shows>, or none, <reason>
    - Answer:
 ```
 
@@ -329,12 +330,15 @@ An execution that deviates rewrites the suggestion into the form below, leaving 
 ```markdown
 1. <question>
    - Suggested: overridden at execution to <pick>, <the measurement that moved it>
+   - Evidence: `<command or path>` <what it shows>
    - Answer:
 ```
 
 - A blank `- Answer:` means accept the suggestion at execution time. That default is what makes the plan decision-ready in one pass, with no separate round to collect answers.
 - Never ship a question without a suggestion. A bare question defers the judgment the plan exists to supply, and it arrives at the executing session as a stop.
 - State the pick in one line with its reason or its main tradeoff. List an alternative only where it changes the pick.
+- Cite on the `- Evidence:` line, in a code span, the command or path the claim rests on, or write `none, <reason>` where no fact applies
+  - `canon records validate plans` reports `evidence-missing` for an absent or bare line, and `evidence-unresolved` for a cited path absent from the tree
 
 ### Preference questions and answers
 
@@ -474,6 +478,7 @@ The questions below decide <what>, numbered across the whole section.
 
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
+   - Evidence: `<command or path>` <what it shows>, or none, <reason>
    - Answer:
 
 ## Sources

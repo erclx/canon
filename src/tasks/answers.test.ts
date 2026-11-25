@@ -14,6 +14,7 @@ let ROOT: string
 
 interface QuestionFixture {
   readonly suggested: string
+  readonly evidence?: string
   readonly answer?: string
 }
 
@@ -21,11 +22,14 @@ function planBody(
   questions: readonly QuestionFixture[],
   approved?: string,
 ): string {
-  const block = questions.flatMap(({ suggested, answer = '' }, index) => [
-    `${index + 1}. Question ${index + 1}?`,
-    `   - Suggested: ${suggested}`,
-    `   - Answer:${answer ? ` ${answer}` : ''}`,
-  ])
+  const block = questions.flatMap(
+    ({ suggested, evidence, answer = '' }, index) => [
+      `${index + 1}. Question ${index + 1}?`,
+      `   - Suggested: ${suggested}`,
+      ...(evidence === undefined ? [] : [`   - Evidence: ${evidence}`]),
+      `   - Answer:${answer ? ` ${answer}` : ''}`,
+    ],
+  )
 
   return [
     '# Feature: A plan under test',
@@ -85,6 +89,23 @@ describe('planAnswers', () => {
     assertOk(outcome)
     expect(outcome.launchable).toBe(false)
     expect(outcome.open).toHaveLength(1)
+  })
+
+  it('should hold an operator call carrying an Evidence line as one without', async () => {
+    await writePlan('gate', [
+      {
+        suggested: 'needs your call, the two shapes cost the same.',
+        evidence: 'none, preference',
+      },
+    ])
+
+    const outcome = await planAnswers(ROOT, 'gate')
+
+    assertOk(outcome)
+    expect(outcome.launchable).toBe(false)
+    expect(outcome.open).toEqual([
+      { label: '1. Question 1?', why: 'the two shapes cost the same.' },
+    ])
   })
 
   it('should launch the same plan once the operator has filled the slot', async () => {
@@ -259,6 +280,29 @@ describe('planAnswers', () => {
       assertOk(outcome)
       expect(outcome.launchable).toBe(true)
       expect(outcome.open).toEqual([])
+      expect(outcome.deferred).toEqual([
+        {
+          label: '1. Question 1?',
+          why: 'the real host stays out of the plan.',
+        },
+      ])
+    })
+
+    it('should defer an approved operator call carrying an Evidence line', async () => {
+      await writePlan(
+        'gate',
+        [
+          {
+            suggested: 'needs your call, the real host stays out of the plan.',
+            evidence: 'none, preference',
+          },
+        ],
+        APPROVED,
+      )
+
+      const outcome = await planAnswers(ROOT, 'gate')
+
+      assertOk(outcome)
       expect(outcome.deferred).toEqual([
         {
           label: '1. Question 1?',

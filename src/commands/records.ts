@@ -120,6 +120,10 @@ export function register(program: Command): void {
         '  and measured-run-unplaced on plans for a measurement with no place.',
         '  A record written before the criteria misses S1, so it reports alone.',
         '',
+        'Evidence, under `evidence` on plans and never in the exit:',
+        '  evidence-missing     a question with no Evidence line citing a span or none, <reason>',
+        '  evidence-unresolved  a cited path under a root folder, or a bare filename, absent',
+        '',
         'Refusals, read off `reason`:',
         "  no-folder     none of the kind's directories exist at either record root",
         '  no-record     the folder holds no record by the name given',
@@ -848,6 +852,7 @@ function report(
         records: outcome.records,
         findings: outcome.findings,
         structure: outcome.structure,
+        ...(outcome.evidence && { evidence: outcome.evidence }),
         ...(outcome.length && { length: outcome.length }),
       })}\n`,
     )
@@ -866,6 +871,11 @@ function report(
     if (outcome.structure.length > 0) {
       logStep('Structure, reported and never in the exit')
       for (const entry of outcome.structure) logInfo(describeStructure(entry))
+    }
+
+    if (outcome.evidence && outcome.evidence.length > 0) {
+      logStep('Evidence, reported and never in the exit')
+      for (const found of outcome.evidence) logInfo(describe(found))
     }
 
     if (outcome.length) {
