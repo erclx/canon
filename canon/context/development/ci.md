@@ -41,6 +41,12 @@ One check over a matrix that runs each group of `*.e2e.test.ts` suites on its ow
 - `scripts/ci/check-browsers.sh` and `scripts/ci/check-e2e-tools.sh` run first, so a missing revision or `libwebp_anim` encoder, or a Chromium that cannot launch, reddens the job
 - A sysctl clears `kernel.apparmor_restrict_unprivileged_userns`, since Ubuntu 24.04 kills every product launch of Chromium, which all run with the sandbox on
 
+### `scripts/ci/e2e-scope.ts`
+
+- The two suites that spawn the CLI each import the command they drive, so vitest selects one on a change to that command's import graph, and `src/gate/corpus-readers.test.ts` fails on a spawning suite that imports no `@/commands/` module
+- A change to `src/cli.ts` or to a module it loads outside a command, read by `src/gate/cli-bootstrap.ts`, selects both, since every command runs through them and no command's graph holds them
+- A change to `package.json` moving only `version` selects nothing on its own, so a release runs no suite, and a read of either side that fails runs all
+
 ### `scripts/ci/e2e-groups.ts`
 
 Holds the groups, balanced by each suite's mean time on a runner. Vitest's `--shard` balances by file count, which puts a half-second suite level with a four-minute one. A leg the scope leaves empty passes with no setup.
