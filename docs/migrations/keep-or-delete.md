@@ -1,12 +1,12 @@
 ---
 title: Keep or delete
-description: Files a project scaffolded under an older toolkit still holds, which a newer toolkit retired or changed and no sync touches, and what keeping or changing each one takes
+description: Files a project scaffolded under an older toolkit still holds, retired or customized, which sync leaves alone, and what keeping or changing each one takes
 category: Agent surface
 ---
 
 # Keep or delete
 
-Each section is a file a project still holds after the toolkit retired or changed it, since no sync deletes or rewrites what a project already has. Keeping it or changing it is your call. The moves every project makes by hand are in [target migrations by hand](by-hand.md).
+Each section is a file a project still holds after the toolkit retired or changed it. Sync deletes no retired file and leaves a customized one as you edited it, so keeping it or changing it is your call. The moves every project makes by hand are in [target migrations by hand](by-hand.md).
 
 ## Keep or delete the wireframes folder, your call
 
