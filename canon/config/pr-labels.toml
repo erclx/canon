@@ -1,22 +1,37 @@
-# Labels git-pr adds to a pull request, by path prefix.
+# Labels git-pr adds by path prefix, anchored, so a dotted folder needs its own.
 # Create them with canon labels sync. Every key: canon docs config
-# Matching is prefix-anchored, so a dotted folder needs its own prefix.
+# A declared color colors the shared issue and pull request label.
 
-[domains]
+[domains.skills]
 # Shipped skills, internal skills, and the marketplace entry.
-skills = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
-governance = [
+paths = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
+color = "1f6feb"
+
+[domains.governance]
+paths = [
   "governance/",
   ".claude/rules/",
   "internal/rules/",
   "internal/governance.toml",
 ]
-tooling = ["tooling/"]
+color = "2da44e"
+
+[domains.tooling]
+paths = ["tooling/"]
+color = "a371f7"
+
+[domains.cli]
 # A new scripts/ folder goes bare until canon labels audit names it.
-cli = ["src/", "scripts/eval/"]
-sandbox = ["sandbox/", "src/sandbox/"]
+paths = ["src/", "scripts/eval/"]
+color = "d29922"
+
+[domains.sandbox]
+paths = ["sandbox/", "src/sandbox/"]
+color = "bf3989"
+
+[domains.docs]
 # assets/loops/ holds the README's loops, so it rides with the README.
-docs = [
+paths = [
   "docs/",
   "wiki/",
   "README.md",
@@ -24,11 +39,17 @@ docs = [
   "examples/",
   "assets/loops/",
 ]
+color = "0598bc"
+
+[domains.web]
 # The landing page, built and deployed apart from every row above.
-web = ["web/"]
+paths = ["web/"]
+color = "e16f24"
+
+[domains.ci]
 # The hooks enforce what the verify gate cannot, and settings.json
 # registers them, so both ride here.
-ci = [
+paths = [
   ".github/",
   "scripts/ci/",
   "scripts/core/",
@@ -36,9 +57,12 @@ ci = [
   ".claude/hooks/",
   ".claude/settings.json",
 ]
+color = "6e7781"
+
+[domains.context]
 # The context entries and the design record, with the hand-drawn brand
 # marks and canon/design/, whose index is written by hand.
-context = [
+paths = [
   "canon/context/",
   "canon/REQUIREMENTS.md",
   "canon/DESIGN.md",
@@ -46,9 +70,12 @@ context = [
   "CLAUDE.md",
   "assets/brand/",
 ]
+color = "56d364"
+
+[domains.repo]
 # Repository configuration belonging to no domain, this map included.
 # A folder prefix, so a new file in canon/config/ is labelled too.
-repo = [
+paths = [
   ".gitignore",
   "canon/config/",
   "vitest.config.ts",
@@ -56,6 +83,7 @@ repo = [
   "commitlint.config.js",
   "commitlint.config.test.ts",
 ]
+color = "d2a8ff"
 
 # Paths deliberately left unlabelled, keyed by the reason.
 [declined]
