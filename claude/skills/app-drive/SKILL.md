@@ -16,6 +16,7 @@ A drive puts a built app in front of the operator and the session together, and 
 - Invoke `canon:role-planner` first unless the session holds it, since the role owns the controller messages and the session's end
 - Report it rather than proceeding silently when `canon:role-planner` does not resolve
 - If the project carries no requirements record with a `## Goals` section, stop: `❌ No goals to drive against. Write canon/REQUIREMENTS.md first.`
+- If the ask holds nothing to test, such as a concept to sketch, stop per `${CLAUDE_SKILL_DIR}/../design-pick/references/from-finding.md`: `❌ Nothing to drive. Sketch it with /canon:design-pick.`
 - If the session is asked to change a tracked file, stop and route it: `❌ A drive records and does not build. The finding goes to intake and a worker takes it from there.`
 
 ## Write scope
@@ -33,23 +34,8 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for the `[drive]` table of `cano
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
 3. Make, build, and serve the throwaway worktree per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which carries the close and crash recovery, or follow `live.md` when the operator names the live app.
-4. Confirm the address with `canon pr local --root <worktree> --json` and write it as the drive log's `Address` row.
-5. Start the board per the section below when the drive will draw on it, and write its address and project as the `Board` row. Leave the row empty otherwise.
-6. Hand the operator the app's address and any board's before the first frame.
-7. Draw the shipped page on `00-current` when the drive draws on the board, per the drawing guide the section below names.
-
-### Starting the board
-
-A drive will draw on the board when the config names `board-project` or `.canon/board/` exists at the main root. With neither, the drive starts no server and draws as Step 3's cases state.
-
-Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for reaching and starting the board, and `drawing.md` beside it before the first frame. A drive differs from a `design-pick` run in four ways.
-
-- `<project>` is the config's `board-project` with `<nn>` filled in, never the project name a pick round derives, so a drive's pages stay apart from pick rounds and accepted frames
-- Where `frameboard list` holds a versioned project of the stem, such as `landing-v2`, ask whether the drive continues it as `landing-v3`, and never write into the earlier one
-- Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
-- That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
-
-Note `reused` off the serve record, since the close ends only a server this run started. Delete an `untitled` project `serve` left only while it holds one empty page. File the drive's project under the config's `board-folder` once it exists, made or found, per `## Home folders` in `board.md`.
+4. Confirm the address with `canon pr local --root <worktree> --json` and write it as the drive log's `Address` row. Leave the `Board` row empty, since Step 3 starts the board.
+5. Hand the operator the app's address before the first step.
 
 ## Step 2: drive
 
@@ -100,7 +86,7 @@ Draw every finding the operator decides, bug fix, feature, or taste call, before
 
 Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, since a worker builds against the picked frame, focus return and dismissal included.
 
-1. Draw the section as shipped and one frame per option at each width on the board, per the next section, or with no board inside the copy, on a canvas the app offers or a scratch route.
+1. Draw the section as shipped and one frame per option at each width, on the board per the next section. With no board, draw them inside the copy, on a canvas the app offers or a scratch route.
 2. Screenshot the frames side by side to `evidence/<surface>/<nn>-options.png` and open it. Ask the pick as `drawing.md` states under Asking, one finding per question.
 3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
 
@@ -110,13 +96,15 @@ A few cases bend those steps.
 - Copy a mock's source into `evidence/mocks/` wherever it was drawn, since the board can change after the close and the check reads `evidence/` alone
 - Write `Drawn: skipped, <reason>` only for a change with nothing visible, such as an exit code or a file format
 - Never write a mock into a tracked path, `canon/design/`, or a page holding the accepted design. An accepted design reaches those through `design-pick` or `design-record` once its fix ships.
-- Leave an undecided taste finding undrawn, as Step 4 hands it to `design-pick`
+- Log an undecided taste finding undrawn, as Step 4 hands it to `design-pick`
 
 Decide a finding about cross-section behavior on `drawing.md`'s live prototype.
 
 ### Drawing on the board
 
-Read `${CLAUDE_SKILL_DIR}/references/drive-board.md` before the first frame on the board, for the drive's pages, the lift from the copy, the capture, and a refusal that ends the board.
+Start the board at the first finding the operator decides, while the copy still runs, when the config names `board-project` or `.canon/board/` exists at the main root. With neither, start no server.
+
+Read `${CLAUDE_SKILL_DIR}/references/drive-board.md` then, for the start, the `Board` row, the shipped page on `00-current`, the drive's pages, the lift from the copy, the capture, and a refusal that ends the board. A drive that decides nothing draws nothing.
 
 ## Step 4: sort
 
@@ -124,7 +112,9 @@ Give every finding one kind, and keep the severity it was logged with.
 
 - **Bug.** The app breaks a goal or its own contract. It becomes an item whose fix a worker can build, with the repro and the evidence path. `systematic-debugging` owns finding its cause.
 - **Requirements conflict.** The app does what the record says and the operator wants otherwise, or the record contradicts itself. The item carries the drafted diff as text, and the operator decides.
-- **Taste.** The call is settled by looking. An undecided one carries a now frame and a fix frame for a `design-pick` pass in the config's `proposals` folder. A decided one carries what Step 3 drew.
+- **Taste.** The call is settled by looking. A decided one carries what Step 3 drew. An undecided one is logged undrawn and waits for a `design-pick` pass.
+
+An undecided taste finding's item takes the operator's `sketch` answer, and the pick draws back on this drive's project, as `${CLAUDE_SKILL_DIR}/../design-pick/references/from-finding.md` states. Never draw its frames here.
 
 ## Step 5: file
 
@@ -150,7 +140,7 @@ Close only on the operator's word, and keep the app up while they keep talking.
 Run this tail by default after the close, since the intake records the session's measurements only as outcomes. A drive left with `You:` slots unread ends at the close and hands its rows off, a reason `role-planner` names under `### Planning what this session measured`.
 
 1. Answer the intake's `You:` slots with `plan-intake-answer` before any row is promoted from it.
-2. Send the controller the ready items by intake folder, cluster file, and number, none with an open `You:` slot, and say this session is planning those rows, so it holds a cold planner for each.
+2. Send the controller the ready items by intake folder, cluster file, and number, none with an open slot or a `sketch` answer. Say this session plans those rows, so it holds a cold planner for each.
 3. Wait for the controller to file the rows and name each back. Plan only a row named to this session, and write no task file.
 4. Invoke `canon:plan-feature` for each named row, since its Step 1 loads the UI skills for a rendered surface. Link it with `canon tasks plan-link` and announce it per `role-planner` before the next.
 
@@ -180,5 +170,5 @@ Omit the `Board` line when the drive drew no board, then close on the retell `${
 - Controller messages, the talk clause, and the session's end: `role-planner`
 - The intake folder's shape and its routing test: `plan-intake`
 - The cause of a bug: `systematic-debugging`
-- Picking a now or fix frame for an undecided taste finding: `design-pick`
+- Drawing and picking an undecided taste finding, on this drive's own page: `design-pick`
 - The voice of every recorded passage: `write-human`

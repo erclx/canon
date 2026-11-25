@@ -40,7 +40,7 @@ A drive numbers and orders its pages by the findings they serve.
 
 ## A drive's whole page
 
-A drive draws the shipped surface whole on `00-current` before its first finding, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied. Both pages' frames take no device and are fitted, so each section shows at its full length.
+A drive draws the shipped surface whole on `00-current` before the first finding it draws, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied. Both pages' frames take no device and are fitted, so each section shows at its full length.
 
 - Draw one frame per section at each width, never the whole page in one frame. A page frame 12,000px tall is one nobody reads.
 - Give each section one row in page order, desktop first, then tablet, then phone

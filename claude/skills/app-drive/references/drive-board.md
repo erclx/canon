@@ -1,11 +1,34 @@
 ---
 title: Drive board
-description: How app-drive draws on its own board project, from the page order and the frame lift to the capture and the refusals that end the board
+description: How app-drive draws on its own board project, from the start at the first decided finding through the page order, the frame lift, the capture, and the refusals that end the board
 ---
 
 # Drive board
 
-Read before the first frame `app-drive` draws on the board, once Step 1 started it. The drive's project stays apart from `design-pick`'s rounds, so this file covers the drive's own pages alone. The `drawing.md` and `board.md` it names sit in `${CLAUDE_SKILL_DIR}/../design-pick/references/`.
+Read when `app-drive` reaches the first finding the operator decides, before any frame on the board. The drive's project stays apart from `design-pick`'s rounds, so this file covers the drive's own pages alone. The `drawing.md` and `board.md` it names sit in `${CLAUDE_SKILL_DIR}/../design-pick/references/`.
+
+## Starting the board
+
+A drive will draw on the board when the config names `board-project` or `.canon/board/` exists at the main root. With neither, the drive starts no server and draws as Step 3's cases state.
+
+Read `board.md` for reaching and starting the board, and `drawing.md` before the first frame. A drive differs from a `design-pick` run in four ways.
+
+- `<project>` is the config's `board-project` with `<nn>` filled in, never the project name a pick derives, so a drive's pages stay apart from standalone picks and accepted frames
+- Where `frameboard list` holds a versioned project of the stem, such as `landing-v2`, ask whether the drive continues it as `landing-v3`, and never write into the earlier one
+- Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
+- That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
+
+Note `reused` off the serve record, since the close ends only a server this run started. Delete an `untitled` project `serve` left only while it holds one empty page. File the drive's project under the config's `board-folder` once it exists, made or found, per `## Home folders` in `board.md`.
+
+### Before the first frame
+
+Do these once, while the copy still runs, since a copy the close removed has no shipped page to lift.
+
+1. Write the board's address and project as the drive log's `Board` row.
+2. Hand the operator the board's address.
+3. Draw the shipped page whole on `00-current`, as `drawing.md` states.
+
+On a finding raised after the close, with the copy gone, add that finding's section alone to `00-current`, as `from-finding.md` beside `drawing.md` states.
 
 ## Drawing on the board
 
@@ -19,4 +42,4 @@ The drive's project holds `00-current`, a page per topic, and `00-next`, as `dra
 
 Give the operator each page's address in the turn the page is added, read off `frameboard show` as `drawing.md` states. The operator then opens a page while it holds only what was just drawn, rather than asking for the link.
 
-Repair a `font-missing` capture as `design-pick`'s Step 3 does, and answer a refusal `board.md` reads as it states. Any other refusal ends the board as Step 1 does, so redraw in the copy and take the options shot there. On `browser-not-found`, name `bunx playwright install chromium` as the repair.
+Repair a `font-missing` capture as `design-pick`'s Step 3 does, and answer a refusal `board.md` reads as it states. Any other refusal ends the board as the start does, so redraw in the copy and take the options shot there. On `browser-not-found`, name `bunx playwright install chromium` as the repair.

@@ -19,8 +19,8 @@
 # Scenario files a drive runs first.
 # scripts = ["canon/drive/basics.md"]
 
-# Where a drive puts the frames of an undecided taste finding.
-# proposals = ".canon/picks"
+# Where a drive puts the mock of a decided finding its copy cannot host.
+# proposals = ".canon/proposals"
 
 # The board project and home folder a drive draws in.
 # board-project = "drive-<nn>"
