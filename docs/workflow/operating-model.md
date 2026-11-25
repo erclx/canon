@@ -40,6 +40,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
    - Each trailing worker the merge touched rebases on the wake of its `canon pr review-state --wait-standing`, and the orchestrator hands the rebase only to a branch whose worker is gone
    - A standing authorization, scoped by default to the PRs in flight when the operator gives it, lets the orchestrator merge each as its gates pass and report after
    - The verb refuses `standing-stale`, naming the files, when a sibling changed one the PR writes or its examples stamp since the fork point. The branch updates and reruns CI before it retries.
+     - On a release-please branch, no worker owns the update, so the refusal names `gh pr update-branch <number>` as the step to run
    - The verb then fast-forwards the main worktree it ran from, so the `post-merge` hook runs, unless `--no-pull` is passed
 
 Each worker halts at the PR, and the merge stays a human gate. An agent merges only on the operator's word, for a named PR or under a standing authorization. The verb squashes with the body's Summary, Key changes, and Technical context as the message. A release-please or Dependabot pull request merges the same way, from the bot's own body.
