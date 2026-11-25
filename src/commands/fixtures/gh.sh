@@ -50,7 +50,10 @@ api*compare/*)
   printf '%s' "${@: -1}" >"$fx/review-body-$id.log"
   echo "{}"
   ;;
-api*pulls/7/reviews*) [ -f "$fx/ui-reviews.json" ] && jq -r "$f" "$fx/ui-reviews.json" ;;
+api*pulls/7/reviews*)
+  [ -f "$fx/ui-reviews-fail" ] && exit 1
+  if [ -f "$fx/ui-reviews.json" ]; then jq -r "$f" "$fx/ui-reviews.json"; fi
+  ;;
 api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' "$FAKE_GH_COMMENTS" | jq -r "$f" ;;
 "api -X PATCH repos/{owner}/{repo}/pulls/7 "*)
   [ -f "$fx/body-fail" ] && exit 1

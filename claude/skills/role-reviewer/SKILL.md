@@ -100,6 +100,7 @@ A request on a head that merged the base earns none either when this session's f
 A UI reviewer acts on a worker's re-review request the way a code reviewer does, with no order from the controller. The request names the head it pushed.
 
 - Run the tick `review-ui` runs against that head first, since a push touching only inert paths carries the close and owes no drive
+- On `verdict-behind`, post the verdict for the commit this pass drove and tick again, since no verdict names it. Never move `--head` onto the standing one
 - On `redrive-owed`, start the next `review-ui` pass at the tip in `head`, driving what the refusal's `drivenPaths` reach from the driven commit
 - Wait while the controller has stated a hold on the pull request, and say what you are waiting on, since a hold is how a pending rebase reaches this session
 - Wait on a request naming no head too, and ask the worker for it rather than driving whatever head the branch shows

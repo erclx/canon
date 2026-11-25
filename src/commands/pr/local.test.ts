@@ -391,7 +391,7 @@ describe('canon pr local', () => {
     writeMarkedComment(
       '## Evidence\n\n**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
     )
-    rmSync(join(tempDir, 'ui-reviews.json'))
+    writeFileSync(join(tempDir, 'ui-reviews-fail'), '')
 
     const outcome = await runLocal(['7', '--remove'])
 
