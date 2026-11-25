@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync } from 'fs'
 import { mkdir } from 'fs/promises'
 import path from 'path'
 import { pathToFileURL } from 'url'
+
 import type {
   CaptureCase,
   CaptureModule,
