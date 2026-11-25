@@ -1,7 +1,7 @@
 {
   "name": "@erclx/canon",
   "type": "module",
-  "version": "5.124.0",
+  "version": "5.125.0",
   "description": "A Claude Code plugin and CLI that runs your agent's work from plan to merge, holds it to cited engineering practice, and sets up every repo the same way.",
   "license": "MIT",
   "bin": {

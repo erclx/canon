@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.125.0](https://github.com/erclx/canon/compare/v5.124.0...v5.125.0) (2026-11-25)
+
+
+### Features
+
+* **pr:** refuse the lift on undriven boxes unless waived ([#3538](https://github.com/erclx/canon/issues/3538)) ([795ef4a](https://github.com/erclx/canon/commit/795ef4a58f668357d8b13997fe699884c7446761))
+* **records:** skip an oversized file and push the rest ([#3539](https://github.com/erclx/canon/issues/3539)) ([fe5264e](https://github.com/erclx/canon/commit/fe5264efd72b7bdd998e8d09df12478c0d236bc0))
+* **sessions:** reap a shell held past a dwell on a live task ([#3541](https://github.com/erclx/canon/issues/3541)) ([8008836](https://github.com/erclx/canon/commit/8008836e73c8925b2cf048d14b870b8ea3d06680))
+* **sessions:** set aside foreign records from before the last boot ([#3540](https://github.com/erclx/canon/issues/3540)) ([ab3ec67](https://github.com/erclx/canon/commit/ab3ec674b3c01e2ecc52ad7d7af07ebfab1fe217))
+
+
+### Bug Fixes
+
+* **governance:** word the alias and Playwright rules without naming src ([#3544](https://github.com/erclx/canon/issues/3544)) ([c03446f](https://github.com/erclx/canon/commit/c03446f8f98e83c3fa15ccced19ee00fe09d7b0b))
+* **tooling:** sort capture script imports and skip partly covered masks ([#3542](https://github.com/erclx/canon/issues/3542)) ([704544e](https://github.com/erclx/canon/commit/704544e7cec892db29dcdd26326d168d29f10328))
+
 ## [5.124.0](https://github.com/erclx/canon/compare/v5.123.0...v5.124.0) (2026-11-25)
 
 
