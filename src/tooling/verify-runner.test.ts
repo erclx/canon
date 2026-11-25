@@ -1240,6 +1240,172 @@ describe('changed mode in a nested root', () => {
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('not the repository root')
   })
+
+  describe('the skip', () => {
+    const settle = (): void => {
+      commit()
+      pushTrunk()
+    }
+
+    // A run that is not scoped reaches the root's own suite first.
+    const passRoot = (): void => writePackage(declare(STACK_SCRIPTS.web))
+
+    beforeEach(() => {
+      writeService({ 'test:run': 'exit 1' })
+      settle()
+    })
+
+    it('should skip it and name it when no path under it changed', () => {
+      writeSource('src/root.ts', 'edited')
+
+      const result = runChanged()
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Skipped: nested root service')
+      expect(result.stdout).not.toContain('Nested root service')
+    })
+
+    it('should run it whole when a tracked file under it changed', () => {
+      writeSource('service/cart.ts', 'edited')
+      runGit('add', '-A')
+
+      const result = runChanged()
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('service failed')
+    })
+
+    it('should run it whole when an untracked file lands under it', () => {
+      writeSource('service/new.ts')
+
+      expect(runChanged().stdout).toContain('service failed')
+    })
+
+    it('should run it whole when a file under it is deleted', () => {
+      writeSource('service/gone.ts')
+      settle()
+      rmSync(join(fixture, 'service/gone.ts'))
+
+      expect(runChanged().stdout).toContain('service failed')
+    })
+
+    it('should run only the touched one where one folder prefixes another', () => {
+      // A root that runs when it should not fails the run, and web-admin passes.
+      for (const dir of ['web', 'web-admin']) {
+        const body = dir === 'web' ? 'exit 1' : 'true'
+        writeSource(`${dir}/package.json`, `{"scripts":{"test:run":"${body}"}}`)
+        writeSource(`${dir}/scripts/verify.json`, '{"require":["test:run"]}')
+        copyFileSync(RUNNER, join(fixture, `${dir}/scripts/verify.ts`))
+      }
+      settle()
+      writeSource('web-admin/page.ts', 'edited')
+
+      const result = runChanged()
+
+      expect(result.status).toBe(0)
+      expect(result.stdout).toContain('Nested root web-admin passed')
+      expect(result.stdout).toContain('Skipped: nested root web,')
+      expect(result.stdout).not.toContain('Nested root web\n')
+    })
+
+    it('should run every nested root in a full run', () => {
+      passRoot()
+
+      expect(runVerify().stdout).toContain('service failed')
+    })
+
+    it('should run every nested root with no trunk base', () => {
+      runGit('remote', 'add', 'origin', 'https://example.com/a.git')
+      runGit('update-ref', '-d', 'refs/remotes/origin/main')
+      passRoot()
+
+      expect(runChanged().stdout).toContain('service failed')
+    })
+
+    it('should still fail naming the runner when the runner of a touched root is gone', () => {
+      rmSync(join(fixture, 'service/scripts/verify.ts'))
+
+      const result = runChanged()
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('No service/scripts/verify.ts here')
+    })
+
+    describe('from a subfolder', () => {
+      beforeEach(() => {
+        writeSource('service/package.json', '{"scripts":{"test:run":"true"}}')
+        writeSource('service/inner/scripts/verify.json', '{}')
+        copyFileSync(RUNNER, join(fixture, 'service/inner/scripts/verify.ts'))
+        writeSource('service/inner/package.json', '{"scripts":{}}')
+        settle()
+      })
+
+      it('should run a root touched below the repository root', () => {
+        writeSource('service/inner/x.ts', 'edited')
+
+        const result = runChangedIn('service')
+
+        expect(result.status).toBe(0)
+        expect(result.stdout).toContain('Nested root inner passed')
+      })
+
+      it('should skip a root untouched below the repository root', () => {
+        writeSource('service/cart.ts', 'edited')
+
+        const result = runChangedIn('service')
+
+        expect(result.status).toBe(0)
+        expect(result.stdout).toContain('Skipped: nested root inner')
+      })
+    })
+
+    it('should run a nested root with local commits on the trunk checkout', () => {
+      runGit('checkout', '-q', '-B', 'main')
+      writeSource('service/cart.ts', 'edited')
+      passRoot()
+      commit()
+
+      expect(runChanged().stdout).toContain('service failed')
+    })
+  })
+
+  describe('the packages stop', () => {
+    beforeEach(() => {
+      writeService({ 'test:run': 'true' })
+      commit()
+      pushTrunk()
+      writeSource('service/cart.ts', 'edited')
+    })
+
+    it('should name the folder and bun install when it has a lockfile and no node_modules', () => {
+      writeSource('service/bun.lock')
+
+      const result = runChanged()
+
+      expect(result.status).toBe(1)
+      expect(result.stdout).toContain('service')
+      expect(result.stdout).toContain('bun install')
+      expect(result.stdout).not.toContain('Nested root service passed')
+    })
+
+    it('should run it when node_modules sits beside the lockfile', () => {
+      writeSource('service/bun.lock')
+      mkdirSync(join(fixture, 'service/node_modules'))
+
+      expect(runChanged().stdout).toContain('Nested root service passed')
+    })
+
+    it('should never stop a root with no lockfile', () => {
+      expect(runChanged().stdout).toContain('Nested root service passed')
+    })
+
+    it('should not stop a full run', () => {
+      writeSource('service/bun.lock')
+      writePackage(declare(STACK_SCRIPTS.web))
+
+      expect(runVerify().stdout).toContain('Nested root service passed')
+    })
+  })
 })
 
 describe('the remembered pass', () => {
