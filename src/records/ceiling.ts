@@ -1,13 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { lengthExemption } from '@/markdown/ceiling'
+import { ceilingFor, lengthExemption } from '@/markdown/ceiling'
 import { documentHeight } from '@/markdown/structure'
 
-/**
- * Rendered lines from which a document counts as near the ceiling, a 20-line
- * margin under the 300 the gate fails past.
- */
-export const NEAR_CEILING = 280
+/** Rendered lines under a document's own gate ceiling from which it counts as near it. */
+const NEAR_MARGIN = 20
 
 /** The fixed phrase an entry uses to state an edit replaces lines in place. */
 const IN_PLACE_PHRASE = 'adds no line'
@@ -83,7 +80,9 @@ export function checkCeiling(
       continue
 
     const lines = documentHeight(source)
-    if (lines < NEAR_CEILING) continue
+    const ceiling = ceilingFor(target)
+    const near = ceiling - NEAR_MARGIN
+    if (lines < near) continue
 
     seen.add(target)
     const stated =
@@ -94,7 +93,7 @@ export function checkCeiling(
     findings.push({
       kind: 'ceiling-unstated',
       subject: target,
-      message: `renders at ${lines} lines, ${NEAR_CEILING} or more of the 300 ceiling, and its entry names no second markdown path for the new content and does not say "${IN_PLACE_PHRASE}". Say in the entry which reference the content goes to or which split comes first.`,
+      message: `renders at ${lines} lines, ${near} or more of the ${ceiling} ceiling, and its entry names no second markdown path for the new content and does not say "${IN_PLACE_PHRASE}". Say in the entry which reference the content goes to or which split comes first.`,
     })
   }
 
