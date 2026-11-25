@@ -1,6 +1,5 @@
-// Writes one group's suites to GITHUB_OUTPUT as files, the whole group with no
-// scope and empty where the scope reaches none of it.
-// Usage: e2e-groups.ts <group> [scoped file...]
+// Writes one group's suites to GITHUB_OUTPUT as run and files, the whole group
+// with no scope. Usage: e2e-groups.ts <group> [scoped file...]
 
 import { appendFileSync } from 'node:fs'
 
@@ -54,11 +53,25 @@ export function groupFiles(
   return files.filter((file) => scoped.includes(file))
 }
 
+/**
+ * `run` answers on its own key, so a leg skips on an explicit answer and never
+ * on an output that failed to arrive.
+ */
+export function groupOutput(
+  group: string,
+  scoped: readonly string[],
+): { readonly run: string; readonly files: string } {
+  const files = groupFiles(group, scoped)
+  return { run: String(files.length > 0), files: files.join(' ') }
+}
+
 function main(group: string, scoped: readonly string[]): void {
-  const line = `files=${groupFiles(group, scoped).join(' ')}`
+  const lines = Object.entries(groupOutput(group, scoped))
+    .map(([key, value]) => `${key}=${value}\n`)
+    .join('')
   const out = process.env.GITHUB_OUTPUT
-  if (out !== undefined) appendFileSync(out, `${line}\n`)
-  console.error(line)
+  if (out !== undefined) appendFileSync(out, lines)
+  console.error(lines)
 }
 
 if (import.meta.main) main(process.argv[2] ?? '', process.argv.slice(3))

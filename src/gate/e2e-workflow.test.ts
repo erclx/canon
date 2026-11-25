@@ -2,11 +2,19 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { E2E_GROUPS } from '../../scripts/ci/e2e-groups'
+import { E2E_GROUPS, groupOutput } from '../../scripts/ci/e2e-groups'
+
+interface Step {
+  readonly id?: string
+  readonly if?: string
+  readonly run?: string
+  readonly env?: Record<string, string>
+}
 
 interface Job {
   readonly name: string
-  readonly steps: readonly { readonly name?: string; readonly run?: string }[]
+  readonly if?: string
+  readonly steps: readonly Step[]
 }
 
 interface MatrixJob extends Job {
@@ -39,10 +47,39 @@ const summaryExit = (changes: string, suites: string, reached: string) =>
     },
   }).exitCode
 
+const legSteps = jobs['e2e-groups'].steps
+
+const readAt = legSteps.findIndex((step) =>
+  step.run?.includes('scripts/ci/e2e-groups.ts'),
+)
+
+const readId = legSteps[readAt]?.id
+
+const [runKey, filesKey] = Object.keys(groupOutput('reel', []))
+
 describe('the e2e matrix', () => {
   it('should run every group as one leg', () => {
     expect(jobs['e2e-groups'].strategy.matrix.group.toSorted()).toEqual(
       Object.keys(E2E_GROUPS).toSorted(),
+    )
+  })
+
+  // Skipping on a missing output would pass a leg that ran nothing
+  it('should skip a later step only on an explicit answer not to run', () => {
+    const gate = `steps.${readId}.outputs.${runKey} != 'false'`
+    const ungated = legSteps
+      .slice(readAt + 1)
+      .filter((step) => step.if?.split(' && ')[0] !== gate)
+
+    expect(readAt).toBeGreaterThan(0)
+    expect(ungated).toEqual([])
+  })
+
+  it('should run the files the group step wrote', () => {
+    const suites = legSteps.find((step) => step.run?.includes('test:e2e'))
+
+    expect(suites?.env?.FILES).toBe(
+      `\${{ steps.${readId}.outputs.${filesKey} }}`,
     )
   })
 })
@@ -50,6 +87,10 @@ describe('the e2e matrix', () => {
 describe('the e2e summary job', () => {
   it('should report under the name a ruleset requires', () => {
     expect(jobs['e2e-suites'].name).toBe('🎬 E2E Suites')
+  })
+
+  it('should run whatever its legs returned', () => {
+    expect(jobs['e2e-suites'].if).toMatch(/^always\(\)/)
   })
 
   it.each([

@@ -46,7 +46,7 @@ One check over a matrix that runs each group of `*.e2e.test.ts` suites on its ow
 Holds the groups, balanced by each suite's mean time on a runner. Vitest's `--shard` balances by file count, which puts a half-second suite level with a four-minute one. A leg the scope leaves empty passes with no setup.
 
 - `src/gate/e2e-groups.test.ts` fails on a suite in no group or in two, and on a timed suite sharing its group. A new suite takes a line in the script.
-- `src/gate/e2e-workflow.test.ts` fails on a group the matrix does not run, and runs the summary step over each result pair
+- `src/gate/e2e-workflow.test.ts` fails on a group the matrix drops or a step that would skip on a missing output, and runs the summary step over each result pair
 - The summary job fails on a failed or cancelled leg and on a failed `🔍 Changes` job, and passes on a skipped matrix only where the scope reached no suite
 - The ruleset requires the check once the operator adds it by hand, after 10 consecutive green runs on `main`
 

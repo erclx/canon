@@ -175,8 +175,8 @@ jobs:
           bun-version: latest
 
       # Scope is empty on a push, on a trigger, and on a failed scope read,
-      # which all run the whole group. Files is empty when the scope reaches
-      # none of the group, so every later step skips and the leg passes.
+      # which all run the whole group. Every later step skips on run=false
+      # alone, so a missing output runs every suite rather than none.
       - name: Read Group
         id: group
         env:
@@ -185,13 +185,13 @@ jobs:
         run: bun scripts/ci/e2e-groups.ts "$GROUP" $SCOPE
 
       - name: Install Dependencies
-        if: steps.group.outputs.files != ''
+        if: steps.group.outputs.run != 'false'
         run: bun install --frozen-lockfile
 
       # The runner image lists no FFmpeg. A stalled mirror connection hangs
       # rather than fails, so the step bound turns a hang into a red step.
       - name: Install FFmpeg
-        if: steps.group.outputs.files != ''
+        if: steps.group.outputs.run != 'false'
         timeout-minutes: 5
         run: |
           bash scripts/ci/prefer-archive-mirror.sh
@@ -200,7 +200,7 @@ jobs:
       # Its own key, since the capture job's cache holds no agent CLI revision
       # and a hit on it would skip the install below
       - name: Cache Playwright Browsers
-        if: steps.group.outputs.files != ''
+        if: steps.group.outputs.run != 'false'
         id: playwright-cache
         uses: actions/cache@v6
         with:
@@ -210,7 +210,7 @@ jobs:
       # Lands the chromium and headless shell revisions playwright-core reads
       - name: Install Playwright Browsers
         if: >-
-          steps.group.outputs.files != '' &&
+          steps.group.outputs.run != 'false' &&
           steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5
         run: bunx playwright install chromium
@@ -219,13 +219,13 @@ jobs:
       # revision differs from the engine's
       - name: Install Agent CLI Browser
         if: >-
-          steps.group.outputs.files != '' &&
+          steps.group.outputs.run != 'false' &&
           steps.playwright-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5
         run: bun src/cli.ts browser install-browser chromium
 
       - name: Verify Tools Present
-        if: steps.group.outputs.files != ''
+        if: steps.group.outputs.run != 'false'
         run: |
           scripts/ci/check-browsers.sh chromium chromium_headless_shell
           scripts/ci/check-e2e-tools.sh "$(bun -e "import { CHROMIUM_REVISION } from './src/browser/agent-cli'; console.log(CHROMIUM_REVISION)")"
@@ -234,12 +234,12 @@ jobs:
       # spawns with its sandbox on. Playwright's launches turn the sandbox off,
       # so only the take suites need this.
       - name: Allow Unprivileged User Namespaces
-        if: steps.group.outputs.files != ''
+        if: steps.group.outputs.run != 'false'
         timeout-minutes: 1
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Run E2E Suites
-        if: steps.group.outputs.files != ''
+        if: steps.group.outputs.run != 'false'
         timeout-minutes: 15
         env:
           FILES: ${{ steps.group.outputs.files }}
