@@ -272,6 +272,7 @@ export async function readChecksGate(
       state: reading.state,
       isConflicted: reading.conflicted,
       ...(reading.advisory !== undefined && { advisory: reading.advisory }),
+      ...(reading.running !== undefined && { running: reading.running }),
       ...(stalled.length > 0 && { stalled }),
     }
   } catch {
@@ -353,6 +354,14 @@ async function readRequiredChecks(
     return requiredChecks(JSON.parse(rules))
   } catch {
     return undefined
+  }
+}
+
+export function warnRunning(running: readonly string[] | undefined): void {
+  for (const name of running ?? []) {
+    logWarn(
+      `running: ${name} has not finished, which the base's rules do not require, so it did not block`,
+    )
   }
 }
 

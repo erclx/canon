@@ -214,6 +214,40 @@ describe('lift', () => {
       })
     })
 
+    // A non-required check still going never gates, so the draft still lifts, and the record names it.
+    it('should read clear under --check and name a non-required check still running', async () => {
+      const { api } = makeApi({
+        checks: [
+          {
+            state: 'passing',
+            isConflicted: false,
+            advisory: [],
+            running: ['🍎 macOS Unit Tests'],
+          },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'clear',
+        isOk: true,
+        running: ['🍎 macOS Unit Tests'],
+      })
+    })
+
+    it('should carry no running field when nothing outside the required set runs', async () => {
+      const { api } = makeApi({
+        checks: [
+          { state: 'passing', isConflicted: false, advisory: [], running: [] },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).not.toHaveProperty('running')
+    })
+
     it('should carry no advisory field when none failed', async () => {
       const { api } = makeApi({
         checks: [{ state: 'passing', isConflicted: false, advisory: [] }],
@@ -473,6 +507,28 @@ describe('lift', () => {
       expect(record).toMatchObject({
         reason: 'already-ready',
         advisory: ['🍎 macOS'],
+      })
+    })
+
+    it('should name a non-required check still running on already-ready', async () => {
+      const { api } = makeApi({
+        ...ready,
+        checks: [
+          {
+            state: 'passing',
+            isConflicted: false,
+            advisory: [],
+            running: ['🍎 macOS'],
+          },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'already-ready',
+        isOk: true,
+        running: ['🍎 macOS'],
       })
     })
 
