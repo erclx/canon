@@ -1,4 +1,5 @@
 import type { ChecksState } from '@/targets/pulls'
+import { EXAMPLES_DIR, EXAMPLES_INDEX, stampedStandards } from '@/gate/examples'
 import type { StalledRun } from '@/pr/checks'
 import {
   coversHead,
@@ -113,7 +114,7 @@ export interface ChangedRead {
 /** How the head sits against the base the pull request targets. */
 export type Standing = 'fresh' | 'stale' | 'conflict' | 'unknown'
 
-/** A standing with the branch paths the base changed, present only on `stale`. */
+/** A standing with the written or stamped paths the base changed, present only on `stale`. */
 export interface BaseReading {
   readonly standing: Standing
   readonly moved?: readonly string[]
@@ -954,8 +955,37 @@ function nonEmptyLines(output: string): string[] {
 }
 
 /**
+ * The standards the examples gate stage stamps at the head, for a branch writing
+ * an example, since a base edit to one fails that stage after the merge. A head
+ * with no index stamps nothing, and a failed read answers undefined.
+ */
+async function readStampedPaths(
+  git: GitRunner,
+  head: string,
+  writes: readonly string[],
+): Promise<readonly string[] | undefined> {
+  if (!writes.some((path) => path.startsWith(`${EXAMPLES_DIR}/`))) return []
+
+  // Listed first, since `git show` fails alike on an absent file and a failed read.
+  const listed = await git([
+    'ls-tree',
+    '--full-tree',
+    '--name-only',
+    head,
+    '--',
+    EXAMPLES_INDEX,
+  ])
+  if (listed === undefined) return undefined
+  if (nonEmptyLines(listed).length === 0) return []
+
+  const source = await git(['show', `${head}:${EXAMPLES_INDEX}`])
+  return source === undefined ? undefined : stampedStandards(source)
+}
+
+/**
  * The orchestrator poll's read, through merge-tree since `mergeable_state` is
- * unknown while computed. Only a base change to a branch path makes it stale.
+ * unknown while computed. Only a base change to a path the branch writes, or a
+ * standard its examples stamp, makes it stale.
  */
 export async function readBaseStanding(
   git: GitRunner,
@@ -1009,6 +1039,9 @@ export async function readBaseReading(
   const paths = nonEmptyLines(written)
   if (paths.length === 0) return { standing: 'fresh' }
 
+  const stamped = await readStampedPaths(git, head, paths)
+  if (stamped === undefined) return { standing: 'unknown' }
+
   const moved = await git([
     '--literal-pathspecs',
     'diff',
@@ -1018,6 +1051,7 @@ export async function readBaseReading(
     ref,
     '--',
     ...paths,
+    ...stamped,
   ])
   if (moved === undefined) return { standing: 'unknown' }
 
