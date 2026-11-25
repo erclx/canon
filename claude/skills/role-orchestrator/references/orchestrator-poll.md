@@ -31,7 +31,7 @@ The orchestrator starts the poll on that condition and stops re-arming it on the
 
 ## The prompt
 
-Start the poll in the background, act on what it prints when it exits by the block below, then start it again. It reads every 180 seconds by itself and exits on movement, so an idle board costs no turn and no message queues behind a run. The block is read on every wake, so edit it here and never from memory.
+Start the poll in the background, act on what it prints when it exits by the block below, then start it again. It reads every 180 seconds by itself and exits on a line that routes to an act, so an idle board costs no turn. The block is read on every wake, so edit it here and never from memory.
 
 ```bash
 bun <POLL_SCRIPT> --wait 1200
@@ -49,8 +49,8 @@ Act on what the poll printed when it exited, then start it again.
 - MOVED, REBASED, or EVIDENCE, before the rule below: run the review dispatch runbook's proof check on the head, and route on its table. A head owing evidence goes back to its worker and holds the re-review. A head first carrying an uncaptured path holds nothing. A live code reviewer reads the paths off its own evidence read on the re-review, so only a fresh launch carries them, in its brief's uncaptured clause. One first carrying a `drivable` box with no UI reviewer launched takes one now.
 - MOVED or RESPONSE on a pull request already reviewed: when a live local reviewer holds it, report it and stop, since the worker asks that reviewer for the re-review directly. When none does, launch a fresh reviewer under the review dispatch runbook of the canon:role-orchestrator skill. Never run the canon:review-pr skill here. Re-reviews read prior..head and gain nothing from waiting.
 - OPENED, or a pull request with no prior review pass: once that runbook's proof check reads proof, launch its reviewer under the review dispatch runbook of the canon:role-orchestrator skill, and its UI reviewer beside it when the evidence record counts a `drivable` box. Never run the first pass here. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
-- SEEN: report it and stop. A pass already covers that head, whether it arrived out of band or before the poll first saw the pull request, so no review follows.
-- REBASED: both closes carried, so report it and stop, first running `canon pr lift <number> --json` with `run_in_background` on a draft and reporting its reason on the wake.
+- SEEN: report it and stop, since a pass already covers that head. REBASED: both closes carried, so report it and stop, first running `canon pr lift <number> --json` with `run_in_background` on a draft and reporting its reason on the wake.
+- CODE-CLOSED or HELD: read orchestrator-poll-lines.md and route by it. A HELD line asks nothing.
 - STALLED: read the last pass and report what it carried. The pass has sat open for hours with nothing following it, so a worker mid-task is already ruled out and the dispatch either never went out or the session holding it is gone. Confirm and re-send it under the dispatch rule below, whatever grades the pass carried. Do not re-run a review to correct the heading, since a pass on an unchanged head with no response behind it stops by design.
 - CONFLICT or STALE: report it, since a live worker rebases off its own standing wait. Run `canon sessions list --branch <branch> --json`, and launch the rebase handback in the canon:role-orchestrator skill's handback runbook only when it reads no live session: `confidence` reading "confirmed", no row, and `foreignDead` at zero. Send nothing on one confirmed row. Route any other reading through the handback rule's fallback below, since it may be the live worker. The canon pr lift verb refuses on either standing, so nothing here lifts the mark.
 - OVERLAP: report the pair and the files, and settle their merge order now under the Parallelism rule of the canon:role-orchestrator skill. Defer each one's UI reviewer and reel per the OVERLAP deferral in its review dispatch runbook, and dispatch nobody else. The second to merge reads STALE or CONFLICT once the first lands, and the handback goes out then.
@@ -61,7 +61,7 @@ Act on what the poll printed when it exited, then start it again.
 - READY: report it. Once every open pull request but a release one reads READY, start no next poll, per the READY stop in the review dispatch runbook of the canon:role-orchestrator skill.
 - GONE: report it, then sweep the board by invoking the canon:role-orchestrator skill and following its queue-refill sweep.
 - A line starting `poll:`: report it verbatim and treat that pull request as unread this run. It is a failed query, not a state.
-- Nothing changed: say exactly "No movement." and nothing else.
+- Only "No movement." printed: say exactly that and nothing else.
 
 After a pass that posts a finding, at any severity, and that no live local reviewer sent on, tell the session holding that branch to run the canon:review-address skill. That covers a reviewer's message reporting no live worker and a STALLED pass, which is by definition one nobody acted on, and nothing else, since a second dispatch for one pass runs review-address twice. Resolve the target by running `canon sessions list --branch <branch> --json` at that moment, which scopes the match to this repository, then route on how many sessions it returned. Zero: launch the review-address shape in the canon:role-orchestrator skill's launch runbook, carrying the reviewer's sessionId when a local reviewer is live. Exactly one, with the confidence field reading "confirmed": address that name directly. Any other count, any other confidence, or a command that is missing or refuses: fall back to picking from a session listing, open by naming the worktree and branch you believe the reader holds, and ask to be corrected. Two sessions can hold one branch, so read the count rather than the first row. The threshold is stated once in the canon:review-pr skill and governs the heading with it, so an open heading and an owed dispatch answer the same question and either one is enough to send.
 ```
@@ -76,7 +76,7 @@ Every classification line names a pull request and a state. A line starting `pol
 
 ### Headings the script knows
 
-The script's eight headings come from `review-pr`, `review-address`, `canon pr evidence`, and `review-ui`, the first stating the set. An unmatched one reads as unreviewed. `orchestrator-poll-lines.md` routes `CODE-CLOSED`.
+The eight headings the script knows are written by `review-pr`, `review-address`, `canon pr evidence`, and `review-ui`, and the whole set is stated once in the first. A heading nothing matches reads as a pull request nobody has reviewed.
 
 - The reply family matches by a filter in `poll.ts`, so a project posting it under different headings edits that
 - The review and UI families match inside `canon pr review-state`, which the script and `review-pr` both read, so renaming one changes the verb

@@ -14,7 +14,7 @@ A `--wait` run ends on a line that routes to an act and holds every other line f
 - `READY`, `CONFLICT`, `STALE`, `OVERLAP`, `EVIDENCE`, `UI-CLOSED`, `CODE-CLOSED`, and `UNMATCHED` end it
 - A `poll:` line is reported as it always was, a failed read holding to the cap rather than ending the wait
 - `OPENED`, `SEEN`, `MOVED`, `REBASED`, `RESPONSE`, `STALLED`, `UI-OPEN`, `UI-STALE`, and `GONE` are held, printed with the next exit, and printed at the cap when nothing actionable came
-- A held line is already in the baseline, so it is never printed twice, and the run with no `--wait` prints every line
+- A held line is already in the baseline, so it waits in `.canon/tmp/pr/poll/held.txt` until a run prints it, which a wait stopped early still honors, and the run with no `--wait` prints every line
 - `HELD      <n> line(s) above ended no wait` closes an exit that carried held lines, and it asks nothing
 
 ## Reading a held line

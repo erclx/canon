@@ -481,6 +481,65 @@ describe('poll', () => {
       expect(poll().stdout).toBe('CODE-CLOSED #7 at 1111111')
     })
 
+    it('should not print CODE-CLOSED again after a failed read of a closed review', () => {
+      writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+      poll()
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+      expect(poll().stdout).toBe('CODE-CLOSED #7 at 1111111')
+
+      breakView()
+      poll()
+      rmSync(join(root, 'fixtures', 'unreadable'))
+
+      expect(poll().stdout).toBe('No movement.')
+    })
+
+    it('should print held lines a stopped wait never printed on the next run', async () => {
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+      poll()
+      answered()
+      const held = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll', 'held.txt')
+      const child = spawn('bun', [SCRIPT, '--wait', '30', '--every', '1'], {
+        cwd: join(root, 'repo'),
+        env: buildEnv(),
+      })
+      const exited = new Promise<null | number>((resolve) =>
+        child.on('close', resolve),
+      )
+      stopWaiter = () => {
+        child.kill()
+        return exited
+      }
+      while (!existsSync(held)) {
+        await new Promise((resolve) => setTimeout(resolve, 50))
+      }
+      child.kill()
+      await exited
+
+      const next = poll()
+
+      expect(next.stdout).toBe('RESPONSE  #7 answered with no new commit')
+      expect(existsSync(held)).toBe(false)
+      expect(poll().stdout).toBe('No movement.')
+    })
+
+    it('should print held lines at the cap when the last read failed', () => {
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+      poll()
+      answered()
+      const child = spawnSync(
+        'bash',
+        [
+          '-c',
+          `(sleep 1.5; touch '${join(root, 'fixtures', 'list-unreadable')}') & bun '${SCRIPT}' --wait 4 --every 1`,
+        ],
+        { cwd: join(root, 'repo'), encoding: 'utf8', env: buildEnv() },
+      )
+
+      expect(child.status).toBe(1)
+      expect(child.stdout).toContain('RESPONSE  #7')
+    })
+
     it('should print no CODE-CLOSED on a first sighting of a closed review', () => {
       writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
 
@@ -658,7 +717,7 @@ describe('poll', () => {
   })
 
   // A blanked count would report every existing comment as UNMATCHED next run.
-  it('should keep the unmatched count and UI token on a carried line', () => {
+  it('should keep the unmatched count, UI token, and close on a carried line', () => {
     const dir = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
     const baseline = join(dir, 'baseline.txt')
     mkdirSync(dir, { recursive: true })
@@ -673,7 +732,7 @@ describe('poll', () => {
 
     expect(carried.stdout).toBe('No movement.')
     expect(readFileSync(baseline, 'utf8')).toBe(
-      `7 ${HEAD} none 0 unknown carried 2 open-head-1111111\n`,
+      `7 ${HEAD} none 0 unknown closed 2 open-head-1111111\n`,
     )
   })
 
