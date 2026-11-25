@@ -76,8 +76,9 @@ The task form stops three more sessions a status alone would have blocked, and t
 | `planned`     | A `planner-` session holding no branch and reading `shell`, on a task whose `Plan:` line links a plan |
 | `shell-dwell` | Any other session reading `shell` on the live task named, its dwell past `--idle-minutes`             |
 
-A `busy` session never reads `shell-dwell`, nor does one with no measured dwell. The dwell restarts on every status change, so a session that ran a turn since is safe.
+A `busy` session never reads `shell-dwell`, nor does one with no measured dwell. The dwell restarts on every status change, so a session that ran a turn since is safe while the machine stays awake.
 
+- Time the machine spent asleep counts toward the dwell, so a check minutes old at suspend can read `shell-dwell` on wake. Pass `--idle-minutes 0` on a reap run after a wake.
 - A command running past the threshold, such as a long CI watch, ends with the stop, so raise `--idle-minutes` or pass `--keep` while one is expected
 - `--idle-minutes 0` turns the reading off on the task form, so every held shell on a live task reads `busy`
 - The finished form never reads `shell-dwell`
