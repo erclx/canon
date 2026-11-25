@@ -79,9 +79,9 @@ Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before
 A project can also opt out of one golden file or `package.json` script without leaving the stack. Each verb below takes the path relative to the target, as `canon tooling diff` lists it, or a script as `package.json:<key>`.
 
 ```bash
-canon tooling decline .github/workflows/readme-screenshot.yml --reason "no screenshots here"
+canon tooling decline .github/workflows/verify.yml --reason "CI runs elsewhere"
 canon tooling customize e2e/screenshot.ts
-canon tooling lift .github/workflows/readme-screenshot.yml
+canon tooling lift .github/workflows/verify.yml
 canon tooling customize package.json:test:run
 ```
 

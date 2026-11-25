@@ -244,7 +244,7 @@ export function register(program: Command): void {
       [
         ...dispositionHelp,
         'Examples:',
-        '  canon tooling decline .github/workflows/readme-screenshot.yml',
+        '  canon tooling decline .github/workflows/verify.yml',
         '  canon tooling decline .oxlintrc.json web --reason "lint runs in CI only"',
         '  canon tooling decline package.json:test:e2e:changed',
         '',
@@ -299,7 +299,7 @@ export function register(program: Command): void {
       [
         ...dispositionHelp,
         'Examples:',
-        '  canon tooling lift .github/workflows/readme-screenshot.yml',
+        '  canon tooling lift .github/workflows/verify.yml',
         '  canon tooling lift package.json:test:run',
         '',
       ].join('\n'),
