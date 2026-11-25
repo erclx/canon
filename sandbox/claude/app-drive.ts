@@ -160,7 +160,7 @@ export default scenario({
         '         and a Board row in the log naming project drive-<nn>,',
       )
       ctx.log.info(
-        '         whose pages open on 00-current with frames at 390, 834, and 1440, and no empty',
+        '         whose pages open on 00-current with frames at 390, 768, and 1280, and no empty',
       )
       ctx.log.info(
         '         page-1 or untitled project, evidence grouped under evidence/<surface>/ with the',

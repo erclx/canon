@@ -9,8 +9,8 @@ paths = [
   { path = ".canon/board/drive-*/project.json", why = "The drive's board project." },
   { path = ".canon/board/drive-*/00-current/layout.json", why = "The current-state page leads the board." },
   { path = ".canon/board/drive-*/00-current/*-390.html", why = "A frame at the narrow width." },
-  { path = ".canon/board/drive-*/00-current/*-834.html", why = "A frame at the middle width." },
-  { path = ".canon/board/drive-*/00-current/*-1440.html", why = "A frame at the wide width." },
+  { path = ".canon/board/drive-*/00-current/*-768.html", why = "A frame at the middle width." },
+  { path = ".canon/board/drive-*/00-current/*-1280.html", why = "A frame at the wide width." },
 ]
 
 absent = [
