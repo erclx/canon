@@ -404,6 +404,54 @@ function harness(fixture: Fixture = {}): Harness {
   return { api, puts, pulls, standings }
 }
 
+const RUN = 'https://github.com/erclx/frameboard/actions/runs/45560474777'
+const PENDING_TABLE = [
+  '## Outcome',
+  '',
+  '| what | Result | baseline | conditions |',
+  '| --- | --- | --- | --- |',
+  `| scan | pending | 4 ms | [run](${RUN}) |`,
+].join('\n')
+
+describe('merge over a pending measurement', () => {
+  it('should refuse and send no write while a results row reads pending', async () => {
+    const { api, puts } = harness({
+      pull: { body: `${BODY}\n\n${PENDING_TABLE}\n` },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({
+      reason: 'measurement-pending',
+      isOk: false,
+      pending: [{ row: 'scan', run: RUN }],
+    })
+    expect(puts).toEqual([])
+  })
+
+  it('should refuse a dry run the same way', async () => {
+    const { api } = harness({ pull: { body: `${BODY}\n\n${PENDING_TABLE}\n` } })
+
+    const record = await merge(api, { number: 2544, isDryRun: true })
+
+    expect(record.reason).toBe('measurement-pending')
+  })
+
+  it('should merge a release body that quotes a pending row', async () => {
+    const { api, puts } = harness({
+      pull: {
+        body: `${RELEASE_BODY}\n\n${PENDING_TABLE}\n`,
+        branch: 'release-please--branches--main--components--canon',
+      },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({ reason: 'merged', isOk: true })
+    expect(puts).toHaveLength(1)
+  })
+})
+
 describe('merge reading the base standing', () => {
   it('should merge a fresh head after reading its standing against the base', async () => {
     const { api, puts, standings } = harness()

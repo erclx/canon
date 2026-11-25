@@ -1,4 +1,8 @@
 import type { MainPull } from '@/git/worktree'
+import {
+  type PendingMeasurement,
+  pendingMeasurements,
+} from '@/labels/measurement'
 import { advisoryOf, type BaseReading, type ChecksGate } from '@/pr/lift'
 import { readSection } from '@/pr/paths'
 import { UI_PASS_MARKER } from '@/pr/tick'
@@ -9,6 +13,7 @@ export type MergeRefusal =
   | 'pull-draft'
   | 'missing-summary'
   | 'missing-key-changes'
+  | 'measurement-pending'
   | 'ci-failing'
   | 'ci-conflicted'
   | 'ci-stalled'
@@ -95,6 +100,8 @@ export interface MergeRecord {
   readonly moved?: readonly string[]
   /** The bot a stale pull request comes from, so the refusal can name who refreshes the branch. Present only on `standing-stale`. */
   readonly bot?: BotKind
+  /** The results rows still pending, present only on `measurement-pending`. */
+  readonly pending?: readonly PendingMeasurement[]
   /** The fast-forward of the main worktree, present only on a merge. */
   readonly pull?: MergePullRecord
 }
@@ -224,6 +231,7 @@ function refused(
     description?: string
     moved?: readonly string[]
     bot?: BotKind
+    pending?: readonly PendingMeasurement[]
   } = {},
 ): MergeRecord {
   return { reason, isOk: false, number, ...message }
@@ -259,6 +267,12 @@ export async function merge(
     return refused(composed.reason, number, { title })
   }
   const message = { title, description: composed.description }
+
+  // A bot body quotes whatever its tool wrote, so it never holds a measurement.
+  const pending = bot === undefined ? pendingMeasurements(pull.body) : []
+  if (pending.length > 0) {
+    return refused('measurement-pending', number, { ...message, pending })
+  }
 
   const checks = await api.readChecks(pull.head)
   if (checks === undefined) return refused('gh-failed', number, message)
