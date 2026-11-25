@@ -50,7 +50,8 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Then run `canon sessions reap <stem> --remove --json` for each merged task, archived or not, so its worker and reviewers stop, leave the agent view, and the view keeps to live work
    - The verb skips an interactive, talk, or controller session, the caller, one a live task still records, and a busy one on a task whose pull request has not landed
    - Read each row's `sessions[].outcome` and `reason` rather than stopping a session by hand, since a stop reads `merged` or `planned` where the task alone showed it finished
-   - List what it stopped in the report's `Reaped:` line, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
+   - Treat a stop reading `shell-dwell` as unproven, since only a long-held shell showed it, and relaunch the session when its work is unfinished
+   - List what it stopped in the report's `Reaped:` line, naming each `shell-dwell`, any `failed` row with its `detail`, and each listener the record's `listeners` ended, by port and path
 5. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## In flight` is what is running, so keep one in reserve beyond it.
 6. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
@@ -75,7 +76,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
 ```plaintext
 Findings placed: <finding> → <destination>
 Archived: <task>
-Reaped: <session names stopped>, failed <session: detail> or none, listeners ended <port in path>, unread, or none
+Reaped: <session names stopped, with any shell-dwell reason>, failed <session: detail> or none, listeners ended <port in path>, unread, or none
 Struck: <outcome>, owed by <operator or repository>, <reason>
 Operator checks: <outcome>, left unticked on <task>
 Launch filled: <task>, <role, model, effort, route> or none
