@@ -81,6 +81,28 @@ function sectionOf(text: string, heading: string): string {
   return next === -1 ? rest : rest.slice(0, heading.length + next)
 }
 
+/**
+ * Where a config file's keys are documented. `app.toml` has a page of its own
+ * with a heading per table, and every other file is one section of the config page.
+ */
+function docsSectionOf(name: string): {
+  file: string
+  tableHeading: (table: string) => string
+} {
+  const read = (page: string): string =>
+    readFileSync(join(REPO, 'docs', 'agents', page), 'utf8')
+  if (name === 'app.toml') {
+    return {
+      file: read('app-config.md'),
+      tableHeading: (table) => `## [${table}]`,
+    }
+  }
+  return {
+    file: sectionOf(read('config.md'), `## ${name}`),
+    tableHeading: (table) => `### [${table}]`,
+  }
+}
+
 let root: string
 
 beforeEach(() => {
@@ -135,21 +157,17 @@ describe('the commented starters', () => {
   it.each(CONFIG_FILES.map((spec) => [spec.name, spec] as const))(
     'should have every key on the docs page: %s',
     (_name, spec) => {
-      const page = readFileSync(
-        join(REPO, 'docs', 'agents', 'config.md'),
-        'utf8',
-      )
-      const file = sectionOf(page, `## ${spec.name}`)
+      const { file, tableHeading } = docsSectionOf(spec.name)
       const missing = everyKeyPath(spec.root).filter((path) => {
         const key = path.split('.').at(-1) ?? ''
         const table = path.split('.')[0] ?? ''
-        const own = file.includes(`### [${table}]`)
-          ? sectionOf(file, `### [${table}]`)
+        const own = file.includes(tableHeading(table))
+          ? sectionOf(file, tableHeading(table))
           : file
         return !(own.includes(`\`${key}\``) || own.includes(`[${path}`))
       })
 
-      expect(page).toContain(`## ${spec.name}`)
+      expect(file).not.toBe('')
       expect(missing).toEqual([])
     },
   )
