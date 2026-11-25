@@ -13,7 +13,7 @@ Draw only when an item's fix is a choice the operator settles by looking, such a
 
 - The pass needs no ask from the operator to draw, and says in its output which items it drew for
 - Write the item's problem and its suggested pick first, then draw the options the suggestion weighs
-- A `design-pick` round follows that skill's own branch. This file covers the pass's own project alone.
+- A `design-pick` round on one of the pass's items draws in the pass's project too, on that item's page, per `from-finding.md` beside `board.md`
 
 ## Where it draws
 
@@ -22,7 +22,7 @@ A pass draws on the board when `.canon/board/` exists at the main root. Without 
 Reach and start the board per `board.md`, and pass `--root <board>` on every `frameboard` verb, since a verb sent with no root creates a `.frameboard/` folder wherever the session stands. The drawing skill's own start step names no root, so this file's rule decides.
 
 - `<project>` is `drive-<nn>`, the default `${CLAUDE_SKILL_DIR}/../app-drive/references/config.md` gives with the intake's ordinal
-- Never take a name a pick round derives, so a pass's pages stay apart from pick rounds and accepted frames
+- Never take the name a standalone pick derives, so a pass's pages stay apart from standalone picks and accepted frames
 - Read `frameboard list --root <board> --json` with no `--project`, run `project add` when the list lacks the project, and name it in the overview before the first frame
 - File it under the `board-folder` key of the `[drive]` table, `Drives` when absent, per `## Home folders` in `board.md`, so a drive and a pass land in one place
 - Note `reused` off the serve record
@@ -38,11 +38,11 @@ A refusal that ends the board ends the drawing on it rather than the pass. Repor
 
 ## Pages
 
-Read `drawing.md` beside `board.md` before the first frame, for the widths, layout, frame names, and heights. It states pages for a pick round and a drive only, so this file fixes the intake's.
+Read `drawing.md` beside `board.md` before the first frame, for the widths, layout, frame names, and heights. It states pages for a pick and a drive only, so this file fixes the intake's.
 
 - Draw one page per item, named `<n>-<topic>` after the item's number and a short topic, and delete the empty page `project add` leaves once the first page holds a frame
 - Name an option frame as a drive's option, `<topic>-<arm>-<px>`
-- Never use `00-current` or `00-next`, which belong to a drive alone
+- Never draw `00-current` or `00-next` in the pass itself. A later `design-pick` round on an item adds both, per `from-finding.md`.
 
 ## The server after the pass
 
@@ -50,7 +50,7 @@ Leave a server this pass started running, since the operator settles an item by 
 
 ## The write scope on the board
 
-The pass writes into its own project alone. It never writes a frame into a pick round's project, the `project` key's project, or a page holding an accepted design, and a decision reaches those through `design-pick` or `design-record` once it ships.
+The pass writes into its own project alone. It never writes a frame into a standalone pick's project, the `project` key's project, or a page holding an accepted design, and a decision reaches those through `design-pick` or `design-record` once it ships.
 
 ## Copying into the folder
 

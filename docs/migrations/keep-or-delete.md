@@ -30,6 +30,14 @@ A reference to a retired skill takes a hand edit.
 - Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
 - Delete a `canon:canvas-board` reference too. Frameboard, which `canon:design-pick` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
 
+## Keep or delete the pick archives, your call
+
+A pick no longer copies its arms out of the board. Earlier picks left a folder of images per project under `.canon/`, such as `.canon/picks/` or `.canon/landing/`, and nothing deletes or moves one.
+
+- Keep a folder that may hold the only copy of a losing arm, since the round's board pages were deleted when the pick closed
+- Delete it once nothing cites it, and leave the record folders beside it alone, such as `.canon/intake/` and `.canon/board/`
+- `canon migrate record-layout` still files an older archive under `.canon/picks/`, where the same call is yours
+
 ## Delete the retired Playwright deps script, your call
 
 The web stack no longer ships `scripts/install-playwright-deps.sh`, and nothing deletes the copy a project already synced.

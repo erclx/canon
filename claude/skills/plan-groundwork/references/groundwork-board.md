@@ -12,13 +12,13 @@ Read before the first frame a groundwork track draws. Most tracks measure and ne
 Draw only when an open question is a judgment the operator settles by looking, such as a choice between visible options. A measurement never draws, since a frame of a number settles nothing a table does not.
 
 - Write the question in its topic file first, with its lean, and draw the options that lean weighs
-- A `design-pick` round started inside the track follows that skill's own branch and removes its round on close. This file covers the track's own project alone.
+- A `design-pick` round started inside the track draws in this project too, on the question's `q<n>-<topic>` page and its `-2` and on, and stays there after its close
 
 ## Where it draws
 
 A track draws on the board when `.canon/board/` exists at the main root. Without it, it starts no server and draws standalone HTML mocks under `scripts/mocks/<question>/`, and the README's `## Method` says the track drew without a board.
 
-Reach and start the board per `board.md`, with two differences. `<project>` is `groundwork-<nn>`, the track's own ordinal, never a name a pick round derives, so a track's pages stay apart from pick rounds and accepted frames.
+Reach and start the board per `board.md`, with two differences. `<project>` is `groundwork-<nn>`, the track's own ordinal, never the name a standalone pick derives, so a track's pages stay apart from standalone picks and accepted frames.
 
 - Read `frameboard list --root <board> --json` with no `--project`, run `project add` when the list lacks the project, and name it in the README before the first frame
 - File the project under the `Groundwork` home folder once it exists, made or found, per `## Home folders` in `board.md`
@@ -35,7 +35,7 @@ A deleted track frees its ordinal while its kept project stays on the board, so 
 
 ### The write scope on the board
 
-The track writes into the project its README names alone. It never writes a frame into a pick round's project, the `project` key's project, or a page holding an accepted design, and a decision reaches those through `design-pick` or `design-record` once it ships.
+The track writes into the project its README names alone. It never writes a frame into a standalone pick's project, the `project` key's project, or a page holding an accepted design, and a decision reaches those through `design-pick` or `design-record` once it ships.
 
 ## Pages
 
@@ -64,4 +64,4 @@ A capture cited from the board with no copy under `evidence/` makes the track no
 Keep the project the README names, `groundwork-<nn>` or its `-<slug>` fallback, since the operator looks back at a track's frames there. End the serve command only when `reused` read false.
 
 - Name the project and its board in the README's file map, beside the `evidence/` and `scripts/` paths that hold the copies
-- A `design-pick` round inside the same track is still removed by that skill's close
+- Keep the pages a `design-pick` round drew inside the track, since that skill's close deletes none

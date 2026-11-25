@@ -21,7 +21,7 @@ This body states the role, the reads, the boundaries, and the channel, and start
 
 - Write records, never source. A tracked file under `src/`, a standard, a rule, a reference doc, and a seed all sit outside what this session may touch.
 - Write only into the folder the running skill names, being `.canon/plans/`, `.canon/groundwork/<nn>-<slug>/`, or `.canon/intake/<nn>-<slug>/`
-- A sketch round's record is its own board pages and the archive `design-pick` captures under `.canon/`
+- A sketch round's record is its own board pages, and what a pick from a finding writes back into that finding's intake folder
 - Each skill's own `## Write scope` carries its exceptions, such as the board project a groundwork track or an intake pass draws in, so a change to one scope edits one body
 - Resolve those folders, and `.canon/tasks/` and `.canon/review/`, at the main worktree root. They are gitignored, so a linked worktree's copy is absent and reads as unwritten.
 
@@ -30,7 +30,7 @@ This body states the role, the reads, the boundaries, and the channel, and start
 A sketch round ends on the operator's pick, and the pick reaches the project only through a worker. Applying it here would put a tracked change outside any reviewed pull request.
 
 - Never write under `canon/design/` or the real surface a round drafts for, so `design-pick`'s Step 6 items 1 to 3 never run in this role
-- Keep the picked page on the board and capture the archive as that step states, then hand the controller the winning arm's frame refs, the page ref, and the archive path, and any track path
+- Keep every page on the board as that step states, then hand the controller the winning arm's frame refs, the page ref, and any track path
 - A worker lands the pick through `design-record` under a plan the controller dispatches, in a pull request the reviewers read
 
 ### Worktrees and rows

@@ -5,12 +5,12 @@ description: The launch for a design session, being an app drive or a sketch rou
 
 # Dispatch a design session
 
-A design session is a planner whose record is an app drive under `app-drive` or a sketch round under `design-pick`. It writes intake items, board frames, and the round's archive, and never a tracked file. Like a planning launch, it takes no branch and no worktree, and none of the three checks in `orchestrator-dispatch.md` binds it.
+A design session is a planner whose record is an app drive under `app-drive` or a sketch round under `design-pick`. It writes intake items and board frames, and never a tracked file. Like a planning launch, it takes no branch and no worktree, and none of the three checks in `orchestrator-dispatch.md` binds it.
 
 Launch it as a talk session every time, since the operator judges a design by looking and only the operator can make a round's pick. The talk sentence and the `-talk` suffix come from `orchestrator-talk-launch.md`.
 
 ```bash
-claude --bg --model <model> --effort <effort> -n "planner-<project>-design-<topic>-talk" "Run /canon:role-planner, then /canon:design-pick <ask>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pick is made, carrying the winning arm's frame refs, the page ref, and the archive path, and message it again if you stop on a question."
+claude --bg --model <model> --effort <effort> -n "planner-<project>-design-<topic>-talk" "Run /canon:role-planner, then /canon:design-pick <ask>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pick is made, carrying the winning arm's frame refs and the page ref, and message it again if you stop on a question."
 ```
 
 A drive swaps the middle of the brief to `/canon:app-drive <target>` and asks for the ready list in place of the pick, which that skill's close sends.

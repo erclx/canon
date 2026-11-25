@@ -48,7 +48,7 @@ Say which source gave the widths. Add `--touch` to the capture at the phone-clas
 
 ## Step 3: open the page
 
-Resolve `<board>` and `<project>` and start the board as `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` states, unless this run already has. Note `reused` off the serve record.
+Resolve `<board>` and `<project>` and start the board as `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` states, unless this run already has. A standalone run's project is `pick-<nn>-<topic>`, named and filed as a standalone pick's is. Note `reused` off the serve record.
 
 1. Read `frameboard list --root <board> --json` with no `--project`, and run `frameboard project add <project>` when it lists no `<project>`.
 2. Add the page `references` with `frameboard page add references` when the project has none. A page by that name already there is this skill's page from an earlier run, so keep it.
