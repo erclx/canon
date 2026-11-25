@@ -385,6 +385,7 @@ describe('resolveSessions from another pid namespace', () => {
       probes: reader(false),
       locate: locating('feat/parser'),
       bootTime: () => 60_000,
+      machineId: () => 'abc',
     })
 
     expect(report).toMatchObject({
@@ -408,6 +409,7 @@ describe('resolveSessions from another pid namespace', () => {
       probes: reader(false),
       locate: locating('feat/parser'),
       bootTime: () => 60_000,
+      machineId: () => 'abc',
     })
 
     expect(report).toMatchObject({
@@ -417,6 +419,47 @@ describe('resolveSessions from another pid namespace', () => {
     })
   })
 
+  it.each([
+    ['updatedAt', { updatedAt: 60_000 }],
+    ['statusUpdatedAt', { statusUpdatedAt: 60_000 }],
+  ])(
+    'should keep counting a foreign row whose %s reaches the boot',
+    async (_, stamps) => {
+      seed(100, { ...FOREIGN, startedAt: 59_999, ...stamps })
+
+      const report = await resolveSessions({
+        dir: DIR,
+        probes: reader(false),
+        locate: locating('feat/parser'),
+        bootTime: () => 60_000,
+        machineId: () => 'abc',
+      })
+
+      expect(report).toMatchObject({ foreignDead: 1, foreignPreBoot: [] })
+    },
+  )
+
+  it.each([
+    ['another machine', 'linux:other:pid:[4026532999]', 'abc'],
+    ['a platform that stamps no machine', 'linux', 'abc'],
+    ['a machine this reader cannot name', FOREIGN.pidDomain, undefined],
+  ])(
+    'should keep counting a pre-boot foreign row from %s',
+    async (_, pidDomain, machine) => {
+      seed(100, { ...FOREIGN, pidDomain, startedAt: 59_999 })
+
+      const report = await resolveSessions({
+        dir: DIR,
+        probes: reader(false),
+        locate: locating('feat/parser'),
+        bootTime: () => 60_000,
+        machineId: () => machine,
+      })
+
+      expect(report).toMatchObject({ foreignDead: 1, foreignPreBoot: [] })
+    },
+  )
+
   it('should keep counting a foreign row where the boot time is unreadable', async () => {
     seed(100, { ...FOREIGN, startedAt: 59_999 })
 
@@ -425,6 +468,7 @@ describe('resolveSessions from another pid namespace', () => {
       probes: reader(false),
       locate: locating('feat/parser'),
       bootTime: () => undefined,
+      machineId: () => 'abc',
     })
 
     expect(report).toMatchObject({ foreignDead: 1, foreignPreBoot: [] })
@@ -438,6 +482,7 @@ describe('resolveSessions from another pid namespace', () => {
       probes: reader(true),
       locate: locating('feat/parser'),
       bootTime: () => 60_000,
+      machineId: () => 'abc',
     })
 
     expect(report).toMatchObject({
@@ -453,6 +498,7 @@ describe('resolveSessions from another pid namespace', () => {
       dir: DIR,
       probes: { ...reader(true), procStartOf: () => 'other' },
       locate: locating('feat/parser'),
+      bootTime: () => undefined,
     })
 
     expect(report.kind === 'resolved' && report.foreign).toEqual([])
@@ -465,6 +511,7 @@ describe('resolveSessions from another pid namespace', () => {
       dir: DIR,
       probes: { ...reader(true), procStartOf: () => 'other' },
       locate: locating('feat/parser'),
+      bootTime: () => undefined,
     })
 
     expect(report).toMatchObject({

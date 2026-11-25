@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { type BootSources, lastBoot } from '@/sessions/boot'
+import { type BootSources, lastBoot, machineId } from '@/sessions/boot'
 
 const STAT = [
   'cpu  4039960 14215007 7265328 433045299 296234 0 1322634 0 0 0',
@@ -127,4 +127,18 @@ describe('lastBoot on this machine', () => {
       expect(boot).toBeLessThan(started)
     },
   )
+})
+
+describe('machineId', () => {
+  it('should read the identifier without its newline', () => {
+    expect(machineId(() => '1fe2f629a12b\n')).toBe('1fe2f629a12b')
+  })
+
+  it('should read undefined where the file is empty', () => {
+    expect(machineId(() => '\n')).toBeUndefined()
+  })
+
+  it('should read undefined where the file cannot be read', () => {
+    expect(machineId(unread)).toBeUndefined()
+  })
 })

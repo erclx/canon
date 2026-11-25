@@ -52,9 +52,20 @@ export function lastBoot(
   try {
     if (sources.platform === 'linux') return linuxBoot(sources)
     if (sources.platform === 'darwin') {
+      // No record reads foreign without /proc, so no clock step is bounded here.
       return millisecondsIn(sources.kernBoottime(), /\bsec = (\d+)/)
     }
     return undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function machineId(
+  read: () => string = () => readFileSync('/etc/machine-id', 'utf8'),
+): string | undefined {
+  try {
+    return read().trim() || undefined
   } catch {
     return undefined
   }

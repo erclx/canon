@@ -1,7 +1,7 @@
 import { basename, join } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
-import { lastBoot } from '@/sessions/boot'
+import { lastBoot, machineId } from '@/sessions/boot'
 import {
   type Confidence,
   liveness,
@@ -126,6 +126,8 @@ export interface ResolveOptions {
   readonly now?: () => number
   /** Undefined keeps every foreign record counted. Defaults to `lastBoot`. */
   readonly bootTime?: () => number | undefined
+  /** Undefined keeps every foreign record counted. Defaults to `machineId`. */
+  readonly machineId?: () => string | undefined
 }
 
 export interface Located {
@@ -298,12 +300,13 @@ export async function resolveSessions(
   )
 
   // Read only when a record needs it, since macOS spawns a process to answer.
-  const boot =
-    unanswered.length === 0 ? undefined : (opts.bootTime ?? lastBoot)()
+  const needed = unanswered.length > 0
+  const boot = needed ? (opts.bootTime ?? lastBoot)() : undefined
+  const machine = needed ? (opts.machineId ?? machineId)() : undefined
   const foreign: ForeignRecord[] = []
   const foreignPreBoot: ForeignRecord[] = []
   for (const record of unanswered) {
-    const list = predates(record, boot) ? foreignPreBoot : foreign
+    const list = predates(record, boot, machine) ? foreignPreBoot : foreign
     list.push(foreignOf(record, registry.dir))
   }
 
@@ -318,15 +321,27 @@ export async function resolveSessions(
   }
 }
 
-/** The registry checks no type on `startedAt`, and a null or zero compares as 1970. */
-function predates(record: SessionRecord, boot: number | undefined): boolean {
-  const started: unknown = record.startedAt
-  return (
-    boot !== undefined &&
-    typeof started === 'number' &&
-    started > 0 &&
-    started < boot
-  )
+/**
+ * Another kernel's boot says nothing about this record, so it must carry this
+ * machine's identifier. A stamp at or after the boot is a write by a live
+ * session, so it disproves a boot time that a clock step moved.
+ */
+function predates(
+  record: SessionRecord,
+  boot: number | undefined,
+  machine: string | undefined,
+): boolean {
+  if (boot === undefined || machine === undefined) return false
+  if (!record.pidDomain?.startsWith(`linux:${machine}:`)) return false
+  if (!isStamp(record.startedAt)) return false
+  return [record.startedAt, record.updatedAt, record.statusUpdatedAt]
+    .filter(isStamp)
+    .every((stamp) => stamp < boot)
+}
+
+/** The registry checks no type on a stamp, and a null or zero compares as 1970. */
+function isStamp(value: unknown): value is number {
+  return typeof value === 'number' && value > 0
 }
 
 function foreignOf(record: SessionRecord, dir: string): ForeignRecord {

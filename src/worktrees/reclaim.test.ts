@@ -691,6 +691,7 @@ describe('reclaimReport', () => {
               ownDomain: () => 'pid:[4026532221]',
             },
             bootTime: () => BOOT,
+            machineId: () => 'abc',
           }),
         mergedPullRequests: async () => merged(['feat/parser', 673]),
       })

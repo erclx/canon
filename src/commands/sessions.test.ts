@@ -12,6 +12,7 @@ import { $ } from 'bun'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
+import { machineId } from '@/sessions/boot'
 import { encodeProjectPath } from '@/sessions/transcript'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
@@ -166,7 +167,7 @@ describe('canon sessions list from another pid namespace', () => {
     socket: string,
     socketPresent: boolean,
     cwd = REPO,
-    startedAt = Date.now(),
+    fields: Record<string, unknown> = {},
   ): void {
     const registry = join(CONFIG, 'sessions')
     mkdirSync(registry, { recursive: true })
@@ -180,10 +181,11 @@ describe('canon sessions list from another pid namespace', () => {
         name: 'canon-4242',
         kind: 'interactive',
         status: 'idle',
-        startedAt,
+        startedAt: 1,
         procStart: '1',
         pidDomain: FOREIGN_DOMAIN,
         messagingSocketPath: socket,
+        ...fields,
       }),
     )
   }
@@ -202,10 +204,12 @@ describe('canon sessions list from another pid namespace', () => {
     },
   )
 
-  it.skipIf(!readable)(
+  it.skipIf(!readable || machineId() === undefined)(
     'should leave a foreign record from before the boot out of the count',
     async () => {
-      seed(join(DIR, 'gone.sock'), false, REPO, 1)
+      seed(join(DIR, 'gone.sock'), false, REPO, {
+        pidDomain: `linux:${machineId()}:pid:[1]`,
+      })
 
       const result = await runSessions(['list', '--json'])
 
@@ -496,7 +500,7 @@ describe('canon sessions list and usage-limit stops', () => {
           name: 'canon-4242',
           kind: 'interactive',
           status: 'idle',
-          startedAt: Date.now(),
+          startedAt: 1,
           procStart: '1',
           pidDomain: 'linux:test:pid:[1]',
           messagingSocketPath: join(DIR, 'gone.sock'),
