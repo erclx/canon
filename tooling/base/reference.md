@@ -40,13 +40,18 @@ The root run calls each nested runner after its own stages, so one `bun run chec
 
 ### Changed mode
 
-`bun run check:changed` is the gate a push runs. It checks the whole tree with typecheck, lint, format, shell, and the canon checks, then runs the tests tied to the change. It runs no build, no full suite, and neither check that reads the build.
+`bun run check:changed` is the gate a push runs. A folder declaring `test:changed` runs typecheck, lint, format, shell, and the canon checks over the whole tree, then the tests tied to the change. It leaves the full suite, the build, and the two checks that read the build to CI.
 
+- A folder declaring no `test:changed` runs every phase `check` runs, with its full suite and its build, since nothing else runs them.
+- Declare `test:changed` only where CI runs the full suite and the build on a pull request. The `web` stack declares it and ships that workflow at the root, so a nested web root owes a job of its own.
 - It compares against the merge base with `origin/HEAD`, then `origin/main`, then `origin/master`, and refuses with a fetch hint when none resolves.
-- A first push runs every phase instead, since `origin` holds no branch to compare with and no fetch can bring one.
-- It ties a test that changed, and one in a changed file's folder under its stem with `.test.`, `.spec.`, or `_test`. A `test_<stem>.py` ties from any folder.
-- Past 40 tied files it runs none, since a change that wide is a sweep.
-- It passes the tied paths to `test:changed`, and a nested root runs in changed mode with the root, under its own `test:changed`.
+- A first push runs every phase, since `origin` holds no branch to compare with and no fetch can bring one.
+- A nested root runs in changed mode with the root, and its own scripts decide between tied tests and the full suite.
+
+A test ties to the change by name, and no import is followed.
+
+- It ties a test that changed, and one in a changed file's folder under its stem with `.test.`, `.spec.`, or `_test`.
+- Past 40 tied files it runs none, since a change that wide is a sweep CI runs whole.
 
 ### The remembered pass
 
@@ -130,7 +135,7 @@ Negative knowledge that costs a failed run to relearn.
 | Script                  | What it does                                                       |
 | ----------------------- | ------------------------------------------------------------------ |
 | `bun run check`         | Gates a checkout through `scripts/verify.ts`, writing nothing      |
-| `bun run check:changed` | Gates a push on the static checks and the tests tied to the change |
+| `bun run check:changed` | Gates a push, on tied tests alone where `test:changed` is declared |
 | `bun run check:format`  | Asserts oxfmt formatting without writing                           |
 | `bun run format`        | Writes oxfmt formatting in place                                   |
 | `bun run prepare`       | Initializes husky hooks, run automatically on `bun install`        |

@@ -15,11 +15,11 @@ Install [Bun](https://bun.sh) with `curl -fsSL https://bun.sh/install | bash` an
 
 ### `scripts/`
 
-| Command                 | Purpose                                                                 |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `bun run check:changed` | Gates a push on the static checks and the tests tied to the change.     |
-| `bun run check`         | Runs every check and the full suite by hand. Both checks write nothing. |
-| `bun run format`        | Auto-fix oxfmt formatting.                                              |
+| Command                 | Purpose                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `bun run check:changed` | Gates a push, on the tests tied to the change where `test:changed` is declared. |
+| `bun run check`         | Runs every check, the full suite, and the build by hand. Neither check writes.  |
+| `bun run format`        | Auto-fix oxfmt formatting.                                                      |
 
 The synced stacks add more scripts, such as a test runner, a build, or a dev server. Read the `scripts` block in `package.json` for the full set rather than this table.
 

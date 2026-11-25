@@ -20,4 +20,5 @@ Holds `verify.yml`, the merge gate. A pull request targeting `main` starts it, a
 
 ## Gotchas
 
+- A push runs the full suite and the build where `package.json` declares no `test:changed`. Declare that script only once a job here runs both, since it takes them off the push.
 - `bun run check` runs the same assert as CI and writes nothing, so a CI format failure is fixed by running `bun run format` locally and committing the diff
