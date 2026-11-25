@@ -1,29 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import {
-  type ChangedRead,
   type ChecksGate,
-  type EvidenceGate,
   type GateResult,
   lift,
   type LiftApi,
-  type PullState,
   readsDrivableBox,
-  type Standing,
 } from '@/pr/lift'
-import type { RebaseRead } from '@/pr/carry'
+import { CODE_CLOSED, HEAD, makeApi, READ_AT } from '@/pr/fixtures/lift-api'
 import { DEFAULT_PAINTED, type PaintedPatterns } from '@/pr/painted'
 import type { ReviewRow } from '@/pr/review-scope'
 
-const HEAD = '9b1f2c3d4e5f60718293a4b5c6d7e8f901234567'
 const MOVED = '1111111111111111111111111111111111111111'
 const REEL_AT_HEAD = [{ width: 1280, head: HEAD }]
 const REEL_AT_SHORT_HEAD = [{ width: 1280, head: HEAD.slice(0, 7) }]
 const REEL_AT_MOVED = [{ width: 1280, head: MOVED }]
-const READ_AT = '2026-10-12T10:00:00Z'
 
-const CODE_CLOSED: ReviewRow = {
-  body: `## Review closed\n\nclean\n<!-- review-pr: commit=${HEAD} read-at=${READ_AT} -->`,
-}
 const CODE_OPEN: ReviewRow = {
   body: `## Review\n\n1 should-fix\n<!-- review-pr: commit=${HEAD} read-at=${READ_AT} -->`,
 }
@@ -64,106 +55,6 @@ const UI_CLOSED_EDITED: ReviewRow = {
   commit: { oid: MOVED },
 }
 
-interface Fixture {
-  pull?: Partial<PullState>
-  tip?: string
-  reviews?: readonly ReviewRow[]
-  evidence?: Partial<EvidenceGate>
-  standing?: Standing
-  /** One reading per call, the last repeating. */
-  checks?: readonly (ChecksGate | undefined)[]
-  isMarked?: boolean
-  isDrafted?: boolean
-  /** What the read answers, null for one that failed. */
-  changed?: ChangedRead | null
-  /** What the rebase comparison answers, a failed read when absent. */
-  rebased?: RebaseRead
-  /** The commits the head adds that are neither merges nor on the base, a failed read when absent. */
-  unmerged?: readonly string[]
-}
-
-interface Harness {
-  readonly api: LiftApi
-  readonly calls: {
-    marks: string[]
-    drafts: string[]
-    reads: (readonly [string, string])[]
-    rebases: (readonly [string, string])[]
-    unmerged: (readonly [string, string])[]
-    checks: number
-    sleeps: number[]
-  }
-}
-
-/** The api over a fake clock that only `sleep` advances. */
-function makeApi(fixture: Fixture = {}): Harness {
-  const calls = {
-    marks: [] as string[],
-    drafts: [] as string[],
-    reads: [] as (readonly [string, string])[],
-    rebases: [] as (readonly [string, string])[],
-    unmerged: [] as (readonly [string, string])[],
-    checks: 0,
-    sleeps: [] as number[],
-  }
-  let clock = 0
-  const pull: PullState = {
-    isDraft: true,
-    isOpen: true,
-    nodeId: 'PR_node',
-    branch: 'feat/x',
-    head: HEAD,
-    ...fixture.pull,
-  }
-  const readings = fixture.checks ?? [{ state: 'passing', isConflicted: false }]
-  const evidence: EvidenceGate = {
-    isSettled: true,
-    owed: [],
-    hasDrivableBox: false,
-    ...fixture.evidence,
-  }
-
-  const api: LiftApi = {
-    readPull: async () => pull,
-    readTip: async () => fixture.tip ?? HEAD,
-    readReviews: async () => fixture.reviews ?? [CODE_CLOSED],
-    readEvidence: async () => evidence,
-    readStanding: async () => fixture.standing ?? 'fresh',
-    readChecks: async () => {
-      const reading = readings[Math.min(calls.checks, readings.length - 1)]
-      calls.checks += 1
-      return reading
-    },
-    markReady: async (nodeId) => {
-      calls.marks.push(nodeId)
-      return fixture.isMarked ?? true
-    },
-    readChanged: async (from, to) => {
-      calls.reads.push([from, to])
-      if (fixture.changed === null) return undefined
-      return fixture.changed ?? { isAncestor: true, paths: [] }
-    },
-    readRebased: async (from, to) => {
-      calls.rebases.push([from, to])
-      return fixture.rebased
-    },
-    readUnmerged: async (from, to) => {
-      calls.unmerged.push([from, to])
-      return fixture.unmerged
-    },
-    markDraft: async (nodeId) => {
-      calls.drafts.push(nodeId)
-      return fixture.isDrafted ?? true
-    },
-    sleep: async (ms) => {
-      calls.sleeps.push(ms)
-      clock += ms
-    },
-    now: () => clock,
-  }
-  return { api, calls }
-}
-
 const PENDING: ChecksGate = { state: 'pending', isConflicted: false }
 const PASSING: ChecksGate = { state: 'passing', isConflicted: false }
 const STUCK_RUN = { id: 43095326656, workflow: 'Verify', queuedSeconds: 900 }
@@ -181,82 +72,6 @@ describe('lift', () => {
 
     expect(record.reason).toBe('lifted')
     expect(calls.marks).toEqual(['PR_node'])
-  })
-
-  describe('advisory checks', () => {
-    const advisoryFailing: ChecksGate = {
-      state: 'passing',
-      isConflicted: false,
-      advisory: ['🍎 macOS Unit Tests'],
-    }
-
-    it('should lift past a failing advisory check and name it in the record', async () => {
-      const { api, calls } = makeApi({ checks: [advisoryFailing] })
-
-      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
-
-      expect(record).toMatchObject({
-        reason: 'lifted',
-        isOk: true,
-        advisory: ['🍎 macOS Unit Tests'],
-      })
-      expect(calls.marks).toEqual(['PR_node'])
-    })
-
-    it('should read clear under --check and name the failing advisory check', async () => {
-      const { api } = makeApi({ checks: [advisoryFailing] })
-
-      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
-
-      expect(record).toMatchObject({
-        reason: 'clear',
-        advisory: ['🍎 macOS Unit Tests'],
-      })
-    })
-
-    // A non-required check still going never gates, so the draft still lifts, and the record names it.
-    it('should read clear under --check and name a non-required check still running', async () => {
-      const { api } = makeApi({
-        checks: [
-          {
-            state: 'passing',
-            isConflicted: false,
-            advisory: [],
-            running: ['🍎 macOS Unit Tests'],
-          },
-        ],
-      })
-
-      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
-
-      expect(record).toMatchObject({
-        reason: 'clear',
-        isOk: true,
-        running: ['🍎 macOS Unit Tests'],
-      })
-    })
-
-    it('should carry no running field when nothing outside the required set runs', async () => {
-      const { api } = makeApi({
-        checks: [
-          { state: 'passing', isConflicted: false, advisory: [], running: [] },
-        ],
-      })
-
-      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
-
-      expect(record).not.toHaveProperty('running')
-    })
-
-    it('should carry no advisory field when none failed', async () => {
-      const { api } = makeApi({
-        checks: [{ state: 'passing', isConflicted: false, advisory: [] }],
-      })
-
-      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
-
-      expect(record).not.toHaveProperty('advisory')
-    })
   })
 
   describe('ready pull request', () => {
@@ -491,44 +306,6 @@ describe('lift', () => {
       expect(record.gates.find((gate) => gate.gate === 'ci')).toMatchObject({
         isOk: false,
         reason: 'ci-pending',
-      })
-    })
-
-    it('should carry a failing advisory check on already-ready', async () => {
-      const { api } = makeApi({
-        ...ready,
-        checks: [
-          { state: 'passing', isConflicted: false, advisory: ['🍎 macOS'] },
-        ],
-      })
-
-      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
-
-      expect(record).toMatchObject({
-        reason: 'already-ready',
-        advisory: ['🍎 macOS'],
-      })
-    })
-
-    it('should name a non-required check still running on already-ready', async () => {
-      const { api } = makeApi({
-        ...ready,
-        checks: [
-          {
-            state: 'passing',
-            isConflicted: false,
-            advisory: [],
-            running: ['🍎 macOS'],
-          },
-        ],
-      })
-
-      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
-
-      expect(record).toMatchObject({
-        reason: 'already-ready',
-        isOk: true,
-        running: ['🍎 macOS'],
       })
     })
 
