@@ -13,7 +13,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is w
 
 ## Must
 
-- The project's verify commands, any scoped gate in place of the full one, run first under a time limit, a failure or hang stops, and no commands or no wrapper is said rather than read as a pass
+- The verify commands run first under a time limit, a scoped gate only where the project declares it, a failure or hang stops, and no commands or no wrapper is said rather than read as a pass
 - Each step runs through the Skill tool in the stated order, with staging after the sync skills write, and the chain reaches the pull request on a branch already committed
 - Steps print nothing beyond a stop report and the watch line, and the body names a wrapping caller's one action point, its one forwarded argument, and when the closing block stays unemitted
 - CI is watched in the background until a terminal state or its own limit, which reports it unsettled in any session. A failure stops naming the check, unless every run was cancelled, which reruns once.
