@@ -1,5 +1,6 @@
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
+import { formatBytes } from '@/records/size'
 
 /**
  * One child `canon` call. Each step runs as its own process rather than
@@ -172,12 +173,32 @@ function archiveLines(
   )
 }
 
+/** A binary predating the skip carries no `skipped`, read as empty. */
+function skippedLines(fields: Fields): string[] {
+  const entries = Array.isArray(fields.skipped) ? fields.skipped : []
+  const named = entries.flatMap((entry: unknown) => {
+    if (entry === null || typeof entry !== 'object') return []
+    const { path, bytes } = entry as Fields
+    if (typeof path !== 'string' || typeof bytes !== 'number') return []
+    return [`  ${path} (${formatBytes(bytes)})`]
+  })
+  if (named.length === 0) return []
+
+  return [
+    `Skipped ${named.length} oversized record(s), not backed up:`,
+    ...named,
+    'Move each out of the record folders, such as into .canon/tmp/, or shrink it.',
+  ]
+}
+
 function pushLines(result: StepResult, fields: Fields): string | undefined {
   if (result.exitCode === 0) {
     const changed = count(fields, 'changed')
-    return changed > 0
-      ? `\n🗄️  Backed up ${changed} record path(s).\n\n`
-      : undefined
+    const lines = [
+      ...(changed > 0 ? [`Backed up ${changed} record path(s).`] : []),
+      ...skippedLines(fields),
+    ]
+    return lines.length > 0 ? `\n🗄️  ${lines.join('\n')}\n\n` : undefined
   }
 
   // No records history, which is every checkout that never ran the setup.
