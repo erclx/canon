@@ -24,7 +24,7 @@ A page is what the operator opens, so its name and its place in the order say wh
 | A drive           | `00-current`, then one `<nn>-<section>` page per topic, then `00-next` once picks settle |
 | A track's pick    | The question's `q<n>-<topic>` page, then `q<n>-<topic>-2` and on                         |
 
-Every page stays on the board after the run closes, so a losing round is still there to reopen. A pick on a drive finding draws on that drive's topic page, as `from-finding.md` beside this file states.
+Every page stays on the board after the run closes, so a losing round is still there to reopen. A pick on a drive finding joins that drive's topic page, and one on an intake item joins the item's `<n>-<topic>` page, as `from-finding.md` beside this file states.
 
 A drive numbers and orders its pages by the findings they serve.
 
@@ -91,7 +91,7 @@ A round draws each arm as one group, in arm order from the left, so the operator
 
 ### A drive's topic page
 
-A topic page opens with the section as shipped and puts each round of options to its right.
+A topic page opens with the section as shipped and puts each round of options to its right. An intake item's page takes the same layout, whether the pass or a later pick draws on it.
 
 - Put the section's current set as the leftmost group
 - Put each arm of a round in a group of its own to the right of the current set, in arm order
@@ -109,6 +109,7 @@ A frame's name carries its width in pixels, so a reader finds the phone frame by
 | A drive's shipped section | `<section>-current-<px>` |
 | A drive's section, picked | `<section>-next-<px>`    |
 | A drive's option          | `<section>-<arm>-<px>`   |
+| An intake item's option   | `<topic>-<arm>-<px>`     |
 
 The parts of a drive's names come from the drive itself.
 
@@ -116,7 +117,7 @@ The parts of a drive's names come from the drive itself.
 - `<arm>` is a short kebab name for what the option does, such as `pill-row`, unique on its page across every round
 - Write the label drawn inside a frame from the frame's name when the frame is written, and rewrite it in the same step as any `frame rename`, since the label is content the rename leaves alone
 
-`design-pick` reads its selection on `arm-<id>-<px>`, so a pick round keeps that form on every page but a drive's topic page.
+`design-pick` reads its selection on `arm-<id>-<px>`, so a pick round keeps that form on every page but a joined one, where it takes the option's name above.
 
 ## Heights
 

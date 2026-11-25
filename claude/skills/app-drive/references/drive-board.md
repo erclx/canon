@@ -5,7 +5,7 @@ description: How app-drive draws on its own board project, from the start at the
 
 # Drive board
 
-Read when `app-drive` reaches the first finding the operator decides, before any frame on the board. The drive's project stays apart from `design-pick`'s rounds, so this file covers the drive's own pages alone. The `drawing.md` and `board.md` it names sit in `${CLAUDE_SKILL_DIR}/../design-pick/references/`.
+Read when `app-drive` reaches the first finding the operator decides, before any frame on the board. The drive's project stays apart from standalone picks, so this file covers the drive's own pages alone. The `drawing.md` and `board.md` it names sit in `${CLAUDE_SKILL_DIR}/../design-pick/references/`.
 
 ## Starting the board
 

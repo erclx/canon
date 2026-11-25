@@ -43,7 +43,7 @@ The board's home lists every project, and a home folder gathers the projects of 
 | A groundwork track | `Groundwork`, holding each drawing track's `groundwork-<nn>` project |
 | A standalone pick  | `Picks`, holding each `pick-<nn>-<topic>` project                    |
 
-A pick inside a drive or a track files nothing, since its project already sits in that run's folder. Any other run files its project once the project exists, whether this run added it or found it on the board.
+A pick that found a drive's, a pass's, or a track's project files nothing, since it already sits in that run's folder. A pick that adds one files it where that run would. Any other run files its project once the project exists, made or found.
 
 - File it with `frameboard project group <project> <folder> --root <board> --json`, which takes the project as its name rather than through `--project`, and makes the folder when no project holds it yet
 - Run the call on a found project too, since a project made before the folder existed sits loose on home
@@ -74,9 +74,9 @@ Read `frameboard selection --root <board> --json` when the operator's answer poi
 | One frame in `frames`, on an earlier round's page                 | A revert, so name the round back before acting           |
 | An `element` inside a picked frame                                | A correction the loop carries by its `index` and `hash`  |
 | Several entries in `frames`                                       | Ask which one rather than taking the first               |
-| Empty `frames`, another project, or a page the run never made     | No answer, so ask again rather than guess                |
+| Empty `frames`, another project, or a page the run never used     | No answer, so ask again rather than guess                |
 | `tabs: 0`, or a `server-not-running` refusal                      | No board is open, so hand the address over and ask again |
 
-On a drive's topic page every round shares one page, so read a frame's `<arm>` as the arm, and one in an earlier round's row as a revert.
+A joined page, being a drive's topic page or an intake item's, counts as one the run used. Every round shares it, so read a frame's `<arm>` as the arm, and one in an earlier round's row as a revert.
 
 Pass the element's `hash` to `frameboard edit --hash` with its `index`. A frame rewritten since the operator picked refuses with `stale-address` rather than landing on another element, so ask for the pick again on that refusal.

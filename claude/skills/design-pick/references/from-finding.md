@@ -23,8 +23,9 @@ A drive draws and decides a finding inside its own project while its copy runs. 
 ## Where the pick draws
 
 - Draw in the drive's project, the one the drive log's `Board` row or the intake overview names, and start the board when neither was filled
-- Draw on the finding's topic page as `${CLAUDE_SKILL_DIR}/../design-pick/references/drawing.md` lays one out, the section as shipped first and one group per arm
-- Add the section to `00-current` as shipped and to `00-next` as picked, when the project lacks either
+- With neither filled, name the project the `board-project` of the `[drive]` table gives a drive, or `drive-<nn>` for a pass, and file it under `board-folder`
+- Draw on the finding's topic page, or the item's, as `${CLAUDE_SKILL_DIR}/../design-pick/references/drawing.md` lays one out, the section as shipped first and one group per arm
+- Add the section to `00-current` as shipped when that page lacks it, and write it to `00-next` as picked at every pick
 
 ## What the pick writes back
 
@@ -33,3 +34,5 @@ A drive draws and decides a finding inside its own project while its copy runs. 
 - Add `Decided:` to the item and land it with `canon intake answer <slug> --cluster <file> --decided <label>`, which fills a `sketch` slot
 - With no drive log, land the pick with `--set <label>=<pick>` in place of the two lines above
 - Run the folder's checks again, `canon intake drive-check` only where a drive record sits in it
+
+The check compares a checkout the pick has since changed, so fix only what the pick owns, being `undrawn`, `uncaptured`, `skippedVisible`, `strayEvidence`, and `missingEvidence`. Report every other list, and a `no-baseline` refusal, as it reads. Never run `--baseline` to clear one, since that erases what the drive was compared against.

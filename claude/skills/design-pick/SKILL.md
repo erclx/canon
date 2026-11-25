@@ -51,7 +51,7 @@ Every arm of a round sits as one group of frames on one board page, the groups s
 4. Add each arm at each round width as `frameboard frame add <page>/arm-<id>-<px> --device on --scroll`, laid out per `${CLAUDE_SKILL_DIR}/references/drawing.md`. Step 4's selection reads the names.
 5. Write each frame's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
 
-A pick on a drive finding draws each round as a row on that finding's topic page, in place of items 3 and 4's page and frame names, per `references/drawing.md`.
+A pick on a drive finding or an intake item joins that finding's or item's page instead, each round a row on it, with the page and frame names `references/drawing.md` gives in place of items 3 and 4's.
 
 A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar. Read `${CLAUDE_SKILL_DIR}/references/widths.md` before the first add, for the phone, tablet, and desktop widths the round draws, the 320 check, and the form a tablet frame takes.
 
@@ -124,7 +124,7 @@ Take no pick on the operator's behalf when two arms are both defensible and the 
 
 ## Step 5: loop on the pick
 
-1. Add each iteration as its own page, recorded on the run's list. An overwritten page cannot be reopened, and the losing round stops a correction re-proposing a rejected arm.
+1. Add each iteration as its own page on the run's list, or as a row on a joined page. An overwritten page cannot be reopened, and the losing round stops a correction re-proposing a rejected arm.
 2. Write fresh arms off the pick and return to Step 2 where the correction opens a new question. Revise the one arm's frame where it does not.
 3. Re-render, hand off again, and take the next answer.
 4. Repeat until the operator says it is right. A run stopping because the arms stopped differing has stopped early.
