@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.127.0](https://github.com/erclx/canon/compare/v5.126.0...v5.127.0) (2026-11-25)
+
+
+### Features
+
+* **sessions:** have a talk worker write an answer to a slot first ([#3552](https://github.com/erclx/canon/issues/3552)) ([6a18f97](https://github.com/erclx/canon/commit/6a18f97c6232d1f40c954df4701baed3496b7a14))
+* **tooling:** declare chromium alone and write a ci html report ([#3554](https://github.com/erclx/canon/issues/3554)) ([a568107](https://github.com/erclx/canon/commit/a5681076c2179aa4375bf787b5e2faa4a2cead33))
+* **tooling:** stop shipping the readme screenshot workflow and script ([#3553](https://github.com/erclx/canon/issues/3553)) ([2b284d2](https://github.com/erclx/canon/commit/2b284d2abdd5cff23277baaa73ed850ef063718b))
+
+
+### Bug Fixes
+
+* **tasks:** read a joined share as no blocker and show each parse ([#3548](https://github.com/erclx/canon/issues/3548)) ([d7c7adc](https://github.com/erclx/canon/commit/d7c7adcafff13a780c11ccd445a5b81f3166797f))
+
 ## [5.126.0](https://github.com/erclx/canon/compare/v5.125.0...v5.126.0) (2026-11-25)
 
 
