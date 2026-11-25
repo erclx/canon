@@ -21,7 +21,7 @@ Run `canon sessions reap --help` for every flag. The verb takes one of two forms
 | Task     | The sessions one task's `Sessions:` line records, live or archived                         | After a merge or a planner's landed plan |
 | Finished | Background sessions here on settled tasks alone, or on none and idle past `--idle-minutes` | Under `--write`, or `--dry-run` first    |
 
-The finished form reaches sessions nobody named, which is why it refuses without `--write`. Its idle threshold is 60 minutes unless `--idle-minutes` says otherwise. On the task form the same flag sets how long a live task's session must hold a background shell before it reads as finished, 30 minutes by default.
+The finished form reaches sessions nobody named, which is why it refuses without `--write`. Its idle threshold is 60 minutes unless `--idle-minutes` says otherwise. On the task form the same flag sets how long a live task's session must hold a background shell before it reads as finished, 65 minutes by default.
 
 ## Output
 
@@ -79,9 +79,9 @@ The task form stops three more sessions a status alone would have blocked, and t
 A `busy` session never reads `shell-dwell`, nor does one with no measured dwell. The dwell restarts on every status change, so a session that ran a turn since is safe while the machine stays awake.
 
 - Time the machine spent asleep counts toward the dwell, so a check minutes old at suspend can read `shell-dwell` on wake. Pass `--idle-minutes 0` on a reap run after a wake.
-- A command running past the threshold, such as a long CI watch, ends with the stop, so raise `--idle-minutes` or pass `--keep` while one is expected
+- The 65-minute default outlasts a CI watch, which stops itself at 60 minutes. A longer command ends with the stop, so raise `--idle-minutes` or pass `--keep` while one is expected.
 - `--idle-minutes 0` turns the reading off on the task form, so every held shell on a live task reads `busy`
-- The finished form never reads `shell-dwell`
+- The finished form never reads `shell-dwell`, so its 60 minutes time an idle session alone
 
 The caller, kept, controller, and talk skips still run first. A clone behind the remote reads a merged pull request as not landed, so the reap keeps skipping it.
 

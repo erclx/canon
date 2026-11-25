@@ -368,7 +368,7 @@ describe('planTaskReap on finished work the task shows', () => {
 
 describe('idleThresholdMs', () => {
   it.each([
-    ['task', undefined, HALF_HOUR],
+    ['task', undefined, 65 * 60 * 1000],
     ['finished', undefined, HOUR],
     ['task', 45, 45 * 60 * 1000],
     ['finished', 45, 45 * 60 * 1000],

@@ -317,7 +317,7 @@ export function register(program: Command): void {
     )
     .option(
       '--idle-minutes <n>',
-      "How long a status must hold: a live task's held shell (default: 30), or with --finished an idle session no task records (default: 60)",
+      "How long a status must hold: a live task's held shell (default: 65), or with --finished an idle session no task records (default: 60)",
     )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(

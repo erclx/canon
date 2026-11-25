@@ -88,11 +88,11 @@ const IDLE_STATUSES: readonly string[] = ['idle', 'waiting']
 const SETTLED_STATUSES: readonly string[] = [...IDLE_STATUSES, 'shell']
 
 /**
- * The task form's outlasts the 20-minute bound on a verify run and a review
- * wait, though not a CI watch, which may hold a shell for an hour. The finished
- * form reaches sessions nobody named, so it waits longer.
+ * The task form's outlasts the ship chain's 60-minute CI watch, the longest wait
+ * a working session holds a shell for. The finished form's times an idle
+ * session and never a held shell, so no wait bounds it.
  */
-const IDLE_MINUTES = { task: 30, finished: 60 } as const
+const IDLE_MINUTES = { task: 65, finished: 60 } as const
 
 export function idleThresholdMs(
   form: keyof typeof IDLE_MINUTES,
