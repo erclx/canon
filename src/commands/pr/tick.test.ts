@@ -248,7 +248,10 @@ describe('canon pr tick', () => {
       const outcome = await runTick(['--boxes', '1', '--head', tip])
 
       expect(outcome).toEqual({
-        record: expect.objectContaining({ reason: 'verdict-behind', head: tip }),
+        record: expect.objectContaining({
+          reason: 'verdict-behind',
+          head: tip,
+        }),
         exit: 1,
       })
       expect(existsSync(apiLog)).toBe(false)
