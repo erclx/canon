@@ -136,6 +136,17 @@ describe('web verify.yml e2e-shards job', () => {
     expect(step.run).toContain('--shard="$SHARD"')
   })
 
+  it('should list the unsharded suite before the shard, so an empty suite fails', () => {
+    const steps = shards().steps
+    const names = steps.map((step) => step.name)
+    const list = stepNamed(steps, 'Require Specs').run
+
+    expect(list).toBe('bun run test:e2e --list --project=chromium')
+    expect(names.indexOf('Require Specs')).toBeLessThan(
+      names.indexOf('Run E2E Tests'),
+    )
+  })
+
   it('should name each report for its shard so two uploads never collide', () => {
     const upload = stepNamed(shards().steps, 'Upload E2E Report')
 

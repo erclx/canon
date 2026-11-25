@@ -168,6 +168,10 @@ jobs:
         timeout-minutes: 5
         run: bunx playwright install chromium
 
+      - name: Require Specs
+        # A sharded run over an empty suite exits 0 on some Playwright releases, and the list never does.
+        run: bun run test:e2e --list --project=chromium
+
       - name: Run E2E Tests
         env:
           DIST_PREBUILT: 'true'
