@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.126.0](https://github.com/erclx/canon/compare/v5.125.0...v5.126.0) (2026-11-25)
+
+
+### Features
+
+* **ci:** run the cli suites only where their command changes ([#3547](https://github.com/erclx/canon/issues/3547)) ([e66a044](https://github.com/erclx/canon/commit/e66a044afa66f0f858113faad8085421acab1a39))
+* **plan:** give each measured run a place and teach how to measure ([#3546](https://github.com/erclx/canon/issues/3546)) ([cf66eb4](https://github.com/erclx/canon/commit/cf66eb4adcff9f4f05adc1072ebb10ee0de3ac8b))
+* **pr:** carry the ui close and preview across a base merge ([#3545](https://github.com/erclx/canon/issues/3545)) ([8b156d6](https://github.com/erclx/canon/commit/8b156d6b7e8fafcd769544ca44591fe92a543f1c))
+* **pr:** name gh pr update-branch on a stale release pull request ([#3549](https://github.com/erclx/canon/issues/3549)) ([0ddf948](https://github.com/erclx/canon/commit/0ddf9489f72b7d111fd7407b0f41ed07f0368104))
+
 ## [5.125.0](https://github.com/erclx/canon/compare/v5.124.0...v5.125.0) (2026-11-25)
 
 
