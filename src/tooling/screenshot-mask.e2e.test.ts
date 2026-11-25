@@ -45,7 +45,7 @@ const hasBrowser = await browserAvailable()
 const CASES_SOURCE = `const only1280 = ['320', '390', '768', '1536']
 export const EVIDENCE_ROOT = 'evidence'
 export const CASES = [
-  { section: 'open', theme: 'light', route: '/', excludeViewports: only1280, mask: ['.edited', '.below', '.badge', '.partial', '.missing'] },
+  { section: 'open', theme: 'light', route: '/', excludeViewports: only1280, mask: ['.edited', '.below', '.badge', '.partial', '.cover-left', '.cover-top', '.cover-bottom', '.cover-corner', '.missing'] },
   { section: 'closed', theme: 'light', route: '/?closed', excludeViewports: only1280, mask: ['.edited'] },
 ]
 `
@@ -121,6 +121,16 @@ describe.skipIf(!hasBrowser)('screenshot.ts masks', () => {
   it('should skip a mask whose end sits under a menu while its center is clear', () => {
     expect(maskedAt('open', 150, 420)).toBe(false)
     expect(output).toMatch(/open\/1280--light: .*\.partial.*covered/)
+  })
+
+  it.each([
+    ['left end', '.cover-left', 500, 420],
+    ['top edge', '.cover-top', 800, 420],
+    ['bottom edge', '.cover-bottom', 1100, 420],
+    ['top left corner', '.cover-corner', 200, 540],
+  ])('should skip a mask covered only at its %s', (_label, selector, x, y) => {
+    expect(maskedAt('open', x, y)).toBe(false)
+    expect(output).toContain(selector)
   })
 
   it('should mask the element once the dialog is closed', () => {

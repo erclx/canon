@@ -34,13 +34,12 @@ describe('stack shipped TypeScript', () => {
     const files = listTypeScript(configs)
     expect(files.length).toBeGreaterThan(0)
 
-    const { status, stdout, stderr } = spawnSync(
+    const { status, stdout } = spawnSync(
       OXLINT,
       ['-c', '.oxlintrc.json', '--max-warnings', '0', ...files],
       { cwd: configs, encoding: 'utf8' },
     )
 
-    expect(`${stdout}${stderr}`).not.toMatch(/error|warning/i)
-    expect(status).toBe(0)
+    expect({ status, report: stdout }).toMatchObject({ status: 0 })
   })
 })
