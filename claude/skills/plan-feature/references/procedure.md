@@ -60,6 +60,8 @@ Every `- Suggested:` line takes senior judgment, picking the best option in one 
 - Write `## Verification` as one bullet per outcome naming the test or command that proves it, with a grep bullet per `## Verbatim` block of settled wording
 - Write `## Review focus` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
 
+Cite on each question's `- Evidence:` line the Step 2 command or file its claim came from, never one carried in from the task file, which records what someone once read rather than what the tree holds.
+
 ### Sources and size
 
 A small feature produces a short plan, not a padded one.
