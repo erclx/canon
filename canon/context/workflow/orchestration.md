@@ -100,7 +100,7 @@ Owns the orchestrator body and requirement, which state the dispatch policy.
 
 ### `claude/skills/role-orchestrator/scripts/`
 
-Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/claude/orchestrate-poll.test.ts` and `orchestrate-watch.test.ts`. `poll.ts --wait` runs in the background and exits only on movement or its cap.
+Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/claude/orchestrate-poll.test.ts` and `orchestrate-watch.test.ts`. `poll.ts --wait` runs in the background and exits only on a line that routes to an act or its cap, and holds the rest for the next exit.
 
 - `poll.ts` keeps its baseline at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, read as the first twelve space-separated fields, and `--no-record` skips the write
 - `RESPONSE` needs a new reply count and a reply newer than the last pass, and `canon pr review-state` is the only parser of the `review-pr` and `review-ui` markers

@@ -76,7 +76,7 @@ Every classification line names a pull request and a state. A line starting `pol
 
 ### Headings the script knows
 
-The eight headings the script knows are written by `review-pr`, `review-address`, `canon pr evidence`, and `review-ui`, and the whole set is stated once in the first. A heading nothing matches reads as a pull request nobody has reviewed.
+The script's eight headings come from `review-pr`, `review-address`, `canon pr evidence`, and `review-ui`, the first stating the set. An unmatched one reads as unreviewed. `orchestrator-poll-lines.md` routes `CODE-CLOSED`.
 
 - The reply family matches by a filter in `poll.ts`, so a project posting it under different headings edits that
 - The review and UI families match inside `canon pr review-state`, which the script and `review-pr` both read, so renaming one changes the verb

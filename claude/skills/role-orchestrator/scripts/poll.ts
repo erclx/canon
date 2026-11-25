@@ -457,6 +457,11 @@ export const classify = (
     )
   }
 
+  // A code close behind a held UI review has no other line, and each close reports once.
+  if (row.heading === 'closed' && old.state !== 'closed') {
+    lines.push(`CODE-CLOSED #${row.number} at ${short(row.head)}`)
+  }
+
   // A post or a push moves the UI state, and either is when an action is owed.
   lines.push(...classifyUi(row, old))
   lines.push(...classifyEvidence(row, old))
@@ -1228,6 +1233,31 @@ const print = (result: PollRun): void => {
   for (const line of result.out) console.log(line)
 }
 
+// The lines that route to an act. Any other line is held in a wait and printed
+// with the next exit, since a wake over one costs a turn that does nothing.
+const ACTIONABLE = [
+  'READY',
+  'CONFLICT',
+  'STALE',
+  'OVERLAP',
+  'EVIDENCE',
+  'UI-CLOSED',
+  'CODE-CLOSED',
+  'UNMATCHED',
+  'poll:',
+]
+
+/** Matches the token before the first space, so `STALE` never matches `UI-STALE`. */
+export const isActionable = (line: string): boolean =>
+  ACTIONABLE.includes(line.split(/\s+/)[0])
+
+/** The count of lines an exit carries that ended no wait, printed only when above zero. */
+export const heldLine = (lines: string[]): string[] => {
+  const held = lines.filter((line) => !isActionable(line)).length
+
+  return held === 0 ? [] : [`HELD      ${held} line(s) above ended no wait`]
+}
+
 const main = async (args: string[]): Promise<number> => {
   const root = mainRoot()
   if (root === null) {
@@ -1255,14 +1285,20 @@ const main = async (args: string[]): Promise<number> => {
     return result.status
   }
 
-  // Only movement ends early, and a failed read holds to the cap rather than ending it.
+  // Only an actionable line ends early, and a failed read holds to the cap rather than ending it.
   const deadline = Date.now() + wait * 1000
   const failed = new Set<string>()
+  const carried: string[] = []
   for (;;) {
     const result = await pollOnce(root, { record })
     for (const line of result.err) failed.add(line)
-    if (result.status === 0 && result.isChanged) {
-      print({ ...result, err: [...failed] })
+    if (result.status === 0) carried.push(...result.out)
+    if (result.status === 0 && carried.some(isActionable)) {
+      print({
+        ...result,
+        err: [...failed],
+        out: [...carried, ...heldLine(carried)],
+      })
 
       return 0
     }
@@ -1271,7 +1307,9 @@ const main = async (args: string[]): Promise<number> => {
     if (left <= 0) {
       for (const line of failed) console.error(line)
       if (result.status !== 0) return result.status
-      console.log('No movement.')
+      // Held lines are movement the baseline already took, so the cap prints them rather than drop them.
+      for (const line of [...carried, ...heldLine(carried)]) console.log(line)
+      if (carried.length === 0) console.log('No movement.')
 
       return 0
     }
