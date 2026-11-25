@@ -87,7 +87,7 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 
 ### `scripts/ci/install-playwright-deps.sh`
 
-Canon's own workflows installing the firefox and webkit system packages call this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red. No seeded web workflow calls it, and neither do canon's chromium-only capture and refresh jobs, because the hosted image ships Chrome.
+`pr-visual-checks.yml` alone calls this script, to install the firefox and webkit system packages, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red. No seeded web workflow calls it, since the hosted image ships Chrome.
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
 - It runs `prefer-archive-mirror.sh` before the first attempt and with `--drop-first` before each retry, since a retry on the same degraded mirror fails again

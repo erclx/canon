@@ -21,7 +21,10 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 
 ## Playwright
 
-- Keep end-to-end specs in `e2e/`, running Chromium alone for a Chrome extension and every browser for a web app
+- Keep end-to-end specs in `e2e/`, running Chromium alone, the one engine the seeded workflow installs and gates
+- Add an engine to the config's `projects` and to the workflow's browser install and `--project` flags together, since an engine CI never runs is tested nowhere
+- Run `bunx playwright install-deps <engine>` before the browser install for Firefox or WebKit, since the hosted image ships the libraries Chromium loads alone
+- Expect a CI run to write the HTML report beside the list, one per shard, which the workflow uploads on a failure
 
 ## Tailwind
 
