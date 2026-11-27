@@ -12,7 +12,7 @@ const PLANS = 'plans'
 const MARKDOWN = '.md'
 const NONE_IDENTIFIED = 'None identified.'
 
-/** The one group a dispatch reads, per `claude/skills/task-board/references/board.md`. */
+/** The one group a dispatch reads, per `claude/skills/task-create/references/board.md`. */
 const DISPATCH_GROUP = 'In flight'
 
 export const REACH_REFUSALS = [

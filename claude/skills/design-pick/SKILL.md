@@ -38,7 +38,7 @@ Inside a live `plan-groundwork` track, renders land in the track's own `evidence
 A round drafted with nothing real in front of it comes back generic, so gather references before Step 2 as `references/board.md` states.
 
 - Name in each arm's reference field the frame it draws on and what it takes, or `none`
-- Take structure alone, as the `design-references` skill draws that line, and never a product's text, accounts, logo, or numbers
+- Take structure alone, as the `design-gather` skill draws that line, and never a product's text, accounts, logo, or numbers
 - Ask once for taste words before a look round, per `references/taste.md`
 
 ## Step 2: draft the arms as frames on one page

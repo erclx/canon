@@ -21,7 +21,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing an
 - If the named folder has no unread item and the ask is to answer rather than retell, stop: `❌ Every item in <slug> carries an answer. Nothing to ask.`
 - Never fill a slot the operator did not answer. An abandoned batch leaves every unreached item unread, which is what the empty slot already means.
 - Never infer an answer from the conversation having happened. A selection reaches the file through the verb or not at all.
-- Do not promote an item, edit a verdict, or write outside the answer slots, bar the close Step 5 offers on an explicit yes. Promoting runs through `task-board` after the answers land.
+- Do not promote an item, edit a verdict, or write outside the answer slots, bar the close Step 5 offers on an explicit yes. Promoting runs through `task-create` after the answers land.
 
 ## Step 1: pick the folder
 

@@ -56,10 +56,10 @@ Read `drawing.md` beside this file before the first frame, for the widths, pages
 
 ## The references page
 
-A round draws on the `references` page in `<project>`, which the `design-references` skill writes and owns. Start the board first, then read `frameboard list` for it.
+A round draws on the `references` page in `<project>`, which the `design-gather` skill writes and owns. Start the board first, then read `frameboard list` for it.
 
-- Reuse a `references` page that holds frames, since an earlier `design-references` run left it
-- Otherwise invoke `canon:design-references` with the sites the ask names, or bare when it names none
+- Reuse a `references` page that holds frames, since an earlier `design-gather` run left it
+- Otherwise invoke `canon:design-gather` with the sites the ask names, or bare when it names none
 - Draft on when that skill refuses or does not resolve, or the operator declines references, and say no reference backs the arms
 - Never put `references` on the run's list of pages, so a selection on it reads as no answer. It stays on the board after the close, as every page does.
 - Find a reference's images in `<project>/assets/references/`, since Frameboard serves nothing from a page folder's subfolders

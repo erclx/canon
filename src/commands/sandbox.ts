@@ -635,7 +635,7 @@ function runCheck(
   const parsed = parseTarget(target)
   if (parsed === undefined) {
     logError(
-      'Invalid target. Use <category>:<command>, e.g. claude:context-fold.',
+      'Invalid target. Use <category>:<command>, e.g. claude:context-sync.',
     )
     outro()
     process.exitCode = 1
@@ -762,7 +762,7 @@ export function register(program: Command): void {
     .description('Check a provisioned sandbox against a scenario expectation')
     .argument(
       '<target>',
-      'Scenario as <category>:<command>, e.g. claude:context-fold',
+      'Scenario as <category>:<command>, e.g. claude:context-sync',
     )
     .argument('[arm]', 'Named scenario arm, e.g. drift')
     .helpOption('-h, --help', 'Show this help message')
@@ -791,8 +791,8 @@ export function register(program: Command): void {
       [
         '',
         'Examples:',
-        '  canon sandbox check claude:context-fold drift',
-        '  canon sandbox check claude:context-fold drift --envelope run.json --json',
+        '  canon sandbox check claude:context-sync drift',
+        '  canon sandbox check claude:context-sync drift --envelope run.json --json',
         '',
         'Exit codes: 0 on pass or unchecked, 1 on failure.',
         'With --strict, unchecked exits 1 as well.',

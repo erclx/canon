@@ -87,7 +87,7 @@ Holds the git hooks, which run as POSIX sh under `sh -e`, so each `grep` that ma
 Holds the gitignored record folders, where `canon/context/context-model.md` fixes the rule that every gitignored record lives here and nothing tracked does.
 
 - A linked worktree resolves `plans/`, `review/`, and `tasks/` at the main root. `Edit` and `Write` refuse a main-root path, so write through the routes `session-worktree` states.
-- `records-index.sh` regenerates the task board index, since the index walk skips gitignored folders. A shell write fires no `PostToolUse` hook, so `task-board` regenerates positionally.
+- `records-index.sh` regenerates the task board index, since the index walk skips gitignored folders. A shell write fires no `PostToolUse` hook, so `task-create` regenerates positionally.
 - `board-validate.sh` runs `canon tasks validate` after an edit to `priority.md` and hands back its findings without blocking, so a hand edit is named in the turn that made it
 - `canon tasks archive` moves a shipped task and its plan into `archive/` inside their own folders, and the `Pull request:` line is what lets a merge close the task
 - `canon records push` backs every folder but `tmp`, `ordinal-locks`, and `.records.git` to a private remote through `.canon/.records.git`, skipping the media `MEDIA_PATHSPECS` names under `video/`

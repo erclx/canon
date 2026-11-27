@@ -1,6 +1,6 @@
 ---
 name: backlog-triage
-description: Files a measured verdict for every backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, then applies the verdicts the operator approved through the task verbs. Use when asked to "triage the backlog", "prune the backlog", "which backlog rows are still worth doing", "clear out the backlog", or "apply the backlog triage". Do NOT use to file a brain dump, which is `plan-intake`, to answer the filed items, which is `plan-intake-answer`, or to create or decline one named task, which is `task-board`, or archive one, which is `task-complete`.
+description: Files a measured verdict for every backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, then applies the verdicts the operator approved through the task verbs. Use when asked to "triage the backlog", "prune the backlog", "which backlog rows are still worth doing", "clear out the backlog", or "apply the backlog triage". Do NOT use to file a brain dump, which is `plan-intake`, to answer the filed items, which is `plan-intake-answer`, or to create or decline one named task, which is `task-create`, or archive one, which is `task-complete`.
 metadata:
   family: decide
 ---
@@ -12,8 +12,8 @@ A backlog only grows while nothing can decline a row. This pass reads every row 
 The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`, so three sibling references bind it.
 
 - `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md`, read before writing any file in the folder, holds the item format, the frontmatter, the index shape, and the answer contract
-- `${CLAUDE_SKILL_DIR}/../task-board/references/board.md` holds the ordering file and `${CLAUDE_SKILL_DIR}/../task-board/references/backlog.md` the backlog, both read before applying
-- `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, read before applying, holds the `Declined:` line
+- `${CLAUDE_SKILL_DIR}/../task-create/references/board.md` holds the ordering file and `${CLAUDE_SKILL_DIR}/../task-create/references/backlog.md` the backlog, both read before applying
+- `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`, read before applying, holds the `Declined:` line
 
 ## Guards
 

@@ -46,6 +46,6 @@ A retell restates the folder and decides nothing.
 ## Out of scope
 
 - Filing a dump and writing the items, which `plan-intake` owns
-- Promoting an answered item onto the board, which `task-board` owns
+- Promoting an answered item onto the board, which `task-create` owns
 - The item format, the answer contract, and retrieval, which `plan-intake` owns in its `references/intake.md`
 - Deciding when to fire, which the operator owns since the skill never auto-triggers

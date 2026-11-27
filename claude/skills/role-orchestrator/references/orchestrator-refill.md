@@ -44,7 +44,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Strike each one through `canon tasks outcome <stem> --cut <n> --reason <reason>`, then archive. The verb keeps the checkbox, so every later position still names the outcome it did.
    - Strike only an outcome the operator or another repository owes. An open outcome this repository owes stays on the board, and the task stays with it.
    - Send a struck outcome that another repository owes to that repository's orchestrator through `session-relay`, which resolves the address
-   - Let the receiver file it with `task-board` on its own board, since `task-board` here would file it on this board
+   - Let the receiver file it with `task-create` on its own board, since `task-create` here would file it on this board
    - Name it in the report for the operator when no such session is live
    - List every struck outcome in the report's `Struck:` line, so the work is carried by a named owner rather than lost to the strike
    - Then run `canon sessions reap <stem> --remove --json` for each merged task, archived or not, so its worker and reviewers stop, leave the agent view, and the view keeps to live work

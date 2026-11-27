@@ -28,7 +28,7 @@ flowchart TB
 
 ## File the row
 
-Tidewell users keep asking for a tide table export, and you say so in any session. A pile of such asks goes through `canon:plan-intake`. One clear ask goes through `canon:task-board`, which leaves the row under Needs a plan in `priority.md`, and the orchestrator moves it from there.
+Tidewell users keep asking for a tide table export, and you say so in any session. A pile of such asks goes through `canon:plan-intake`. One clear ask goes through `canon:task-create`, which leaves the row under Needs a plan in `priority.md`, and the orchestrator moves it from there.
 
 The row is now a record on the board, with no code and no plan behind it.
 

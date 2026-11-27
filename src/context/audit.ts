@@ -21,7 +21,7 @@ export type ContextAuditRefusal =
 
 /**
  * Checkpoint quoted from the standard stating it. It is not a cap. Entry length
- * rests on one entry per domain, so `claude/skills/context-fold/references/context.md`
+ * rests on one entry per domain, so `claude/skills/context-sync/references/context.md`
  * keeps it, and depth and bullet weight are measured by `canon markdown audit`.
  */
 export const LENGTH_CHECKPOINT = 150
@@ -119,7 +119,7 @@ const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
 
 /**
  * Verbs that read the date behind them as stamping a measurement, which
- * `claude/skills/context-fold/references/context.md` permits where a change date
+ * `claude/skills/context-sync/references/context.md` permits where a change date
  * is cut. The set is closed, so an unenumerated phrasing falls back to a change marker.
  */
 const STAMPING = /\b(?:measured|verified|driven|passed|fired)\b/i

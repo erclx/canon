@@ -31,5 +31,5 @@ An empty operator slot reads as consent under a blank-means-accept contract, whi
 
 - Measuring one question in depth, which `plan-groundwork` owns
 - Planning a promoted item, which `plan-change` owns
-- Promoting an item onto the board, which `task-board` owns
+- Promoting an item onto the board, which `task-create` owns
 - Enforcing any of this, which no check does since the folder is gitignored

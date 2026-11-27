@@ -50,7 +50,7 @@ Every runbook named here resolves under `${CLAUDE_SKILL_DIR}/references/`. On an
 
 `priority.md` is the ordering source. `index.md` sorts by filename and says nothing about order, so never infer the sequence from it. When `priority.md` is absent, report the queue and say the order is unrecorded.
 
-- Row position under `## Needs a plan` is what gets planned next, top first, per `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`
+- Row position under `## Needs a plan` is what gets planned next, top first, per `${CLAUDE_SKILL_DIR}/../task-create/references/board.md`
 - `backlog.md` is explicitly unordered, so read it for what exists and never as a queue. Report a count rather than its rows, which would put the length back in front of the reader.
 - That count says nothing about whether each row still belongs. `orchestrator-parked.md` re-tests a row's currency, on its own trigger below.
 
@@ -65,7 +65,7 @@ The human asks for each side of a compaction, and this skill reads the runbook.
 - To write the handoff, follow `orchestrator-handoff.md`. It sends the generic half to `canon:session-map` and adds decisions taken under delegated authority.
 - That map follows `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`. Write nothing to the handoff that the board, a task file, or a groundwork folder already carries.
 - Read `orchestrator-limit-stops.md` on request or on the first turn after a limit stop, and `orchestrator-hand-launch.md` on request
-- A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
+- A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`
 - On a request to resume after a compaction, read `orchestrator-resume.md`, which reads that file back with the board and groundwork behind live work
 
 ### The parked rows
@@ -151,7 +151,7 @@ A worker is a separate process the controller can steer, and scope reaches it th
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.
 - Do not hand a worker anything but a plan, which carries exact diffs only when already known and otherwise states scope and open questions
 
-A late ask about a building row is a follow-up filed through `task-board`, with the ask as its origin and the running task cited in the intro. Amend the plan only on the operator's word, naming the re-review cost, and message the worker.
+A late ask about a building row is a follow-up filed through `task-create`, with the ask as its origin and the running task cited in the intro. Amend the plan only on the operator's word, naming the re-review cost, and message the worker.
 
 The tracked-file boundary collides with `CLAUDE.md`, which says to handle a small edit immediately, and this rule wins wherever the two meet. A session that writes a change cannot review it independently afterwards, which is the separation `review-pr` exists to supply.
 

@@ -44,7 +44,7 @@ Each test carries a reason a shortcut would get wrong.
 
 ### What counts as an archive
 
-An archive is `.canon/plans/archive/`, plus the two older spellings `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` leaves in place for a project that archived plans before the folder nested. From a task those read `../plans-archive/` and `../.tmp/plans-archive/`.
+An archive is `.canon/plans/archive/`, plus the two older spellings `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md` leaves in place for a project that archived plans before the folder nested. From a task those read `../plans-archive/` and `../.tmp/plans-archive/`.
 
 - Test all three, since a shipped pointer in a project nobody migrated lands on the older two
 - Run the archive test ahead of the existence test, so a pointer into an archive that no longer holds the file still refuses as shipped work rather than as a stale citation

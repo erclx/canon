@@ -23,7 +23,7 @@ A filed row carries what this seat saw and nothing it did not measure.
 
 - A filed row states the defect and the surface it was seen on, and stops there. Its extent and cause belong to whoever plans it.
 - Where the row's shape invites a count, say in a plain sentence in the task file that it was not taken
-- The board's cell has no room for it, since a `Waiting on` cell caps at two clauses per `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`
+- The board's cell has no room for it, since a `Waiting on` cell caps at two clauses per `${CLAUDE_SKILL_DIR}/../task-create/references/board.md`
 - A finding placed in another task's `## Findings` is filing under a second name and takes the same rule
 - An unverified cause costs more than an unverified count. A count fails loudly at re-measurement, while an unchecked mechanism sends real work the wrong way.
 

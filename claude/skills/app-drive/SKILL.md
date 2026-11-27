@@ -160,7 +160,7 @@ Emit every written file's relative path, the drive-check `reason`, and counts.
 **Board:** project <board-project> kept on <board>
 
 Next: <planning the ready rows here once named back | handed off, <reason>>
-Slots unread: /plan-intake-answer, then /task-board
+Slots unread: /plan-intake-answer, then /task-create
 ```
 
 Omit the `Board` line when the drive drew no board, then close on the retell `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md` shapes.

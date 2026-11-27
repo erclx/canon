@@ -189,7 +189,7 @@ After the chain, report:
 - Tooling stack synced, or skipped. Name the layers pulled via the extends chain.
 - Any post-sync fixups applied (filename renames)
 - `verify` outcome at each depth it ran, and whether the app was started
-- Each code folder the context audit found no entry naming, with `/canon:context-fold` as its fix
+- Each code folder the context audit found no entry naming, with `/canon:context-sync` as its fix
 
 ### Outcomes and gaps
 

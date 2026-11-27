@@ -131,8 +131,8 @@ Next: /canon:plan-intake-answer to answer the `You:` slots
 
 Drop the `Left over:` line when nothing was past the cap, and the `Bundles:` line when no bundle was named.
 
-An answered plan item is handed over by intake folder, cluster file, and item number, so `task-board` takes its outcome from the item's `Fix:` line. It promotes with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. This skill closes nothing, and `plan-intake-answer` offers the close of a declined issue.
+An answered plan item is handed over by intake folder, cluster file, and item number, so `task-create` takes its outcome from the item's `Fix:` line. It promotes with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. This skill closes nothing, and `plan-intake-answer` offers the close of a declined issue.
 
 ## Notes
 
-- This skill files and never reimplements. `plan-intake-answer` owns the answers and `task-board` owns the task a plan item becomes.
+- This skill files and never reimplements. `plan-intake-answer` owns the answers and `task-create` owns the task a plan item becomes.

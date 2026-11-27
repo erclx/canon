@@ -44,7 +44,7 @@ Run `git diff --cached --name-only 2>/dev/null` to check for staged files. If ou
 
 ## Sequence
 
-1. Invoke `canon:context-fold` to sync the context entries against session decisions and the diff
+1. Invoke `canon:context-sync` to sync the context entries against session decisions and the diff
 2. Invoke `canon:task-complete` to mark the outcomes the diff shipped
 3. Invoke `canon:docs-sync` to sync public docs against changes since main
 4. Run `git add -A` to stage any files the sync skills wrote

@@ -32,7 +32,7 @@ The wrong surface fails either way. Intake on a question that needs measuring yi
 ## Write scope
 
 - Write only inside `.canon/intake/<nn>-<slug>/`. Plans, tasks, source, standards, and rules all live outside it, so this one rule forbids every one of them.
-- The one exception is a board project for a pass that draws, below. Promoting an item onto the task board runs through `task-board` after the operator has answered, as a separate invocation.
+- The one exception is a board project for a pass that draws, below. Promoting an item onto the task board runs through `task-create` after the operator has answered, as a separate invocation.
 - Reading is unrestricted inside the project. Measuring is the work.
 - Treat the folder as gitignored. `canon records push` and `pull` back it up only where a records remote exists, and refuse with `no-remote` otherwise.
 - A push protects against losing the machine, never against a compaction dropping reasoning before anyone pushed. No check reaches the folder, so these rules hold only while a session reads them.
@@ -130,7 +130,7 @@ This overrides the paths-only reporting the project states generally, which stay
 **Open questions:** <N> awaiting your call
 
 Next: /plan-intake-answer to answer the `You:` slots from here, or type them
-into the files, then /task-board to promote what is ready
+into the files, then /task-create to promote what is ready
 ```
 
 Use `📂 Resumed` in place of `📂 Opened` on a resume pass, and omit the `**Board:**` line when the pass drew nothing.

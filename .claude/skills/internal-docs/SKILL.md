@@ -23,11 +23,11 @@ Read `claude/skills/markdown-craft/references/markdown.md` and load the `write-h
 ## Owners
 
 - `canon:docs-sync` rewrites stale `README.md` and `docs/` sections from a branch's changes.
-- `canon:context-fold` folds a branch's diff into `canon/context/` and carries the entry shape in `claude/skills/context-fold/references/context.md`.
+- `canon:context-sync` folds a branch's diff into `canon/context/` and carries the entry shape in `claude/skills/context-sync/references/context.md`.
 
 ## Reference
 
 - `claude/skills/markdown-craft/references/markdown.md`: heading, list, code, punctuation, file-reference, banned-character, and frontmatter wording rules
 - The `write-human` skill: voice, rhythm, sentence construction, and information density
-- `claude/skills/context-fold/references/context.md`: the shape of a context entry
+- `claude/skills/context-sync/references/context.md`: the shape of a context entry
 - `canon/context/context-model.md`: the tier test that sorts a fact between surfaces

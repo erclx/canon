@@ -16,7 +16,7 @@ A project declaring fewer classes under `[device-classes]` in `canon/config/app.
 
 - A record still carrying the earlier `Device classes:` line fails the gate's Device classes stage until those classes move into `default` with a `why` and the line goes.
 - A pick that scrolls sideways at any of those widths, or at 320, is held until it reflows.
-- Before drafting, a round reuses the board's `references` page or runs `canon:design-references` to fill one, with the sites you name or bare.
+- Before drafting, a round reuses the board's `references` page or runs `canon:design-gather` to fill one, with the sites you name or bare.
 - That page holds section shots at each width, a filmed scroll, and a few hovers, each frame naming its source. Each arm names the frame it draws on and takes structure alone.
 
 The round also asks for your taste at its start and keeps its work at its close, and an app pick can end in a prototype.
@@ -36,7 +36,7 @@ A pick drafts on `.canon/board/` at the main root, in a project its origin decid
 | A drive finding or an intake item | That drive's project, with the decision written back |
 | A question in a groundwork track  | The track's `groundwork-<nn>` project                |
 
-A standalone pick draws what won on `00-next`, and a second pick on the same topic adds pages to the same project. Name a project in the ask to place a round elsewhere, and name sites in a `canon:design-references` ask to replace the default list it captures.
+A standalone pick draws what won on `00-next`, and a second pick on the same topic adds pages to the same project. Name a project in the ask to place a round elsewhere, and name sites in a `canon:design-gather` ask to replace the default list it captures.
 
 Use `canon:app-drive` when there is a built app to try and `canon:design-pick` when there is something to sketch. Answer an intake item `sketch` to leave it for a pick, which fills the slot once you make it.
 
