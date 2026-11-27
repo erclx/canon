@@ -17,7 +17,7 @@ Holds the page, built from components that read their figures through `lib/`. A 
 
 - `components/` holds a folder per section, `site-nav/`, `site-footer/`, and `session-list/`, each splitting `index.astro` from its style, script, and icons, which `pages/` assembles into one route
 - `content/copy.ts` holds the copy and the product views' scenes, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`
-- `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets under `content/records/`, one formatted HTML file each
+- `content/` also holds the sessions, craft's practices with each quote's ledger row, and the record sheets, each rendered at build from one file under `examples/` by the renderer in `lib/`
 - `lib/` reads the catalog in `skills.ts`, the audits and history in `health.ts`, which refuses a shallow clone, and the reel's stamp in `film.ts`, and `scene.ts` paces each motion
 - `styles/global.css` maps roles onto `tokens.css` in `@layer base` beside the grid ground, the `.part` frame, and the drawn card, and `base.astro` embeds Geist and Geist Mono
 
@@ -48,15 +48,14 @@ Holds the two workflows that build and check the page.
 - `deploy-site.yml` publishes the page. `pr-visual-checks.yml` runs the e2e job and a capture job that only reports drift, since any merge can move the render
 - The two files carry literal copies of the same path globs, which the `visual-path-globs` stage compares
 - The visual copy adds `tooling/web/configs/e2e/**` through `VISUAL_ONLY_GLOBS`
-- Both lists hold `web/**`, `assets/**` minus `assets/evidence/**`, `src/design/**`, and the deploy workflow file
+- Both lists hold `web/**`, `assets/**` minus `assets/evidence/**`, `src/design/**`, `examples/**`, and the deploy workflow file
 - The catalogs (`claude/skills/`, `governance/rules/`, the skill map) are out of both lists because the page reads none at build time, so add one back in the change that makes it read one
 
 ### `web/.htmlvalidate.cjs`
 
-Holds the `html-validate` rules for the built page, and `web/.htmlvalidate-records.cjs` extends it for the record sheets. Both sit under `web/` so release-please excludes them, and a config edit there also triggers the deploy workflow.
+Holds the `html-validate` rules for the built page. It sits under `web/` so release-please excludes it, and a config edit there also triggers the deploy workflow.
 
-- `check:lint` lints `web/src/content/records/*.html` through `web/.htmlvalidate-records.cjs`, which demands the self-closing form oxfmt writes
-- The `pr-visual-checks.yml` e2e job lints the built `web/dist/index.html` through `web/.htmlvalidate.cjs`, found by walking up from the file, so the page is linted only after a build
+- The `pr-visual-checks.yml` e2e job lints the built `web/dist/index.html` through `web/.htmlvalidate.cjs`, found by walking up from the file, so the page and its sheets are linted only after a build
 - Each rule set to `off` in `web/.htmlvalidate.cjs` carries its reason beside it, so a rule turned off with no reason reads as a defect someone left standing
 - `canon/design/**/*.html` is exempt, since Frameboard's sync writes the board's markup and its `--check` compares the bytes, so a fix belongs in Frameboard
 
