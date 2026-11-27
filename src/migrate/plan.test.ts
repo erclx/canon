@@ -116,8 +116,8 @@ describe('planRename', () => {
       SKILL_NAME_RULES,
     ).entries[0]
 
-    expect(entry?.movesTo).toBe('claude/skills/context-fold/SKILL.md')
-    expect(entry?.text).toBe('name: context-fold\nrun canon:context-fold')
+    expect(entry?.movesTo).toBe('claude/skills/context-sync/SKILL.md')
+    expect(entry?.text).toBe('name: context-sync\nrun canon:context-sync')
   })
 
   it('should leave the aitk token alone under the skill preset', () => {

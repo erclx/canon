@@ -1441,7 +1441,10 @@ export function register(program: Command): void {
         'pointer left under each old name is never moved. Four skills then',
         'moved into the family their job belongs to, such as',
         // canon-keep-retired
-        'ux-audit to ui-audit and pick-by-eye to design-pick.',
+        'ux-audit to ui-audit and pick-by-eye to design-pick. Seven took',
+        'a name for the job they do, such as',
+        // canon-keep-retired
+        'plan-feature to plan-change and create-skill to write-skill.',
         'It takes no scope. The skill folders it moves are authored in the',
         'toolkit and no target holds a copy of that catalog, so in a target it',
         'rewrites citations of a renamed skill and moves nothing.',
