@@ -80,6 +80,7 @@
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "html-validate": "11.21.1",
     "husky": "^9.1.7",
+    "marked": "18.2.0",
     "micromatch": "^4.0.8",
     "oxfmt": "0.79.0",
     "oxlint": "1.94.0",
