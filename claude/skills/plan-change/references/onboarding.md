@@ -5,7 +5,7 @@ description: The context lookup, the safe run form per surface kind, and the not
 
 # Onboarding to a domain
 
-Applies to the first two reads of `plan-feature` Step 1 and Step 2, taken ahead of the source. They go cheapest first, being the context entry, then one run of the existing thing, then the code. A plan starting from the source alone inherits whatever the running code gets wrong.
+Applies to the first two reads of `plan-change` Step 1 and Step 2, taken ahead of the source. They go cheapest first, being the context entry, then one run of the existing thing, then the code. A plan starting from the source alone inherits whatever the running code gets wrong.
 
 ## Read the context entry
 

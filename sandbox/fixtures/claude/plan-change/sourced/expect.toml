@@ -1,4 +1,4 @@
-purpose = "/canon:plan-feature on a task resting on a third-party behavior writes a plan with a Sources section pairing a link with a quoted passage. The arm runs live fetches, so a host without outbound access reports it red."
+purpose = "/canon:plan-change on a task resting on a third-party behavior writes a plan with a Sources section pairing a link with a quoted passage. The arm runs live fetches, so a host without outbound access reports it red."
 
 paths = [
   { path = ".canon/plans/feature-*.md", why = "The plan the run wrote." },

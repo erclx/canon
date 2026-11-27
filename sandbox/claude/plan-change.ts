@@ -7,7 +7,7 @@ export default scenario({
   },
   arms: {
     full: (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'full', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'full', '01-initial')
 
       ctx.mkdir('.claude')
 
@@ -24,14 +24,14 @@ export default scenario({
         'Context: task API with SQLite, Express routes, CLAUDE.md, and .canon/tasks/ present',
       )
       ctx.log.info(
-        'Action:  /plan-feature (reference the task in .canon/tasks/)',
+        'Action:  /plan-change (reference the task in .canon/tasks/)',
       )
       ctx.log.info(
         "Expect:  plan written to .canon/plans/feature-<slug>.md with files to touch, risks, and questions, each question carrying a Suggested line and an Answer slot, and v01.0-due-dates.md's Plan: line points at it",
       )
     },
     sourced: (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'sourced', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'sourced', '01-initial')
 
       ctx.mkdir('.claude')
 
@@ -48,14 +48,14 @@ export default scenario({
         'Context: charge endpoint calling a payment API, one task whose outcome rests on how that API treats a repeated idempotency key',
       )
       ctx.log.info(
-        'Action:  /canon:plan-feature plan the task in .canon/tasks/v01.0-retry-charge.md',
+        'Action:  /canon:plan-change plan the task in .canon/tasks/v01.0-retry-charge.md',
       )
       ctx.log.info(
         "Expect:  plan carries a Sources section whose entry pairs an https link to the payment API's documentation with a double-quoted passage, or marks the source unverified. Needs outbound network",
       )
     },
     small: (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'small', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'small', '01-initial')
 
       ctx.mkdir('.claude')
 
@@ -69,14 +69,14 @@ export default scenario({
         'Context: prose-only repo, single README task, decoy DESIGN with sentinel text',
       )
       ctx.log.info(
-        'Action:  /plan-feature (reference the task in .canon/tasks/)',
+        'Action:  /plan-change (reference the task in .canon/tasks/)',
       )
       ctx.log.info(
         'Expect:  chat-only output, NO .canon/plans/ file written, decoys NOT surfaced',
       )
     },
     'multi-concern': (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'multi-concern', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'multi-concern', '01-initial')
 
       ctx.mkdir('src/routes')
       ctx.mkdir('docs')
@@ -91,14 +91,14 @@ export default scenario({
         'Context: two unrelated tasks in .canon/tasks/, one API change and one prose edit',
       )
       ctx.log.info(
-        "Action:  /plan-feature 'add pagination to /users and tighten the docs intro'",
+        "Action:  /plan-change 'add pagination to /users and tighten the docs intro'",
       )
       ctx.log.info(
         "Expect:  two plan files in .canon/plans/, one per concern, not a single bundled slug, and each task's Plan: line points at its own plan",
       )
     },
     stacked: (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'stacked', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'stacked', '01-initial')
 
       ctx.mkdir('src/form')
 
@@ -111,13 +111,13 @@ export default scenario({
       ctx.log.info(
         'Context: one task with three outcomes that build in sequence over the same three source files',
       )
-      ctx.log.info("Action:  /plan-feature 'plan the task'")
+      ctx.log.info("Action:  /plan-change 'plan the task'")
       ctx.log.info(
         'Expect:  one plan file in .canon/plans/, or every extra plan carrying a Judged apart from constraint with a reason, and canon records validate plans reports no stack-foldable',
       )
     },
     constraint: (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'constraint', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'constraint', '01-initial')
 
       ctx.mkdir('docs')
       ctx.mkdir('canon/context')
@@ -132,7 +132,7 @@ export default scenario({
         'Context: docs/reference.md split into a folder, cited by docs/onboarding.md and canon/context/pipeline.md',
       )
       ctx.log.info(
-        "Action:  /plan-feature 'split docs/reference.md per the task. Constraint: leave canon/context/pipeline.md alone.'",
+        "Action:  /plan-change 'split docs/reference.md per the task. Constraint: leave canon/context/pipeline.md alone.'",
       )
       ctx.log.info(
         "Expect:  the plan's Constraints entry resolves both acts for pipeline.md, forbidding conforming it to the new shape and requiring its citations of the deleted path be retargeted, and v01.0-reference-split.md's Plan: line points at the plan",
@@ -140,7 +140,7 @@ export default scenario({
     },
     layout: (ctx) => {
       // Generic primitives and cart-only pieces share one flat folder, so the arm scores placement by role.
-      ctx.fixtures('claude', 'plan-feature', 'layout', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'layout', '01-initial')
 
       ctx.mkdir('src/components')
       ctx.mkdir('e2e')
@@ -179,10 +179,10 @@ export default scenario({
         'Context: flat src/components/ mixing 7 primitives with 5 cart pieces, flat e2e/ mixing 2 specs with 2 helpers, one wishlist task',
       )
       ctx.log.info(
-        'Before:  rm -rf .claude/skills/codebase-layout .claude/skills/plan-feature, since the injected copies carry no references/ and shadow the plugin',
+        'Before:  rm -rf .claude/skills/codebase-layout .claude/skills/plan-change, since the injected copies carry no references/ and shadow the plugin',
       )
       ctx.log.info(
-        'Action:  /canon:plan-feature plan the wishlist task in .canon/tasks/v01.0-wishlist.md',
+        'Action:  /canon:plan-change plan the wishlist task in .canon/tasks/v01.0-wishlist.md',
       )
       ctx.log.info(
         "Expect:  plan names its new components under a subfolder rather than flat in src/components/, its new e2e helper outside the specs' folder, and a placement reason on each new path",
@@ -190,7 +190,7 @@ export default scenario({
     },
     vague: (ctx) => {
       // The ask names no number, so the only measurable criterion is the budget this file states.
-      ctx.fixtures('claude', 'plan-feature', 'vague', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'vague', '01-initial')
 
       ctx.mkdir('canon')
 
@@ -203,13 +203,13 @@ export default scenario({
       ctx.log.info(
         'Context: task list API that filters in memory, canon/REQUIREMENTS.md states a 200 ms p95 budget for GET /tasks',
       )
-      ctx.log.info('Action:  /canon:plan-feature make the task list faster')
+      ctx.log.info('Action:  /canon:plan-change make the task list faster')
       ctx.log.info(
         'Expect:  plan written whose Verification carries the stated budget as a number with a unit, with the success criteria settled before the file list',
       )
     },
     underspecified: (ctx) => {
-      ctx.fixtures('claude', 'plan-feature', 'underspecified', '01-initial')
+      ctx.fixtures('claude', 'plan-change', 'underspecified', '01-initial')
 
       ctx.mkdir('src')
 
@@ -220,7 +220,7 @@ export default scenario({
       ctx.log.info(
         'Context: one-line CLAUDE.md and one source file, no requirements, no tasks',
       )
-      ctx.log.info('Action:  /canon:plan-feature improve the app')
+      ctx.log.info('Action:  /canon:plan-change improve the app')
       ctx.log.info(
         'Expect:  NO .canon/plans/ file written, and the session asks what the improvement must achieve before planning',
       )

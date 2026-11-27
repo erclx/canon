@@ -27,12 +27,12 @@ The session that measured holds the evidence, so it plans the row by default rat
 
 | Step 4 route             | Step 7 does                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------- |
-| A task                   | Invokes `canon:plan-feature` on that task                                                      |
+| A task                   | Invokes `canon:plan-change` on that task                                                       |
 | A controller and no task | Says in the close announcement that this session is planning, and waits for the row named back |
-| Neither                  | Invokes `canon:plan-feature` on the task file Step 4 wrote                                     |
+| Neither                  | Invokes `canon:plan-change` on the task file Step 4 wrote                                      |
 
-Under a controller, plan only the row it names back, invoke `canon:plan-feature` on it, and write no task file. The close announcement says one of two things, that this session is planning or that it hands off and why, so the controller never launches a second planner beside this one.
+Under a controller, plan only the row it names back, invoke `canon:plan-change` on it, and write no task file. The close announcement says one of two things, that this session is planning or that it hands off and why, so the controller never launches a second planner beside this one.
 
-- A launch that already chains `plan-feature` after the close runs it once, here
+- A launch that already chains `plan-change` after the close runs it once, here
 - An item Step 5 routed through `plan-intake` is planned only once its `You:` slot is answered and its row is named back
-- Each plan is written under `plan-feature`'s own write scope, which the rule above does not reach
+- Each plan is written under `plan-change`'s own write scope, which the rule above does not reach

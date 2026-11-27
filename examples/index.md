@@ -10,15 +10,15 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 
 ## Research
 
-- [Intake folder](research/intake/03-tide-feedback/): spring beta feedback sorted into advisory and tide-time items, one of them sent on to groundwork. Read against `claude/skills/plan-intake/references/intake.md` at `16cd8e2a`.
-- [App drive](research/drive/05-tide-drive/): a drive of the station week view, its log, its `drive.json`, and the two items it decided. Read against `claude/skills/app-drive/references/drive-record.md` at `3dc5a647` and `claude/skills/plan-intake/references/intake.md` at `16cd8e2a`.
+- [Intake folder](research/intake/03-tide-feedback/): spring beta feedback sorted into advisory and tide-time items, one of them sent on to groundwork. Read against `claude/skills/plan-intake/references/intake.md` at `338f8f72`.
+- [App drive](research/drive/05-tide-drive/): a drive of the station week view, its log, its `drive.json`, and the two items it decided. Read against `claude/skills/app-drive/references/drive-record.md` at `3dc5a647` and `claude/skills/plan-intake/references/intake.md` at `338f8f72`.
 - [Groundwork track](research/groundwork/04-surge-alerts/): a closed track measuring how a surge advisory reaches a closed app, ending on push. Read against `claude/skills/plan-groundwork/references/groundwork.md` at `11b4687c`.
 
 ## Planning
 
 - [Task](planning/v03.2-surge-alerts.md): the surge alert task with its origins, outcomes, and findings. Read against `claude/skills/task-board/references/tasks.md` at `af045565`.
 - [Board](planning/priority.md): Tidewell's board with the surge alert task in flight beside the rows waiting on it. Read against `claude/skills/task-board/references/board.md` at `9b64483c`.
-- [Feature plan](planning/feature-surge-alerts.md): the approved surge alert plan a worker builds from. Read against `claude/skills/plan-feature/references/plan.md` at `5f1a06fa`.
+- [Feature plan](planning/feature-surge-alerts.md): the approved surge alert plan a worker builds from. Read against `claude/skills/plan-change/references/plan.md` at `60b42291`.
 
 ## Shipping
 
@@ -37,4 +37,4 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 
 ## Sessions
 
-- [Handoff note](sessions/handoff-note.md): the note the worker left before a compaction mid-build. Read against `claude/skills/session-compact/references/handoff-note.md` at `832ea581`.
+- [Handoff note](sessions/handoff-note.md): the note the worker left before a compaction mid-build. Read against `claude/skills/session-compact/references/handoff-note.md` at `c3e66487`.

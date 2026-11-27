@@ -62,7 +62,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Serialize it behind a task only on one of that check's holds, and name the hold
    - A path the two merely share is promoted beside it, named so the merge order plans the rebase
    - A candidate held by something outside the tree stays put whatever the check shows, since clearing a conflict leaves an external condition standing
-8. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then fill the picks the link left blank and report:
+8. Write a plan for each newly promoted task with `plan-change`, carrying the in-flight constraint that `## The loop` in the skill body states, then fill the picks the link left blank and report:
    - Run `canon tasks validate --json` and record a pick through `canon tasks launch` for each `launch-unstated` row, per `## Pick the model` in `orchestrator-dispatch.md`
    - Run it after the links, since a promoted row gets its plan only at this step
    - The finding refuses nothing, so a row left unfilled still waits on its pick before it dispatches

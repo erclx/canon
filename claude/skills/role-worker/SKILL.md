@@ -41,7 +41,7 @@ The rebase is the one rewrite this session owns, beside that boundary.
 
 ### Overriding a plan question
 
-Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` when this build decides against a suggestion. Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md` when this build decides against a suggestion. Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ### The preview server
 

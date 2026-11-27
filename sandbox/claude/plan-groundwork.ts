@@ -128,7 +128,7 @@ export default scenario({
       )
       ctx.log.info('         Only one of the three qualifying tests can hold')
       ctx.log.info('Action:  /canon:plan-groundwork adding a --help flag')
-      ctx.log.info('Expect:  skill declines and points at /plan-feature')
+      ctx.log.info('Expect:  skill declines and points at /plan-change')
       ctx.log.info('         NO folder created under .canon/groundwork/')
       ctx.log.info('         No measuring pass, no README.md')
     },

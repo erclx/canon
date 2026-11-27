@@ -32,7 +32,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Sketch out a plan for adding this new capability before we touch any code.',
-    expect: 'plan-feature',
+    expect: 'plan-change',
   },
   {
     prompt:

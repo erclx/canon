@@ -219,7 +219,7 @@ describe('addPrompt', () => {
       ok: true,
       prompt: {
         lines: [
-          'Run /canon:role-planner, then /canon:plan-feature .canon/tasks/v1.4-unplanned.md',
+          'Run /canon:role-planner, then /canon:plan-change .canon/tasks/v1.4-unplanned.md',
           `Controller: ${CONTROLLER}`,
         ],
       },

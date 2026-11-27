@@ -67,7 +67,7 @@ Three sections form the core, in this order, and every session fills all three.
 - `## Mistakes worth not repeating`: one line per mistake, written as the habit it yields
 - `## Standing cautions`: commands that lie, tools that measure the wrong tree, and anything unbacked
 
-Add a section only for content that fits none of the three and would otherwise be lost. Every section holds to the six criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+Add a section only for content that fits none of the three and would otherwise be lost. Every section holds to the six criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`.
 
 ## Length
 

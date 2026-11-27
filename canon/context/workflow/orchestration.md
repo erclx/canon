@@ -31,7 +31,7 @@ Holds one plan per task, archived beside the task on ship.
 - `next-label --claim` reserves a label under `.canon/ordinal-locks/`, since a bare read lets two callers land on one answer
 - The next `--claim` releases a lock above the highest task label once the roster shows its `claim.json` session gone, so a planner whose session ends before writing the task loses its label
 
-### `claude/skills/plan-feature/`
+### `claude/skills/plan-change/`
 
 Owns the plan shape that a planner writes and a worker or controller reads.
 

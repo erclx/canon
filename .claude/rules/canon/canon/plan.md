@@ -1,5 +1,5 @@
 ---
-description: Route edits under .canon/plans/ to the plan-feature skill, and keep the five hand-edit floors a plan breaks silently
+description: Route edits under .canon/plans/ to the plan-change skill, and keep the five hand-edit floors a plan breaks silently
 paths:
   - '.canon/plans/**'
 ---
@@ -8,7 +8,7 @@ paths:
 
 ## Plan files
 
-- Load the `canon:plan-feature` skill before a hand edit under `.canon/plans/`, whose references own its shape and lifecycle. Report it rather than proceeding silently when it does not resolve.
+- Load the `canon:plan-change` skill before a hand edit under `.canon/plans/`, whose references own its shape and lifecycle. Report it rather than proceeding silently when it does not resolve.
 - Where `plan-guard.sh` is installed, expect it to block a new plan until the skill is invoked for it or an `auto-ship` launch names its path, since a shell write never loads this rule.
 - Never fill an `- Answer:` slot on behalf of the person who owns it. A blank slot accepts the suggestion at execution time.
 - Rewrite an unanswered question's `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when execution deviates, leaving the slot blank.

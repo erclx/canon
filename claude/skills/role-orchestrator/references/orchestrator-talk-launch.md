@@ -12,7 +12,7 @@ Run this when the operator wants to talk with a planner or worker rather than le
 A planner or worker the operator will talk with takes the same launch as its cold shape in `orchestrator-launch.md`, with a `-talk` suffix on its name and one sentence added to its brief. A cold session works alone and reports back, and a talk session stays open after its plan or pull request lands so the operator can keep shaping the row.
 
 ```bash
-claude --bg --model <model> --effort <effort> -n "planner-<project>-<slug>-talk" "Run /canon:role-planner, then /canon:plan-feature <task>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
+claude --bg --model <model> --effort <effort> -n "planner-<project>-<slug>-talk" "Run /canon:role-planner, then /canon:plan-change <task>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
 claude --bg --model <model> --effort <effort> -n "worker-<project>-<slug>-talk" "/canon:auto-ship <plan>
 This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
 ```
@@ -20,7 +20,7 @@ This is a talk session: the operator will talk with you here, so run your role's
 The ellipsis stands for the rest of the cold template's message clauses, unchanged. The build variant keeps `/canon:auto-ship <plan>` at position zero with nothing before it, per `### Position zero` in `orchestrator-launch.md`.
 
 - A design session always takes this form, as `planner-<project>-design-<topic>-talk`, with the brief `orchestrator-design-launch.md` carries
-- A flaky row takes the same swap here, running `/canon:plan-groundwork <task>` ahead of `/canon:plan-feature <task>` as `orchestrator-launch.md` states under `### A flaky row`
+- A flaky row takes the same swap here, running `/canon:plan-groundwork <task>` ahead of `/canon:plan-change <task>` as `orchestrator-launch.md` states under `### A flaky row`
 - Keep the role prefix and add the suffix, since `orchestrator-handoff.md` separates dispatched sessions by `worker-` and `planner-` and a new prefix reads as a hand launch
 - A talk session is retired only on the operator's word, stated once in `orchestrator-handoff.md`, so do not restate it in a launch report
 - Reviewers get no talk shape, since a reviewer's pass holds no operator dialogue

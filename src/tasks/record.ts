@@ -585,7 +585,7 @@ export async function recordPullRequest(
 
 /**
  * Records a plan's path on the task it belongs to, as the task's `Plan:` line.
- * `plan-feature` runs this once the plan lands, resolving the reference through
+ * `plan-change` runs this once the plan lands, resolving the reference through
  * `planCandidates`. The caller holds the task stem, so it is named directly.
  */
 export async function recordPlan(

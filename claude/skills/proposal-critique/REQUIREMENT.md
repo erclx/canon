@@ -31,4 +31,4 @@ When a session does question a proposal, it asks the same long list of a one-lin
 - Batching decisions that turn on the operator's preference, which `decision-escalate` owns
 - Investigating a failing test or a bug in hand, which `systematic-debugging` owns
 - Judging a finished change, which `review-pr` owns
-- Writing the plan a go lets through, which `plan-feature` owns
+- Writing the plan a go lets through, which `plan-change` owns

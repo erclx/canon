@@ -27,7 +27,7 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   {
     prompt:
       'I already wrote the finished wording for a small new reference file, put it in a plan so a worker lands it exactly as written.',
-    expect: 'plan-feature',
+    expect: 'plan-change',
   },
   {
     prompt: 'This project has no README.md at all, write one from scratch.',

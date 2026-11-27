@@ -5,7 +5,7 @@ description: How a planner reads the code and outside sources in Step 2, and wha
 
 # Planning procedure
 
-Applies to `plan-feature` Step 2 and Step 3, between the onboarding reads and the write. The plan's sections and their contract stay in `${CLAUDE_SKILL_DIR}/references/plan.md`, and this file carries what the skill adds on top.
+Applies to `plan-change` Step 2 and Step 3, between the onboarding reads and the write. The plan's sections and their contract stay in `${CLAUDE_SKILL_DIR}/references/plan.md`, and this file carries what the skill adds on top.
 
 ## Step 2: scan the source
 

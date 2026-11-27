@@ -29,7 +29,7 @@ The channel fails at every hand-off. A finding or a reply stays in a thread nobo
 
 ## Out of scope
 
-- Writing the plan itself, which `plan-feature` owns
+- Writing the plan itself, which `plan-change` owns
 - Reviewing a worker's pull request, which `review-pr` and `role-reviewer` own
 - Entering the worktree a build runs in, which `session-worktree` owns
 - The worker's half of the channel and its boundaries, which `role-worker` owns

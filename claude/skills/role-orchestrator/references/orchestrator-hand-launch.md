@@ -23,7 +23,7 @@ canon dispatch prompts add <task> --role worker --model <model> --effort <effort
 ```
 
 - `--role worker` writes `/canon:auto-ship <plan>` from the plan the task links, and refuses `no-plan` for a task linking none
-- `--role planner` writes the `role-planner` then `plan-feature` command for the task
+- `--role planner` writes the `role-planner` then `plan-change` command for the task
 - `--role reviewer` takes `--pr <number>` and writes the `role-reviewer` then `review-pr` command. Add the sibling facts `orchestrator-reviewer-launch.md` lists as lines.
 - `--line <text>` adds one context line, and repeats. Carry only what `### What the brief may carry` in `orchestrator-launch.md` allows, never the answer-slot default or another fact the plan states.
 - `--merge-order <text>` writes the one lead line the file carries. The verb drops it while no two queued worker plans share a file, and says so in the record.

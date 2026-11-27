@@ -12,7 +12,7 @@ Run this before handing a planner more than one row, whether rows sharing a surf
 The brief names every task file and asks for one plan file per task, so the session reads the shared code once and writes a plan for each row.
 
 ```bash
-claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<batch-slug>" "Run /canon:role-planner, then /canon:plan-feature once for each task below in the order listed, writing one plan file per task and linking it before starting the next: <task-1> <task-2>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it once per three plans and on the last one, carrying each path and what its task file got wrong, and message it again if you stop on a question."
+claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<batch-slug>" "Run /canon:role-planner, then /canon:plan-change once for each task below in the order listed, writing one plan file per task and linking it before starting the next: <task-1> <task-2>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it once per three plans and on the last one, carrying each path and what its task file got wrong, and message it again if you stop on a question."
 ```
 
 `<batch-slug>` names the shared surface, since the planning wait keys on each task and nothing matches a planner's name to a row. The other placeholders resolve as in the single-row shape of `orchestrator-launch.md`.
@@ -22,7 +22,7 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 A batch shares the planner and nothing downstream of it.
 
 - This is not a bundle row. Each task keeps its own plan file, branch, pull request, and planning wait.
-- A bundle row is one plan the operator agreed to, per `### Bundle rows` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
+- A bundle row is one plan the operator agreed to, per `### Bundle rows` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`
 - Arm one wait per task, per `orchestrator-planning-wait.md`
 - A flaky row inside the batch keeps the order `### A flaky row` in `orchestrator-launch.md` states, so the brief puts `/canon:plan-groundwork <task>` ahead of that task's plan
 
@@ -35,7 +35,7 @@ A filed row carries no extent, so the count first exists in the plan its planner
 - Hold that plan's build dispatch while the offer waits, since a worker launched on it builds the row the fan-in would replace
 - Put the offer under `Decisions:` in the report, naming the member count, each member's folders and file count, and the integrator
 - Split by folder so no two members share a file where the tree allows, and keep each member at or under the bound
-- On the operator's word, brief the planner to plan it as a fan-in set, one plan per member and one for the integrator, per `## Fan-in` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/batches.md`
+- On the operator's word, brief the planner to plan it as a fan-in set, one plan per member and one for the integrator, per `## Fan-in` in `${CLAUDE_SKILL_DIR}/../plan-change/references/batches.md`
 - Launch the members together and hold the integrator until `plan-answers` reads it launchable
 
 ## An attended row
@@ -60,7 +60,7 @@ A reused session pays the context load once and ages its picture of the tree, wh
 The session that closed a groundwork track or an app drive is the default planner of the rows its record produced, talk session or not. Name each filed row back to it, since it holds the evidence and what the operator said about the row.
 
 - Launch a cold planner for such a row only on a close message handing off with a reason `role-planner` states, or on the operator's ask
-- Hold all planning of a row any other talk session has said by message it is planning, whether by a launch or by `plan-feature` here, unless the operator asks for a cold planner
+- Hold all planning of a row any other talk session has said by message it is planning, whether by a launch or by `plan-change` here, unless the operator asks for a cold planner
 
 ## Reviving a stopped planner
 
