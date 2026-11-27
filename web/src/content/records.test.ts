@@ -1,52 +1,75 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
-import { records, renderedPage } from './records'
+import { exampleSource, records, renderedPage } from './records'
 
-const sheet = (crumb: string, ren: string) =>
-  `<div class="tb"></div><div class="file" data-f="0"><div class="crumb">${crumb}</div><div class="bd"><div class="v-src"><pre class="raw">src</pre></div><div class="v-view md"><div class="ren">${ren}</div></div><p class="also">Also</p></div></div>`
+const examplesRoot = resolve(import.meta.dirname, '../../../examples')
+const index = readFileSync(resolve(examplesRoot, 'index.md'), 'utf8')
+/** Every target `examples/index.md` links, a folder link ending in `/`. */
+const linked = [...index.matchAll(/\]\(([^)]+)\)/g)].map(
+  (match) => match[1] ?? '',
+)
 
 describe('renderedPage', () => {
-  it('should read the path from the crumb and the body from the rendered view', () => {
-    const page = renderedPage(
-      sheet(
-        '.canon <i>›</i> plans <i>›</i> feature-x.md',
-        '<h4 class="t">Feature</h4><div class="pair"><span>a</span></div><p>after</p>',
-      ),
-    )
+  it('should read the path the sheet names and render its example', () => {
+    const page = renderedPage({
+      name: 'Board',
+      by: 'Written by the orchestrator.',
+      path: '.canon/tasks/priority.md',
+      source: 'planning/priority.md',
+    })
 
-    expect(page.path).toBe('.canon/plans/feature-x.md')
-    expect(page.body).toBe(
-      '<h4 class="t">Feature</h4><div class="pair"><span>a</span></div><p>after</p>',
-    )
+    expect(page.path).toBe('.canon/tasks/priority.md')
+    expect(page.body).toContain('<h4 class="t">Priority</h4>')
+    expect(page.body).toContain('<h4>In flight</h4>')
   })
 
-  it('should read the address of a browser page with no crumb', () => {
-    const page = renderedPage(
-      '<div class="bbar"><div class="url">github.com/you/canon/pull/412</div></div><div class="v-view gmd"><div class="ren"><p>x</p></div></div>',
-    )
+  it('should refuse a sheet whose example does not exist', () => {
+    expect(() =>
+      renderedPage({
+        name: 'Gone',
+        by: 'Written by nobody.',
+        path: '.canon/plans/gone.md',
+        source: 'planning/gone.md',
+      }),
+    ).toThrow('planning/gone.md')
+  })
+})
 
-    expect(page.path).toBe('github.com/you/canon/pull/412')
-    expect(page.body).toBe('<p>x</p>')
+describe('records', () => {
+  it('should hold the twelve sheets in the order a change writes them', () => {
+    expect(records.map((record) => record.name)).toEqual([
+      'Intake',
+      'Groundwork',
+      'Plan',
+      'Task',
+      'Board',
+      'Pull request',
+      'Code review',
+      'UI review',
+      'Evidence',
+      'Drive log',
+      'Context',
+      'Handoff',
+    ])
   })
 
-  it('should draw each checkbox as a mark naming its state', () => {
-    const page = renderedPage(
-      sheet(
-        '.canon <i>›</i> tasks <i>›</i> t.md',
-        '<input type="checkbox" class="cbx" data-ck="0" checked /><input type="checkbox" class="cbx" data-ck="1" />',
-      ),
-    )
+  describe.each(records)('the $name sheet', (record) => {
+    it('should read an example linked from the examples index', () => {
+      expect(exampleSource(record.source)).not.toBe('')
+      expect(
+        linked.filter((target) => record.source.startsWith(target)),
+      ).not.toEqual([])
+    })
 
-    expect(page.body).toBe(
-      '<span class="box x" role="img" aria-label="done"></span><span class="box" role="img" aria-label="not done"></span>',
-    )
-  })
+    it('should render a body with no live input, image, or link', () => {
+      const page = renderedPage(record)
 
-  it('should read a page from every record sheet', () => {
-    const pages = records.map((record) => renderedPage(record.html))
-
-    expect(pages).toHaveLength(12)
-    expect(pages.filter((page) => !page.path || !page.body)).toEqual([])
-    expect(pages.filter((page) => page.body.includes('<input'))).toEqual([])
+      expect(page.path).not.toBe('')
+      expect(page.body).not.toBe('')
+      expect(page.body).not.toMatch(/<(input|img|a|details|br)\b|<!--/)
+    })
   })
 })
