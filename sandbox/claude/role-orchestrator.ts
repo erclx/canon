@@ -21,7 +21,7 @@ export default scenario({
         '         order read from priority.md rather than inferred from index.md,',
       )
       ctx.log.info(
-        '         log-entry ready to hand to a worker (has plan), streak-view needs /plan-feature first,',
+        '         log-entry ready to hand to a worker (has plan), streak-view needs /plan-change first,',
       )
       ctx.log.info(
         '         a single Next action, and In review omitted (no open PRs in this fixture)',

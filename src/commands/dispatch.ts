@@ -240,7 +240,7 @@ export function register(program: Command): void {
       [
         '',
         'A worker row runs /canon:auto-ship on the plan the task links, a planner',
-        'row runs plan-feature on the task, and a reviewer row runs review-pr on',
+        'row runs plan-change on the task, and a reviewer row runs review-pr on',
         '--pr. A worker row with --plan-first runs /canon:auto-ship --plan-first',
         'on the task instead, and takes its branch from the plan the task links',
         'once that session writes one, naming the row by label under claimUnread',

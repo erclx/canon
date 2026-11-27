@@ -12,16 +12,16 @@ Read `canon/context/surfaces/plugin.md` for the shipped plugin, its marketplace 
 - When updating an internal skill, write to `{base-dir}/SKILL.md`, where `{base-dir}` is the path the skill header shows at load time
 - Read `canon/context/surfaces/plugin.md` before adding a plugin skill and `canon/context/workflow/internal-skills.md` before adding an internal one
 - Run `canon claude skills list` for the plugin roster, which no entry restates
-- Follow `claude/skills/create-skill/references/skill.md` for skill structure and frontmatter
+- Follow `claude/skills/write-skill/references/skill.md` for skill structure and frontmatter
 
 Audit a skill body against four sources, each owning one concern.
 
-| Source                                                 | Covers                                                               |
-| ------------------------------------------------------ | -------------------------------------------------------------------- |
-| `claude/skills/create-skill/references/skill.md`       | Structure and frontmatter                                            |
-| `claude/skills/create-skill/references/skill-paths.md` | Which root a path resolves against, citing another skill's reference |
-| `claude/skills/markdown-craft/references/markdown.md`  | Word choice, punctuation, and formatting                             |
-| The `write-human` skill                                | Voice and rhythm                                                     |
+| Source                                                | Covers                                                               |
+| ----------------------------------------------------- | -------------------------------------------------------------------- |
+| `claude/skills/write-skill/references/skill.md`       | Structure and frontmatter                                            |
+| `claude/skills/write-skill/references/skill-paths.md` | Which root a path resolves against, citing another skill's reference |
+| `claude/skills/markdown-craft/references/markdown.md` | Word choice, punctuation, and formatting                             |
+| The `write-human` skill                               | Voice and rhythm                                                     |
 
 ## Authoring conventions
 

@@ -303,7 +303,7 @@ describe('auditSkills requirement limits', () => {
         '..',
         'claude',
         'skills',
-        'create-skill',
+        'write-skill',
         'references',
         'skill-requirement.md',
       ),

@@ -263,8 +263,8 @@ describe('touchesCell', () => {
   it('should name one folder for paths sharing it, two segments deep', () => {
     expect(
       touchesCell([
-        'claude/skills/task-board/SKILL.md',
-        'claude/skills/task-board/references/board.md',
+        'claude/skills/task-create/SKILL.md',
+        'claude/skills/task-create/references/board.md',
       ]),
     ).toBe('2 files under `claude/skills/`')
   })

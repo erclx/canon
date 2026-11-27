@@ -132,7 +132,7 @@ Keying either half of the opening's threshold on the grade was measured wrong. A
 
 A minor the dispatched worker declines needs a surface that survives the merge, since one fixed on the branch needs no record and one left on the thread is lost at merge. Write it into the `## Findings` section of the task the branch closes.
 
-- Open the line with the bold source-and-date label from `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, where the queue-refill sweep already routes such a finding
+- Open the line with the bold source-and-date label from `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`, where the queue-refill sweep already routes such a finding
 - Read the state off the most recent review comment rather than off the presence of a closed one
 - A close-out does not close the pull request, so a later commit gets its own pass, which reopens under `## Review` on a finding of any grade
 

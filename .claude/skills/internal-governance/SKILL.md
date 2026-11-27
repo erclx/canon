@@ -10,7 +10,7 @@ Read `canon/context/surfaces/governance.md` for the system overview, rule naming
 ## Rules
 
 - Read `canon/context/surfaces/governance.md` for how a rule is named before picking a slug for a new one.
-- Follow `claude/skills/create-rule/references/rule.md` for frontmatter, heading style, and bullet conventions when writing a new rule file.
+- Follow `claude/skills/write-rule/references/rule.md` for frontmatter, heading style, and bullet conventions when writing a new rule file.
 - `ruleSubdir` lives in `src/gov/install.ts` and frontmatter stripping in `src/markdown/frontmatter.ts`. Do not duplicate either.
 
 ### Engine and adapter
@@ -51,7 +51,7 @@ When adding a stack:
 
 After writing or revising a rule, or on "audit this rule" or "review the governance rule", audit each bullet against the checklist.
 
-- Read `claude/skills/create-rule/references/checklist.md` for the criteria and output shape. It ships with `canon:create-rule`, so a target runs the same checklist.
+- Read `claude/skills/write-rule/references/checklist.md` for the criteria and output shape. It ships with `canon:write-rule`, so a target runs the same checklist.
 - A toolkit rule under `lang/`, `lib/`, `framework/`, `ui/`, or `tooling/` carries a source ledger at `governance/ledger/<folder>/<slug>.md`, shaped per `references/ledger.md`.
 - A core rule under `canon/`, `claude/`, `code/`, or `writing/` created or touched on the branch carries a decision ledger at the same path, written in that change.
 - Run `bun src/cli.ts gov audit --touched <path>` on the rule, and fix every shape and ledger finding before reporting.
@@ -60,4 +60,4 @@ After writing or revising a rule, or on "audit this rule" or "review the governa
 ## Reference
 
 - `canon/context/surfaces/governance.md`: the domain entry, covering rules and their names, stacks, and install and sync
-- `claude/skills/create-rule/references/rule.md`: conventions for writing rule files
+- `claude/skills/write-rule/references/rule.md`: conventions for writing rule files

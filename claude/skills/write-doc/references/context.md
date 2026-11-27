@@ -5,7 +5,7 @@ description: The root check, guard, flat-file placement, three-question draft, a
 
 # Context kind
 
-`write-doc` reads this file when the request resolves to an entry under `canon/context/`. An entry that already exists is refreshed by `context-fold`, never drafted here.
+`write-doc` reads this file when the request resolves to an entry under `canon/context/`. An entry that already exists is refreshed by `context-sync`, never drafted here.
 
 ## Root
 
@@ -13,19 +13,19 @@ A project the surface move has not reached keeps its context folder under `.clau
 
 ## Guards
 
-Derive a kebab-case slug from the domain and check whether `<context-root>/<slug>.md` or `<context-root>/<slug>/index.md` already exists. Either resolving means the domain is covered under that exact name, so stop: `❌ <slug> already has a context entry. Use context-fold to refresh it instead.`
+Derive a kebab-case slug from the domain and check whether `<context-root>/<slug>.md` or `<context-root>/<slug>/index.md` already exists. Either resolving means the domain is covered under that exact name, so stop: `❌ <slug> already has a context entry. Use context-sync to refresh it instead.`
 
 ## Placement
 
 - Read `<context-root>/index.md` and check every title and description it lists against the domain
-- Stop on a match: `❌ <path> already covers this domain under a different name. Use context-fold to refresh it instead.`
+- Stop on a match: `❌ <path> already covers this domain under a different name. Use context-sync to refresh it instead.`
 - Default a brand-new entry to a flat file, `<context-root>/<slug>.md`, since the standard splits an entry into a folder only past the 300-line ceiling, which a fresh domain never reaches
 
 ## Draft
 
 - Read the domain's own folders and files well enough to answer the standard's three questions, being what the domain owns, what each folder does now, and which trap a session would hit.
 - Draft `title` and `description` frontmatter, then `## Overview`, `## Layout` with one H3 per working folder and `### Other folders` for the rest, and `## Gotchas` only for a trap true today.
-- Keep the standard's closed set and order of `Overview`, `Layout`, and `Gotchas`, per `context.md` in the `context-fold` skill's references. Write no decision and no history.
+- Keep the standard's closed set and order of `Overview`, `Layout`, and `Gotchas`, per `context.md` in the `context-sync` skill's references. Write no decision and no history.
 
 ## Write
 

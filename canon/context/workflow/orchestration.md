@@ -19,7 +19,7 @@ Holds one task file per task, the board surfaces `priority.md` and `backlog.md`,
 - `canon tasks validate` reads and never writes, since a validator repairing a row asserts the claim it tests, and lists `## In flight` overlaps in `shared` without moving an exit code
 - A blocker cell is prose, and `src/tasks/trunk.ts` settles a cited task only when a commit naming its `Pull request:` number sits on `origin/main`
 - A blocker resting on judgment goes to the `untested` array and a failed `--live` read to `live` as `unread`, so the check never claims more than it settled
-- A worker files no task, because `task-board` stops it before `canon tasks next-label --claim` and placing the row is the controller's call
+- A worker files no task, because `task-create` stops it before `canon tasks next-label --claim` and placing the row is the controller's call
 
 ### `.canon/plans/`
 
@@ -31,7 +31,7 @@ Holds one plan per task, archived beside the task on ship.
 - `next-label --claim` reserves a label under `.canon/ordinal-locks/`, since a bare read lets two callers land on one answer
 - The next `--claim` releases a lock above the highest task label once the roster shows its `claim.json` session gone, so a planner whose session ends before writing the task loses its label
 
-### `claude/skills/plan-feature/`
+### `claude/skills/plan-change/`
 
 Owns the plan shape that a planner writes and a worker or controller reads.
 

@@ -106,6 +106,6 @@ export const SETUP_CASES: readonly SkillCase[] = [
   {
     prompt:
       "This project needs its own coding rule that the toolkit doesn't ship.",
-    expect: 'create-rule',
+    expect: 'write-rule',
   },
 ]

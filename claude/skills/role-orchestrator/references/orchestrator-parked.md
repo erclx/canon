@@ -26,7 +26,7 @@ Every row under `## Up next` and `## Needs a plan` in `.canon/tasks/priority.md`
 
 - Take the board rows in board order and finish one before opening the next, since clearing a row changes what the next row holds behind
 - A pass that measures every row first and writes afterwards writes against a board it has already invalidated
-- On the idle trigger, walk the backlog after the board in filename order, since `${CLAUDE_SKILL_DIR}/../task-board/references/backlog.md` fixes it as unordered
+- On the idle trigger, walk the backlog after the board in filename order, since `${CLAUDE_SKILL_DIR}/../task-create/references/backlog.md` fixes it as unordered
 
 ## Re-testing a row
 
@@ -58,12 +58,12 @@ Every measurement this pass takes decides whether a row can start rather than ho
 Write the result into the row, since a re-test reported in chat is lost at the next compaction and measured again.
 
 - Rewrite a blocker cell whose test no longer holds through `canon tasks block <stem> "<blocker>"`, and move the row to the group its new state puts it in through `canon tasks place`
-- Record the measurement in the task's `## Findings` as a line labeled with this session and the date, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
+- Record the measurement in the task's `## Findings` as a line labeled with this session and the date, per `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`
 - `### Writing the board` in `role-orchestrator` owns the method, and `canon tasks validate` runs once the board is rewritten and before the report
 
 ## Re-testing a backlog row
 
-A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../task-board/references/backlog.md` fixes `backlog.md` as a flat list of links with no state of its own. This pass asks the standard's board-or-backlog question instead, whether the work in front of the row landed or the world changed under it.
+A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../task-create/references/backlog.md` fixes `backlog.md` as a flat list of links with no state of its own. This pass asks the standard's board-or-backlog question instead, whether the work in front of the row landed or the world changed under it.
 
 - Read the answer from the task file's `## Findings` and its origin line, `Plan:`, `Groundwork:`, `Intake:`, or `Issue:`
 - Clearing a row answers yes, never a count of how long it waited, since age is refused as evidence here on the same ground as for a board row
@@ -97,7 +97,7 @@ A local formatter removing the shape on contact says nothing about a target runn
 
 Plan what the pass clears, and any `## Needs a plan` row whose only blocker is the missing plan, skipping a row a talk session holds per `orchestrator-launch.md`. This pass runs while workers build and the session is idle, when planning costs the critical path nothing, and a row cleared with no plan is looked at again next pass.
 
-- Run `plan-feature` for each, carrying the constraint per in-flight track that `## The loop` in `role-orchestrator` requires
+- Run `plan-change` for each, carrying the constraint per in-flight track that `## The loop` in `role-orchestrator` requires
 - Verify each plan against the tree the way that step does, since several branches are already changing it
 - Stop where `## Parallelism` stops, since a plan the conflict check holds behind every track in flight is one nobody can dispatch
 - Do not restate the refill procedure. `orchestrator-refill.md` owns it, so this pass promotes through that method.

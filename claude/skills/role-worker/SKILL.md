@@ -41,7 +41,7 @@ The rebase is the one rewrite this session owns, beside that boundary.
 
 ### Overriding a plan question
 
-Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` when this build decides against a suggestion. Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md` when this build decides against a suggestion. Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md` fixes.
 
 ### The preview server
 
@@ -49,7 +49,7 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 
 ### Building against design references and images
 
-Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the board frames this session may write.
+Read `${CLAUDE_SKILL_DIR}/references/build-to-design.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the board frames this session may write.
 
 ## Scope after dispatch
 
@@ -66,7 +66,7 @@ When the operator approves an addition through the controller, the controller am
 ## The board is read-only
 
 - Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. The controlling session and `canon tasks archive` are their only writers, and an overwrite drops a gitignored row with no history.
-- Create no file under `.canon/tasks/` when this build turns up new work, `task-board` included. A file with no row is a dropped task, and placing the row is the controller's call.
+- Create no file under `.canon/tasks/` when this build turns up new work, `task-create` included. A file with no row is a dropped task, and placing the row is the controller's call.
 - Report the row upward instead, through the channel below.
 - Write the task file this build closes and the plan it ran under. The ban covers the shared board rather than the artifacts of the row in hand.
 

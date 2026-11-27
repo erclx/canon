@@ -1,0 +1,18 @@
+purpose = "/canon:plan-change on three outcomes that build in sequence over the same three files writes one plan, or every extra plan carries a Judged apart from constraint with a reason."
+
+max_turns = 30
+
+paths = [
+  { path = ".canon/plans/feature-*.md", why = "The plan's existence is the mechanical part. The checker cannot count files or take an either-or over them, so the count and the clean validate are manual." },
+]
+
+write_scope = [
+  { path = ".canon/plans/**", why = "The plan the run writes." },
+  { path = ".canon/tasks/**", why = "The task board and its index." },
+  { path = ".canon/tmp/**", why = "Skill scratch." },
+]
+
+manual = [
+  "The run wrote one plan file, or every plan file beyond the first carries a `Judged apart from` constraint with a reason. Unwired: the checker cannot count files or take an either-or over them.",
+  "`canon records validate plans` run in the sandbox reports no `stack-foldable` and no `batch-unsplit`. Unwired: the checker reads files and the reply, and runs no command.",
+]

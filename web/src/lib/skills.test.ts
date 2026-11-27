@@ -24,7 +24,7 @@ describe('readSkills', () => {
   it('should list the catalog this checkout ships, each with a line', () => {
     const skills = readSkills()
 
-    expect(skills.map((skill) => skill.name)).toContain('plan-feature')
+    expect(skills.map((skill) => skill.name)).toContain('plan-change')
     expect(skills.every((skill) => skill.line.length > 0)).toBe(true)
   })
 })

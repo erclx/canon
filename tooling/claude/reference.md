@@ -16,7 +16,7 @@ The claude stack installs the Claude Code workflow into a project through `canon
 
 - `.canon/tasks/` holds one file per task plus a generated `index.md`, local scratch only, with `archive/` holding the tasks that shipped
 - `.canon/plans/` holds execution detail for multi-step tasks, and `canon tasks archive` moves a `feature-*.md` plan into `archive/` when the `post-merge` hook archives its task
-- `.canon/review/` holds the reports a review or measurement skill writes, such as `ui-measure-<slug>.md`
+- `.canon/review/` holds the reports a review or measurement skill writes, such as `ui-performance-<slug>.md`
 - `.canon/tmp/` is ephemeral scratch, safe to delete without loss
 - `.claude/worktrees/` is where `EnterWorktree` creates a linked worktree, which is why it stays under `.claude/`
 
@@ -41,7 +41,7 @@ A project installed before the split holds its records under `.claude/`. `canon 
 
 A project installed before the board became a folder still holds `.claude/TASKS.md`, and nothing migrates it. `canon claude init` seeds an empty `.canon/tasks/index.md` beside it, so every skill reads the empty catalog while the real board sits unreferenced.
 
-1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the `task-board` skill requires. Compare each new file against its source block.
+1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the `task-create` skill requires. Compare each new file against its source block.
 2. Run `canon indexes regen --no-stage --root . .canon/tasks/<any-task>.md` to build the catalog.
 3. Delete `.claude/TASKS.md`, and swap its `.gitignore` entry for `.canon/tasks/`.
 
@@ -60,7 +60,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 - Fill in the seed's placeholder project name, description, and key paths after init
 - Keep its sections `Context`, `Commands`, and `Key paths`, since skills detect, extend, or skip by heading
 - Group `Key paths` under H3s, each opening on a lead sentence, before it runs past 5 bullets. `canon markdown audit` and `canon claude sync` both report a longer run.
-- Keep the `Context` section to one line pointing at the state docs, since `plan-feature` does the parallel read when invoked
+- Keep the `Context` section to one line pointing at the state docs, since `plan-change` does the parallel read when invoked
 
 ## Seed docs
 
@@ -107,7 +107,7 @@ A pass still prompts for `gh api`, `curl`, and `canon pr preview --check` under 
 
 ### The plan guard
 
-`plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-feature` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
+`plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-change` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
 
 That log also names each plan's owner, the session on the last `pass` line for it, and guards a write onto an existing plan.
 

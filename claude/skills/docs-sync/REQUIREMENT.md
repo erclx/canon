@@ -32,7 +32,7 @@ A sync with no step that creates a page lands every feature on the nearest exist
 
 ## Out of scope
 
-- The context entries, which `context-fold` owns, and the task board, which `task-complete` owns
+- The context entries, which `context-sync` owns, and the task board, which `task-complete` owns
 - The requirements record, which `document-health` owns
 - `CLAUDE.md` and the installed seed docs, which an operator reconciles by hand
 - Changelog entries, which release tooling generates

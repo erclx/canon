@@ -23,7 +23,7 @@ An item already applied, by the test in the skill's Step 1, is skipped silently,
 
 ## Step 8: run each verdict
 
-Take the task stem from the item heading. Every verdict leaves the folder slug on its task, which is how Step 1 and `task-board`'s unlinked-origin scan both see the folder as acted on.
+Take the task stem from the item heading. Every verdict leaves the folder slug on its task, which is how Step 1 and `task-create`'s unlinked-origin scan both see the folder as acted on.
 
 The command and board write for each verdict:
 
@@ -40,13 +40,13 @@ A decline whose stem resolves to no file in `.canon/tasks/`, `declined/`, or `ar
 
 ### The findings line
 
-Write it as `- **<YYYY-MM-DD>, backlog triage <slug>:** <verdict>, <evidence>`, the bold label form `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes. It is the last write on every verdict with a task file behind it.
+Write it as `- **<YYYY-MM-DD>, backlog triage <slug>:** <verdict>, <evidence>`, the bold label form `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md` fixes. It is the last write on every verdict with a task file behind it.
 
 Step 1 reads the line as applied, so a line written ahead of a refused move would mark a row done that never moved.
 
 ### Promote and a live orchestrator
 
-Before any promote, check the roster the way `task-board` step 4 does, for a live session in this repository whose name starts with `orchestrator-` and whose `sessionId` is not this one.
+Before any promote, check the roster the way `task-create` step 4 does, for a live session in this repository whose name starts with `orchestrator-` and whose `sessionId` is not this one.
 
 When one is found, write the `## Findings` line but not `priority.md` or `backlog.md`, and message that session with the row and its cell so it places the row itself.
 

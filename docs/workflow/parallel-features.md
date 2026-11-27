@@ -10,7 +10,7 @@ Run independent features in parallel, one git worktree and one Claude Code sessi
 
 ## One worktree per feature
 
-- Invoke `canon:plan-feature` in each session. Plans land at `.canon/plans/feature-<slug>.md` at the main root.
+- Invoke `canon:plan-change` in each session. Plans land at `.canon/plans/feature-<slug>.md` at the main root.
 - `ui-checklist` writes a per-branch handoff at `tmp/handoff/ui-checklist/<slug>.md`, which `pr-evidence` posts and removes. The slug is the branch name minus its leading type segment.
 - Ship each worktree with `canon:git-ship`, or `canon:auto-ship` for a draft pull request
 - Only the operator or the controlling session readies a draft
@@ -29,7 +29,7 @@ Assert the orchestrator role in one warm session with `canon:role-orchestrator`.
 
 `.canon/plans/` and `.canon/review/` resolve at the main worktree root. File-editing tools refuse a main-root path from a worktree, so write a whole file through the shell and change an existing one through a `canon` verb.
 
-`claude/skills/plan-feature/references/plan.md` fixes the plan's shape and `claude/skills/plan-feature/references/plan-lifecycle.md` its lifecycle. A blank `- Answer:` slot accepts the `- Suggested:` line.
+`claude/skills/plan-change/references/plan.md` fixes the plan's shape and `claude/skills/plan-change/references/plan-lifecycle.md` its lifecycle. A blank `- Answer:` slot accepts the `- Suggested:` line.
 
 - To pick otherwise, rewrite that line as `overridden at execution to <pick>,` plus the measurement, and add one line to the open task's `## Findings`
 
@@ -42,7 +42,7 @@ Assert the orchestrator role in one warm session with `canon:role-orchestrator`.
 
 Merge order matters only when two branches touch the same file. Expect to rebase over `CLAUDE.md`, `tooling/**`, `canon/context/context-model.md`, `docs/agents/`, and any folder's `index.md`. Resolve an `index.md` conflict with `canon indexes regen` over the rebased tree.
 
-- **Fan-in.** Batches of one change, split for speed or sharing edge files, ship as one pull request that an integrator opens. See `claude/skills/plan-feature/references/batches.md`.
+- **Fan-in.** Batches of one change, split for speed or sharing edge files, ship as one pull request that an integrator opens. See `claude/skills/plan-change/references/batches.md`.
 - **Merge order.** Merge the smallest hotspot footprint first, and a branch touching `CLAUDE.md` or a context entry last.
 - **Rebase.** The branch merging second runs `/review-address`, which trial-merges against `origin/main` and rebases. Push, then merge.
 - **Clean up.** Run `/git-worktree cleanup` to remove merged worktrees. To start fresh, `ExitWorktree(action: "keep")`, then `/session-worktree <new-name>`.
@@ -60,7 +60,7 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 - A parked row is reported when its cited task reached the trunk, whether the cell links it or names its bare label, and with `--live` when a live session or an open pull request holds it
 - A group header must be the columns the group owns, a `Touches` cell must match its plan, and a `Waiting on` cell renders at most 120 characters
 
-`canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive a closed task whose merge carried a PR number, and a slice merged before then moves only its own plan.
+`canon:task-create` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive a closed task whose merge carried a PR number, and a slice merged before then moves only its own plan.
 
 The hook then runs `canon worktrees reclaim`, which clears two kinds of leftover:
 

@@ -511,7 +511,7 @@ export const skillDescriptionTotal: Measure = async (ctx) => {
       .join(', ')
     return {
       emissions: [],
-      failure: `${measured}, over the ceiling of ${SKILL_DESCRIPTION_CEILING}. The longest are ${longest}. Shorten toward the 400-character target in claude/skills/create-skill/references/skill-frontmatter.md, or raise SKILL_DESCRIPTION_CEILING in src/gate/measures.ts and say which skill grew it.`,
+      failure: `${measured}, over the ceiling of ${SKILL_DESCRIPTION_CEILING}. The longest are ${longest}. Shorten toward the 400-character target in claude/skills/write-skill/references/skill-frontmatter.md, or raise SKILL_DESCRIPTION_CEILING in src/gate/measures.ts and say which skill grew it.`,
     }
   }
 

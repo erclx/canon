@@ -17,7 +17,7 @@ The test is one question. Can the item be answered by reading the repository tod
 
 - Yes: intake owns it, and the cost is a session of grepping
 - No, because it needs an experiment or a source outside the project: route it to `plan-groundwork`, where the cost is measured in runs and days
-- Already decided, with only the work left: route it to `plan-feature`
+- Already decided, with only the work left: route it to `plan-change`
 
 Apply the test per item rather than per dump. A dump of forty items typically yields one groundwork candidate, so routing the whole dump on its worst item buys a folder nobody can close.
 
@@ -26,13 +26,13 @@ The wrong surface fails either way. Intake on a question that needs measuring yi
 ## Guards
 
 - If no dump is given, stop: `❌ No dump to file. Paste the notes or name what to triage.`
-- If the dump is one question rather than a set of findings, stop: `❌ One question, not a dump. Run /plan-groundwork to measure it or /plan-feature to plan it.`
+- If the dump is one question rather than a set of findings, stop: `❌ One question, not a dump. Run /plan-groundwork to measure it or /plan-change to plan it.`
 - Do not pause for approval between steps. The write scope below is what makes that safe.
 
 ## Write scope
 
 - Write only inside `.canon/intake/<nn>-<slug>/`. Plans, tasks, source, standards, and rules all live outside it, so this one rule forbids every one of them.
-- The one exception is a board project for a pass that draws, below. Promoting an item onto the task board runs through `task-board` after the operator has answered, as a separate invocation.
+- The one exception is a board project for a pass that draws, below. Promoting an item onto the task board runs through `task-create` after the operator has answered, as a separate invocation.
 - Reading is unrestricted inside the project. Measuring is the work.
 - Treat the folder as gitignored. `canon records push` and `pull` back it up only where a records remote exists, and refuse with `no-remote` otherwise.
 - A push protects against losing the machine, never against a compaction dropping reasoning before anyone pushed. No check reaches the folder, so these rules hold only while a session reads them.
@@ -69,7 +69,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live item needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
-For each domain an item touches, read its context entry through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`, since the entry records the traps a grep will not show.
+For each domain an item touches, read its context entry through the lookup in `${CLAUDE_SKILL_DIR}/../plan-change/references/onboarding.md`, since the entry records the traps a grep will not show.
 
 ## Step 3: measure against the tree
 
@@ -130,7 +130,7 @@ This overrides the paths-only reporting the project states generally, which stay
 **Open questions:** <N> awaiting your call
 
 Next: /plan-intake-answer to answer the `You:` slots from here, or type them
-into the files, then /task-board to promote what is ready
+into the files, then /task-create to promote what is ready
 ```
 
 Use `📂 Resumed` in place of `📂 Opened` on a resume pass, and omit the `**Board:**` line when the pass drew nothing.

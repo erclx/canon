@@ -17,7 +17,7 @@ The first stop comes at Step 0, ahead of any plan read:
 
 The first plan read stops on a missing or misshapen file, and each repair differs:
 
-- No plan (derived). Run `/plan-feature` to create one.
+- No plan (derived). Run `/plan-change` to create one.
 - No plan (caller-supplied). Check the path or slug passed to autoship, then re-run.
 - No task (caller-supplied). Check the task path passed to autoship, then re-run.
 - Task carries no `Plan:` line. Write the plan, point the task's `Plan:` line at it, then re-run.

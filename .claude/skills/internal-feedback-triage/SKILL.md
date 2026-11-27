@@ -23,4 +23,4 @@ Apply these during the plugin body's measuring and writing steps.
 ## Notes
 
 - The `feedback` label is what `canon feedback` and the `toolkit-feedback.yml` issue form both apply.
-- This skill files and never reimplements. `issue-triage` owns the pass, `plan-intake-answer` owns the answers, and `task-board` owns the task a plan item becomes.
+- This skill files and never reimplements. `issue-triage` owns the pass, `plan-intake-answer` owns the answers, and `task-create` owns the task a plan item becomes.

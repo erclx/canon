@@ -15,13 +15,13 @@ A track fanning out to subagents returns findings without their reasoning. Under
 
 - Detect open, resume, and close from the folder itself, matching the topic against existing tracks first, and number a new folder past the highest ordinal across groundwork and intake
 - Measure the current state now, carry a lean and the finding that would overturn it on every open question, link every outside claim, and end a pass with every question leaned on a plain retell
-- Confine writes to the track folder, the fixture, the intake routing, its own board project, and a close-time task file, whose row `task-board` places only when the launch named no task or controller
+- Confine writes to the track folder, the fixture, the intake routing, its own board project, and a close-time task file, whose row `task-create` places only when the launch named no task or controller
 - Route a finding the conclusion leaves out through `plan-intake` in the same session on every route, hand a named controller the conclusion instead of a task file, and name the route
 - Put a headless run's fixture outside the repository, write a mid-track pause note self-contained, and plan the conclusion in the closing session unless `role-planner`'s bar holds, saying which
 
 ## Must not
 
-- Write a feature plan from its own steps rather than through `plan-feature`, or write a source change, a standard, a rule, or a reference doc
+- Write a feature plan from its own steps rather than through `plan-change`, or write a source change, a standard, a rule, or a reference doc
 - Dispatch subagents, since a search too large to run inline is a finding that the question is too broad
 - Close while an open question quietly fails an outcome, or spawn more than three billed headless runs without asking
 - Pause for approval between steps, or open a track with no topic or fewer than two of the three qualifying conditions
@@ -29,7 +29,7 @@ A track fanning out to subagents returns findings without their reasoning. Under
 
 ## Out of scope
 
-- The shape of the plan the track concludes toward, which `plan-feature` owns
+- The shape of the plan the track concludes toward, which `plan-change` owns
 - The bar that sends a conclusion to a cold planner, which `role-planner` owns
 - Filing a breadth dump, which `plan-intake` owns
-- Placing a task row, which `task-board` owns
+- Placing a task row, which `task-create` owns

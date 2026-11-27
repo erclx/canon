@@ -36,6 +36,6 @@ A launch carrying `--plan-first` builds its own plan only inside a bound.
 
 ## Out of scope
 
-- Writing the plan, which `plan-feature` owns
+- Writing the plan, which `plan-change` owns
 - The behavior of each step, which the skill that step invokes owns
 - The ship sequence and the resume path after its stops, which `git-ship` owns

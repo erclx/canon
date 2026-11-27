@@ -50,7 +50,7 @@ Every runbook named here resolves under `${CLAUDE_SKILL_DIR}/references/`. On an
 
 `priority.md` is the ordering source. `index.md` sorts by filename and says nothing about order, so never infer the sequence from it. When `priority.md` is absent, report the queue and say the order is unrecorded.
 
-- Row position under `## Needs a plan` is what gets planned next, top first, per `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`
+- Row position under `## Needs a plan` is what gets planned next, top first, per `${CLAUDE_SKILL_DIR}/../task-create/references/board.md`
 - `backlog.md` is explicitly unordered, so read it for what exists and never as a queue. Report a count rather than its rows, which would put the length back in front of the reader.
 - That count says nothing about whether each row still belongs. `orchestrator-parked.md` re-tests a row's currency, on its own trigger below.
 
@@ -65,7 +65,7 @@ The human asks for each side of a compaction, and this skill reads the runbook.
 - To write the handoff, follow `orchestrator-handoff.md`. It sends the generic half to `canon:session-map` and adds decisions taken under delegated authority.
 - That map follows `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`. Write nothing to the handoff that the board, a task file, or a groundwork folder already carries.
 - Read `orchestrator-limit-stops.md` on request or on the first turn after a limit stop, and `orchestrator-hand-launch.md` on request
-- A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
+- A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`
 - On a request to resume after a compaction, read `orchestrator-resume.md`, which reads that file back with the board and groundwork behind live work
 
 ### The parked rows
@@ -84,8 +84,8 @@ Re-invoke `/canon:role-orchestrator` first whenever the session has run long or 
 
 The cross-feature call stays here, being which rows conflict, what merges before what, and whether a row runs at all. Every plan written here carries a constraint per track in flight, per `### Constraints from the tracks in flight` below.
 
-- Per-row planning runs through `plan-feature` here, the session that measured the row, or a cold planner under `role-planner`, per `orchestrator-launch.md`
-- A flaky row with no named cause launches `plan-groundwork` ahead of `plan-feature`, per `### A flaky row` in that file
+- Per-row planning runs through `plan-change` here, the session that measured the row, or a cold planner under `role-planner`, per `orchestrator-launch.md`
+- A flaky row with no named cause launches `plan-groundwork` ahead of `plan-change`, per `### A flaky row` in that file
 - That file's talk shape launches a planner the operator shapes the row with, its several-row shape one planner for rows sharing a surface, and its plan-and-build shape a small row by default
 - An oversized row takes the fan-in offer in `orchestrator-planner-reuse.md`
 
@@ -125,7 +125,7 @@ A pass posting anything owed reaches the session holding the branch from the rev
 
 ### Constraints from the tracks in flight
 
-A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from the plan its row links. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from the plan its row links. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`.
 
 - A bare path list leaves the worker guessing, and can end up forbidding the repair of a citation the change broke
 - A shared path forbids an act only where the conflict check in `orchestrator-dispatch.md` holds the pair. Otherwise it names what the second branch to merge rebases over.
@@ -151,7 +151,7 @@ A worker is a separate process the controller can steer, and scope reaches it th
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.
 - Do not hand a worker anything but a plan, which carries exact diffs only when already known and otherwise states scope and open questions
 
-A late ask about a building row is a follow-up filed through `task-board`, with the ask as its origin and the running task cited in the intro. Amend the plan only on the operator's word, naming the re-review cost, and message the worker.
+A late ask about a building row is a follow-up filed through `task-create`, with the ask as its origin and the running task cited in the intro. Amend the plan only on the operator's word, naming the re-review cost, and message the worker.
 
 The tracked-file boundary collides with `CLAUDE.md`, which says to handle a small edit immediately, and this rule wins wherever the two meet. A session that writes a change cannot review it independently afterwards, which is the separation `review-pr` exists to supply.
 

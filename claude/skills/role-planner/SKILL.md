@@ -1,6 +1,6 @@
 ---
 name: role-planner
-description: Asserts the planner role for a session writing one plan, groundwork track, intake pass, or sketch round under one row, holding what it reads first, what it may write, and what it hands back. Use when asked to "be the planner", at the start of a dispatched or hand-launched planning run, or when a planner needs its limits. Do NOT use to write the record, such as `plan-feature`, or to implement.
+description: Asserts the planner role for a session writing one plan, groundwork track, intake pass, or sketch round under one row, holding what it reads first, what it may write, and what it hands back. Use when asked to "be the planner", at the start of a dispatched or hand-launched planning run, or when a planner needs its limits. Do NOT use to write the record, such as `plan-change`, or to implement.
 metadata:
   family: parallel
 ---
@@ -9,7 +9,7 @@ metadata:
 
 This session thinks rather than builds. It reads the row, measures what the row claims against the tree, writes one record, and hands back the path.
 
-The record is a feature plan under `plan-feature`, a groundwork track under `plan-groundwork`, an intake pass under `plan-intake` or `app-drive`, or a sketch round under `design-pick`. The session does not implement, decide what merges before what, or review, which belong to a worker, the controlling session, and the human.
+The record is a feature plan under `plan-change`, a groundwork track under `plan-groundwork`, an intake pass under `plan-intake` or `app-drive`, or a sketch round under `design-pick`. The session does not implement, decide what merges before what, or review, which belong to a worker, the controlling session, and the human.
 
 ## What this body owns
 
@@ -52,10 +52,10 @@ Each item below is something a record needed and a launch string did not carry.
 
 ### Reads for a feature plan alone
 
-Two reads belong to the `plan-feature` path, since neither a groundwork track nor an intake pass is sequenced behind another row or validated as a plan.
+Two reads belong to the `plan-change` path, since neither a groundwork track nor an intake pass is sequenced behind another row or validated as a plan.
 
 - The plan of any row this one is sequenced behind, including one moved to `.canon/plans/archive/`, since a shipped plan can carry the strongest constraint
-- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` for the shape, read through the `plan-feature` invocation rather than in its place
+- `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md` for the shape, read through the `plan-change` invocation rather than in its place
 - `canon records validate plans` and `canon markdown audit <the plan file>` once it is written
 
 Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists. A groundwork or intake record passes its own skill's checks instead, and the gitignore problem holds for all three, so audit any record a session writes.
@@ -92,7 +92,7 @@ The plan standard fixes that block for a feature plan, and a groundwork or intak
 
 One exception belongs to `plan-groundwork` alone. This line keeps the rule above from forbidding the task writes that skill's close Step 4 makes, and that step states every route once, including what a close under a controller hands back.
 
-Each finding in a task written this way opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Each finding in a task written this way opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md` fixes.
 
 ## The channel
 
@@ -115,8 +115,8 @@ One rung stays here because it differs between roles. Inference takes the sessio
 A launch whose brief says it is a talk session puts the operator in this one. Everything above holds, and the clause below changes how questions are answered and when the role ends. A launch carrying no such sentence takes none of this.
 
 - Put each open question to the operator through the structured question surface before writing the record
-- Record each pick, and each decision no question covers, per `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, citing its slot per `canon:session-relay`
-- Keep answering under `plan-feature`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
+- Record each pick, and each decision no question covers, per `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`, citing its slot per `canon:session-relay`
+- Keep answering under `plan-change`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
 - Owe the landing announcement as usual, plus a close message when the operator ends the conversation. Send an ask about a building row to the controller, never the worker.
 - Skip the before-prompt block message for a question put to the operator in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
 
@@ -126,7 +126,7 @@ The operator being present is an assumption the launch carries. A talk planner w
 
 ### A whole-plan approval
 
-When the operator approves the plan whole here, write its `Approved:` line per `### Approval` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Cite that line in the landing announcement's `Answer at:` line, since no `- Answer:` slot holds the approval.
+When the operator approves the plan whole here, write its `Approved:` line per `### Approval` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`. Cite that line in the landing announcement's `Answer at:` line, since no `- Answer:` slot holds the approval.
 
 ## Refusing is part of the job
 
@@ -138,7 +138,7 @@ When the operator approves the plan whole here, write its `Approved:` line per `
 ## Lifetime
 
 - The role runs from the launch to the record landing, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for it.
-- Invoke that record's skill again for a second row, being `plan-feature`, `plan-groundwork`, or `plan-intake`, rather than writing from the reference of the one run before
+- Invoke that record's skill again for a second row, being `plan-change`, `plan-groundwork`, or `plan-intake`, rather than writing from the reference of the one run before
 - A reused session's picture of the tree ages, and a compaction silently drops the reasoning behind its earlier records
 - Run the in-flight read again before each handed row, and stop when the operator ends the session or a compaction nears, telling the controller which rows are still unplanned
 

@@ -32,22 +32,21 @@ it('should keep the two plan-guard.sh copies byte-identical', () => {
 
 describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
   // The line shapes the guard reads an invocation from, pinned because the transcript format is Claude Code's.
-  const SKILL_CALL = JSON.stringify({
-    message: {
-      content: [
-        {
-          input: { skill: 'canon:plan-feature' },
-          name: 'Skill',
-          type: 'tool_use',
-        },
-      ],
-    },
-    type: 'assistant',
-  })
-  const SLASH_COMMAND = JSON.stringify({
-    message: { content: '<command-name>/canon:plan-feature</command-name>' },
-    type: 'user',
-  })
+  const skillCall = (skill: string): string =>
+    JSON.stringify({
+      message: {
+        content: [{ input: { skill }, name: 'Skill', type: 'tool_use' }],
+      },
+      type: 'assistant',
+    })
+  const slashCommand = (skill: string): string =>
+    JSON.stringify({
+      message: { content: `<command-name>/${skill}</command-name>` },
+      type: 'user',
+    })
+  const SKILL_CALL = skillCall('canon:plan-change')
+  // The name before the rename, still licensing a plan for one release.
+  const LEGACY_SKILL_CALL = skillCall('canon:plan-feature') // canon-keep-retired
   // A tool call naming no plan skill reads as today's format with no invocation, not an unread one.
   const OTHER_CALL = JSON.stringify({
     message: {
@@ -124,7 +123,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
       const result = await run(hook, shellIn(project, command))
 
       expect(result.stderr).toContain('.canon/plans/feature-new.md')
-      expect(result.stderr).toContain('Invoke the canon:plan-feature skill')
+      expect(result.stderr).toContain('Invoke the canon:plan-change skill')
       expect(result.code).toBe(2)
     },
   )
@@ -171,7 +170,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
         shellIn(project, heredoc('.canon/plans/feature-new.md')),
       )
 
-      expect(result.stderr).toContain('has not invoked canon:plan-feature')
+      expect(result.stderr).toContain('has not invoked canon:plan-change')
       expect(result.stderr).not.toContain('transcript line')
       expect(result.code).toBe(2)
     })
@@ -234,7 +233,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
         lag.path,
       )
 
-      expect(result.stderr).toContain('has not invoked canon:plan-feature')
+      expect(result.stderr).toContain('has not invoked canon:plan-change')
       expect(result.code).toBe(2)
       expect(readFileSync(lag.waits, 'utf8')).toBe('1\n')
     })
@@ -323,7 +322,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
       ),
     ],
   ])(
-    'should pass the plan %s names with no plan-feature invocation',
+    'should pass the plan %s names with no plan-change invocation',
     async (_, line) => {
       const project = planProject(`${line}\n`)
 
@@ -351,7 +350,12 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
 
   it.each([
     ['a Skill tool call', SKILL_CALL],
-    ['a typed slash command', SLASH_COMMAND],
+    ['a typed slash command', slashCommand('canon:plan-change')],
+    ['a Skill tool call under the old name', LEGACY_SKILL_CALL],
+    [
+      'a typed slash command under the old name',
+      slashCommand('canon:plan-feature'), // canon-keep-retired
+    ],
   ])('should pass a new plan after %s', async (_, line) => {
     const project = planProject(`${line}\n`)
 
@@ -729,7 +733,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
       message: {
         content: [
           {
-            input: { skill: 'canon:plan-feature' },
+            input: { skill: 'canon:plan-change' },
             name: 'Skill',
             type: 'tool_call',
           },

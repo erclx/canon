@@ -25,4 +25,4 @@ A drive swaps the middle of the brief to `/canon:app-drive <target>` and asks fo
 
 ## Landing the pick
 
-A design session never applies its pick, per `role-planner`. On the pick message, file the landing as a row and plan it, so a worker lands the winning arm through `design-record` in a pull request the reviewers read. The `ui-audit` and `ui-measure` skills take no launch of their own, since each runs inside another skill.
+A design session never applies its pick, per `role-planner`. On the pick message, file the landing as a row and plan it, so a worker lands the winning arm through `design-record` in a pull request the reviewers read. The `ui-audit` and `ui-performance` skills take no launch of their own, since each runs inside another skill.

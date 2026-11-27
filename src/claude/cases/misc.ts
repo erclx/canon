@@ -29,7 +29,7 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Before we draft the landing page, pull references from linear.app so the round has a real site to look at.',
-    expect: 'design-references',
+    expect: 'design-gather',
   },
   {
     prompt:

@@ -19,4 +19,4 @@ Ask once per run, ahead of the first look round, for a few taste words such as c
 
 ## What a draft may take
 
-Hand pasted images to `design-references`, which keeps them as its first source. From an operator image a draft takes mood, palette direction, and shape language. It never takes a product's artwork, logo, or text, since the operator pasted the image as taste and the structure-only line still guards third-party content.
+Hand pasted images to `design-gather`, which keeps them as its first source. From an operator image a draft takes mood, palette direction, and shape language. It never takes a product's artwork, logo, or text, since the operator pasted the image as taste and the structure-only line still guards third-party content.

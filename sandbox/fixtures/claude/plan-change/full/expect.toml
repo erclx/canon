@@ -1,0 +1,48 @@
+purpose = "Full-mode /canon:plan-change on the seeded task API writes a plan with the required sections, names the two seeded files the task's outcomes touch, and links it from the task."
+
+max_turns = 30
+
+paths = [
+  { path = ".canon/plans/feature-*.md", why = "Plans are gitignored and the checker scans the tree rather than what git lists, so the glob reaches the plan the run wrote." },
+]
+
+write_scope = [
+  { path = ".canon/plans/**", why = "The plan the run writes." },
+  { path = ".canon/tasks/**", why = "The task board and its index." },
+  { path = ".canon/tmp/**", why = "Skill scratch." },
+]
+
+manual = [
+  "Each question carries a `- Suggested:` line and an `- Answer:` slot. Semantic: a run can ask none, and a pattern that requires one fails a correct run.",
+  "The plan names the Zod schema change. Semantic: wording.",
+]
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Files to touch:\*\*|## Files to touch)[ \t]*$'
+why = "The plan carries the section the plan standard requires. Either spelling the validator accepts satisfies it."
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Verification:\*\*|## Verification)[ \t]*$'
+why = "The plan carries its verification section, in either accepted spelling."
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = '^(\*\*Review focus:\*\*|## Review focus)[ \t]*$'
+why = "The plan carries its review focus section, in either accepted spelling."
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = 'src/db\.ts'
+why = "The first seeded file the task's outcomes name."
+
+[[content]]
+path = ".canon/plans/feature-*.md"
+pattern = 'src/routes/tasks\.ts'
+why = "The second seeded file the task's outcomes name."
+
+[[content]]
+path = ".canon/tasks/v01.0-due-dates.md"
+pattern = '^Plan:.*feature-[\w.-]+\.md'
+why = "The task's Plan line points at the written plan."

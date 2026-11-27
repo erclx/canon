@@ -1,6 +1,6 @@
 ---
 name: design-pick
-description: Drafts several candidates for a decision judged by looking, lays them side by side on one Frameboard page, and takes the operator's pick through the structured question surface, looping until they stop. Use when asked to "draft some options", "show me a few versions", or "mock up alternatives", or when a choice is taste. Do NOT use when the request names the answer, which is `plan-feature`.
+description: Drafts several candidates for a decision judged by looking, lays them side by side on one Frameboard page, and takes the operator's pick through the structured question surface, looping until they stop. Use when asked to "draft some options", "show me a few versions", or "mock up alternatives", or when a choice is taste. Do NOT use when the request names the answer, which is `plan-change`.
 metadata:
   family: decide
 ---
@@ -13,7 +13,7 @@ The candidates live on the Frameboard board at the main root, in the project the
 
 ## Guards
 
-- If the request names one answer and asks for it to be built, stop: `❌ This names one answer, so there is nothing to pick between. Use /canon:plan-feature.`
+- If the request names one answer and asks for it to be built, stop: `❌ This names one answer, so there is nothing to pick between. Use /canon:plan-change.`
 - If the ask is to try a built app and find what is wrong, stop: `❌ Nothing to pick between yet. Use /canon:app-drive.`
 - If the decision has no visible form, stop: `❌ Nothing to look at. Drafting candidates needs a decision a render can show.`
 - Draft no candidate for a decision the operator has not asked to make, since options everywhere spend their attention rather than saving it
@@ -38,7 +38,7 @@ Inside a live `plan-groundwork` track, renders land in the track's own `evidence
 A round drafted with nothing real in front of it comes back generic, so gather references before Step 2 as `references/board.md` states.
 
 - Name in each arm's reference field the frame it draws on and what it takes, or `none`
-- Take structure alone, as the `design-references` skill draws that line, and never a product's text, accounts, logo, or numbers
+- Take structure alone, as the `design-gather` skill draws that line, and never a product's text, accounts, logo, or numbers
 - Ask once for taste words before a look round, per `references/taste.md`
 
 ## Step 2: draft the arms as frames on one page
@@ -161,7 +161,7 @@ The prototype page stays on the board, since later changes land on it first.
 
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
-- `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
+- `plan-change` plans the work once the pick is made, and declares the pull request boundary that plan carries
 - `design-record` lands the winning arm in the reference folder and its values in the design document from the picked page, which the close keeps
 - `references/widths.md` carries how to read a contrast, a column width, or a tap target off a frame, and `canon drive` runs the probes without gating
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past

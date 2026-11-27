@@ -35,7 +35,7 @@ const BACKLOG_FILE = 'backlog.md'
 const DERIVED_COUNT = /^\d+ files?(?: under |$)/
 
 /**
- * The readiness headings `claude/skills/task-board/references/board.md` fixes.
+ * The readiness headings `claude/skills/task-create/references/board.md` fixes.
  * The names are the contract, so a board grouping under its own names reads as
  * carrying no group, and the run refuses instead of reporting it clean.
  */

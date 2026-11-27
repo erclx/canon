@@ -29,6 +29,6 @@ Archiving fails in two ways that both lose work. Moving the file, editing the or
 
 ## Out of scope
 
-- Creating or declining a task, which `task-board` owns
-- The context entries, which `context-fold` owns
+- Creating or declining a task, which `task-create` owns
+- The context entries, which `context-sync` owns
 - The unattended archive at merge, which the `post-merge` hook owns through `canon tasks archive`

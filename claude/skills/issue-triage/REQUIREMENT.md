@@ -31,5 +31,5 @@ Triage done by hand fails three ways. A self-contradicting report gets a guess i
 
 - Opening a new issue, which `git-issue` owns
 - Answering the filed items, which `plan-intake-answer` owns
-- Writing the plan a plan-worthy item needs, which `plan-feature` owns
+- Writing the plan a plan-worthy item needs, which `plan-change` owns
 - Pruning the task backlog, which `backlog-triage` owns

@@ -573,7 +573,7 @@ describe('referencesIn', () => {
     it('should pass a folder mention that names no rule file', () => {
       expect(
         referencesIn(
-          'claude/skills/create-rule/SKILL.md',
+          'claude/skills/write-rule/SKILL.md',
           'Project rules live under `.claude/rules/project/`, beside index.md.',
           root,
         ),
@@ -583,7 +583,7 @@ describe('referencesIn', () => {
     it('should pass a rule path illustrating a placeholder shape', () => {
       expect(
         referencesIn(
-          'claude/skills/create-rule/SKILL.md',
+          'claude/skills/write-rule/SKILL.md',
           'Repoint the citation at `.claude/rules/project/<subdir>/<slug>.md`.',
           root,
         ),
@@ -593,7 +593,7 @@ describe('referencesIn', () => {
     it("should pass a rule path cited from a skill's own REQUIREMENT.md, which a maintainer reads rather than a session", () => {
       expect(
         referencesIn(
-          'claude/skills/task-board/REQUIREMENT.md',
+          'claude/skills/task-create/REQUIREMENT.md',
           'See `.claude/rules/canon/canon/tasks.md` for the file shape.',
           root,
         ),
@@ -634,7 +634,7 @@ describe('referencesIn', () => {
     it('should report a placeholder stack seeds path, which no target holds under any name', () => {
       expect(
         referencesIn(
-          'claude/skills/plan-feature/references/plan.md',
+          'claude/skills/plan-change/references/plan.md',
           'A counterpart under `tooling/<stack>/seeds/` ships with it.',
           root,
         ).map((reference) => [reference.kind, reference.text]),

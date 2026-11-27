@@ -44,7 +44,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Strike each one through `canon tasks outcome <stem> --cut <n> --reason <reason>`, then archive. The verb keeps the checkbox, so every later position still names the outcome it did.
    - Strike only an outcome the operator or another repository owes. An open outcome this repository owes stays on the board, and the task stays with it.
    - Send a struck outcome that another repository owes to that repository's orchestrator through `session-relay`, which resolves the address
-   - Let the receiver file it with `task-board` on its own board, since `task-board` here would file it on this board
+   - Let the receiver file it with `task-create` on its own board, since `task-create` here would file it on this board
    - Name it in the report for the operator when no such session is live
    - List every struck outcome in the report's `Struck:` line, so the work is carried by a named owner rather than lost to the strike
    - Then run `canon sessions reap <stem> --remove --json` for each merged task, archived or not, so its worker and reviewers stop, leave the agent view, and the view keeps to live work
@@ -62,7 +62,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
    - Serialize it behind a task only on one of that check's holds, and name the hold
    - A path the two merely share is promoted beside it, named so the merge order plans the rebase
    - A candidate held by something outside the tree stays put whatever the check shows, since clearing a conflict leaves an external condition standing
-8. Write a plan for each newly promoted task with `plan-feature`, carrying the in-flight constraint that `## The loop` in the skill body states, then fill the picks the link left blank and report:
+8. Write a plan for each newly promoted task with `plan-change`, carrying the in-flight constraint that `## The loop` in the skill body states, then fill the picks the link left blank and report:
    - Run `canon tasks validate --json` and record a pick through `canon tasks launch` for each `launch-unstated` row, per `## Pick the model` in `orchestrator-dispatch.md`
    - Run it after the links, since a promoted row gets its plan only at this step
    - The finding refuses nothing, so a row left unfilled still waits on its pick before it dispatches

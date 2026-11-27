@@ -393,7 +393,7 @@ describe('runEquivalence', () => {
     try {
       const record = await runEquivalence({
         root: snapshot,
-        targets: ['claude:plan-feature/full'],
+        targets: ['claude:plan-change/full'],
         base: 'HEAD',
         includeAnchor: false,
         useMasks: true,
@@ -401,7 +401,7 @@ describe('runEquivalence', () => {
 
       // A machine without the arm's tools reads it red on both sides, which is still no difference.
       expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
-        ['claude:plan-feature/full', []],
+        ['claude:plan-change/full', []],
       ])
     } finally {
       removeSnapshot()

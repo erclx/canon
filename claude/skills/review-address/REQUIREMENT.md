@@ -31,5 +31,5 @@ A branch goes stale as `main` moves, and nothing rebases it, so every finding cl
 
 - Writing the review, which `review-pr` owns
 - Staging, committing, and pushing the follow-up, which `git-followup` owns
-- Refreshing the `.claude/` docs the fixes made stale, which `context-fold` owns
+- Refreshing the `.claude/` docs the fixes made stale, which `context-sync` owns
 - Re-reviewing its own fixes, which hands back to the reviewer

@@ -8,7 +8,7 @@ import {
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(47)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(54)
   })
 
   it('should retire the prefix on every row', () => {
@@ -45,10 +45,12 @@ describe('SKILL_NAME_MAP', () => {
 
     expect(shared).toEqual([
       ['claude-diagram', 'draft-diagram', 'draft-figure'],
-      ['claude-docs', 'docs-fold'],
+      ['claude-docs', 'docs-fold', 'context-fold'],
+      ['claude-feature', 'plan-feature'],
+      ['claude-tasks', 'task-board'],
       ['claude-ui-test', 'ui-test'],
       ['claude-ux-audit', 'ux-audit'],
-      ['claude-ux-measure', 'ux-measure'],
+      ['claude-ux-measure', 'ux-measure', 'ui-measure'],
       ['canon-screencast', 'draft-screencast'],
       ['canon-slides-draft', 'draft-slides'],
       [
@@ -158,13 +160,13 @@ describe('SKILL_NAME_RULES ordering', () => {
 describe('renameText under the skill preset', () => {
   it('should rewrite a plugin-namespaced invocation', () => {
     expect(renameText('run canon:claude-docs now', SKILL_NAME_RULES)).toBe(
-      'run canon:context-fold now',
+      'run canon:context-sync now',
     )
   })
 
   it('should rename the fold skill onto the name that states what it edits', () => {
     expect(renameText('run canon:docs-fold now', SKILL_NAME_RULES)).toBe(
-      'run canon:context-fold now',
+      'run canon:context-sync now',
     )
   })
 
@@ -268,7 +270,7 @@ describe('renameText under the skill preset', () => {
     ['pick-by-eye', 'design-pick'],
     ['ui-record', 'ui-film'],
     ['ux-audit', 'ui-audit'],
-    ['ux-measure', 'ui-measure'],
+    ['ux-measure', 'ui-performance'],
   ])('should move %s into the family its job belongs to', (old, name) => {
     expect(renameText(`run canon:${old} now`, SKILL_NAME_RULES)).toBe(
       `run canon:${name} now`,
@@ -281,8 +283,39 @@ describe('renameText under the skill preset', () => {
         'canon:draft-and-pick, canon:claude-ux-audit, canon:claude-ux-measure',
         SKILL_NAME_RULES,
       ),
-    ).toBe('canon:design-pick, canon:ui-audit, canon:ui-measure')
+    ).toBe('canon:design-pick, canon:ui-audit, canon:ui-performance')
   })
+
+  it.each([
+    ['create-skill', 'write-skill'],
+    ['create-rule', 'write-rule'],
+    ['plan-feature', 'plan-change'],
+    ['ui-measure', 'ui-performance'],
+    ['context-fold', 'context-sync'],
+    ['task-board', 'task-create'],
+    ['design-references', 'design-gather'],
+  ])('should rename %s for the job it does', (old, name) => {
+    expect(renameText(`run canon:${old} now`, SKILL_NAME_RULES)).toBe(
+      `run canon:${name} now`,
+    )
+  })
+
+  it.each([
+    ['claude-docs', 'context-sync'],
+    ['docs-fold', 'context-sync'],
+    ['claude-feature', 'plan-change'],
+    ['claude-tasks', 'task-create'],
+    ['claude-ux-measure', 'ui-performance'],
+    ['ux-measure', 'ui-performance'],
+  ])(
+    'should land %s on its current name in one pass rather than on a name since retired',
+    (old, name) => {
+      const once = renameText(`run canon:${old} now`, SKILL_NAME_RULES)
+
+      expect(once).toBe(`run canon:${name} now`)
+      expect(renameText(once, SKILL_NAME_RULES)).toBe(once)
+    },
+  )
 
   it('should land the merged docs drafter on the new doc skill rather than on the retired draft-doc', () => {
     expect(renameText('canon:draft-docs', SKILL_NAME_RULES)).toBe(

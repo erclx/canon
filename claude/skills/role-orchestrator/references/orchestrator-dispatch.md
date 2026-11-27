@@ -51,14 +51,14 @@ A refusal or a staged plan holds the row as surely as an open question.
 
 - Any other refusal, or no `launchable` key: treat the row as unverified, name what could not be read, and fall back, since a gate reading nothing is not running
 - A plan still staging batches in one file with `**Batch N**` sub-headings reports an `open` entry labeled `Batch staging`, so the row waits on a split
-- A `Fan-in` entry holds a fan-in set, per `batches.md` in `plan-feature`
+- A `Fan-in` entry holds a fan-in set, per `batches.md` in `plan-change`
 - A `Stacked sibling` entry means the plan stacks on a live sibling it mostly shares files with, so the row waits on a fold or a `Judged apart from` line
 
 ### What the gate reads
 
 This gate runs first because it is the cheapest reading, needing no roster and no ref, and the only one asking about the row itself. It reads the plan rather than a cell describing one, since a cell omitting a renamed path clears a check the tree would fail.
 
-A blank `- Answer:` is not an unanswered question, since `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` fixes an empty slot as accepting the suggestion. A gate reading every blank slot as open would refuse every plan in the folder.
+A blank `- Answer:` is not an unanswered question, since `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md` fixes an empty slot as accepting the suggestion. A gate reading every blank slot as open would refuse every plan in the folder.
 
 - The narrow case is `- Suggested: needs your call, <why>` over an empty slot, the form the standard writes where the answer turns on preference
 - Two demonstrated paraphrases read the same, `needs operator's call` and `needs the operator's call`
@@ -96,7 +96,7 @@ No count binds this, and a shared file does not either. Hold a candidate behind 
 - **Sweep.** One plan rewrites a file or folder wholesale, such as a terminology pass or a `canon/context/` reflow, and the other writes inside it.
 - **A stated reason.** A singleton resource, or tracks interacting where no file reading shows, as a row creating a skill does with one counting that catalog.
 
-Read a contract off the changing plan's `**Risks:**`, and both sides of a rename before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. Nothing verifies a stated reason, so it stands only while the dispatcher applies it.
+Read a contract off the changing plan's `**Risks:**`, and both sides of a rename before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`. Nothing verifies a stated reason, so it stands only while the dispatcher applies it.
 
 ### A shared file is not a hold
 

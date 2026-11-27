@@ -126,7 +126,7 @@ export const opening: {
 /** The order an empty `/` lists the workflow skills in, ahead of the rest of the catalog. */
 export const menuFlow = [
   'role-orchestrator',
-  'plan-feature',
+  'plan-change',
   'role-worker',
   'review-pr',
   'review-ui',

@@ -9,7 +9,7 @@ paths = [
 ]
 
 absent = [
-  { path = ".canon/tasks/v00.3*.md", why = "A task file with no row is a dropped task, since placing the row is the controlling session's call. A measured run wrote one through task-board while leaving both board files alone. These four globs cover the names a wrong run most plausibly writes: the next two ordinals and either word from the narration. A positive list against an unbounded space, so it is the weaker half of the pair, and the content block below catches a row added under an unpredicted name." },
+  { path = ".canon/tasks/v00.3*.md", why = "A task file with no row is a dropped task, since placing the row is the controlling session's call. A measured run wrote one through task-create while leaving both board files alone. These four globs cover the names a wrong run most plausibly writes: the next two ordinals and either word from the narration. A positive list against an unbounded space, so it is the weaker half of the pair, and the content block below catches a row added under an unpredicted name." },
   { path = ".canon/tasks/v00.4*.md", why = "The ordinal after the first one a wrong run would claim." },
   { path = ".canon/tasks/*export*.md", why = "A name built from the narration word." },
   { path = ".canon/tasks/*csv*.md", why = "A name built from the other narration word." },

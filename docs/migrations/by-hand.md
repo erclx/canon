@@ -36,13 +36,13 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 
 | Skill             | Standards                                                     |
 | ----------------- | ------------------------------------------------------------- |
-| `task-board`      | `board`, `tasks`, `tasks-decline`                             |
-| `context-fold`    | `context`                                                     |
+| `task-create`     | `board`, `tasks`, `tasks-decline`                             |
+| `context-sync`    | `context`                                                     |
 | `canvas-board`    | `canvas`, `design` <!-- canon-keep-retired -->                |
 | `docs-sync`       | `docs`, `readme`                                              |
 | `draw-figure`     | `figures`, `mermaid`                                          |
-| `create-rule`     | `rule`                                                        |
-| `create-skill`    | `skill`, `skill-paths`, `skill-practice`, `skill-requirement` |
+| `write-rule`      | `rule`                                                        |
+| `write-skill`     | `skill`, `skill-paths`, `skill-practice`, `skill-requirement` |
 | `git-branch`      | `branch`, `slug`                                              |
 | `git-commit`      | `commit`, `versioning`                                        |
 | `git-pr`          | `pr`, `publish`                                               |
@@ -50,12 +50,12 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `teach-workspace` | `glossary`, `teach` <!-- canon-keep-retired -->               |
 | `plan-groundwork` | `groundwork`, `groundwork-spikes`                             |
 | `plan-intake`     | `intake`                                                      |
-| `plan-feature`    | `plan`, `plan-lifecycle`                                      |
+| `plan-change`     | `plan`, `plan-lifecycle`                                      |
 | `plan-ready`      | `ready` <!-- canon-keep-retired -->                           |
 | `write-doc`       | `requirements`, `wiki`                                        |
 | `session-map`     | `session`                                                     |
 
-The `standard` name became `skill-reference.md` in `create-skill`.
+The `standard` name became `skill-reference.md` in `write-skill`.
 
 ## Move decisions out of a held architecture record, once
 

@@ -13,7 +13,7 @@ Write the `number` the final command printed onto the task the branch is closing
 
 The task is the one whose `Plan:` line names the plan this branch implemented. That plan is `.canon/plans/feature-<slug>.md` at the main worktree root, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`.
 
-- `plan-feature` writes the plan under the branch slug, so the two correspond on any branch that came through the plan-to-execute path
+- `plan-change` writes the plan under the branch slug, so the two correspond on any branch that came through the plan-to-execute path
 - When a caller earlier in the chain already read the plan, use that filename instead of re-deriving
 - The slug is a guess at the plan rather than a fact about the task, so the verb re-checks it against the board and refuses on a near miss
 

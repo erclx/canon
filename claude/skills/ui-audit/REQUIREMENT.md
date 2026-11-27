@@ -30,7 +30,7 @@ The pass slides into fixing what it finds, and then the audit and the change lan
 ## Out of scope
 
 - Fixing what it found, which is a separate change with its own review
-- Feature planning, which `plan-feature` owns
+- Feature planning, which `plan-change` owns
 - Verifying one specific change, which `ui-checklist` owns
 - Defining the intent it audits against, which the design document owns
-- Measuring what a running interface costs to paint, block, or shift, which `ui-measure` owns, while contrast stays here as two color values off the stylesheet
+- Measuring what a running interface costs to paint, block, or shift, which `ui-performance` owns, while contrast stays here as two color values off the stylesheet

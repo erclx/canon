@@ -142,7 +142,7 @@ Run this tail by default after the close, since the intake records the session's
 1. Answer the intake's `You:` slots with `plan-intake-answer` before any row is promoted from it.
 2. Send the controller the ready items by intake folder, cluster file, and number, none with an open slot or a `sketch` answer. Say this session plans those rows, so it holds a cold planner for each.
 3. Wait for the controller to file the rows and name each back. Plan only a row named to this session, and write no task file.
-4. Invoke `canon:plan-feature` for each named row, since its Step 1 loads the UI skills for a rendered surface. Link each with `canon tasks plan-link` before the next, and announce per `role-planner`.
+4. Invoke `canon:plan-change` for each named row, since its Step 1 loads the UI skills for a rendered surface. Link each with `canon tasks plan-link` before the next, and announce per `role-planner`.
 
 ### A finding after the close
 
@@ -160,7 +160,7 @@ Emit every written file's relative path, the drive-check `reason`, and counts.
 **Board:** project <board-project> kept on <board>
 
 Next: <planning the ready rows here once named back | handed off, <reason>>
-Slots unread: /plan-intake-answer, then /task-board
+Slots unread: /plan-intake-answer, then /task-create
 ```
 
 Omit the `Board` line when the drive drew no board, then close on the retell `${CLAUDE_SKILL_DIR}/../plan-intake/references/retell.md` shapes.

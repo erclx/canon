@@ -28,13 +28,13 @@ flowchart TB
 
 ## File the row
 
-Tidewell users keep asking for a tide table export, and you say so in any session. A pile of such asks goes through `canon:plan-intake`. One clear ask goes through `canon:task-board`, which leaves the row under Needs a plan in `priority.md`, and the orchestrator moves it from there.
+Tidewell users keep asking for a tide table export, and you say so in any session. A pile of such asks goes through `canon:plan-intake`. One clear ask goes through `canon:task-create`, which leaves the row under Needs a plan in `priority.md`, and the orchestrator moves it from there.
 
 The row is now a record on the board, with no code and no plan behind it.
 
 ## Plan it
 
-The orchestrator dispatches a planner, a session that loads `canon:role-planner` and runs `canon:plan-feature` on the task. The planner reads the tree, writes `.canon/plans/feature-tide-table-export.md`, and links it from the row.
+The orchestrator dispatches a planner, a session that loads `canon:role-planner` and runs `canon:plan-change` on the task. The planner reads the tree, writes `.canon/plans/feature-tide-table-export.md`, and links it from the row.
 
 The plan names the files to touch, the risks, the weight, and any question it cannot settle alone. A question left blank accepts its suggested answer at build time, so only a question marked as needing your call holds the row.
 

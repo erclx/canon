@@ -43,9 +43,9 @@ Plan and build in session 1, then review and ship in a fresh session 2 when you 
 
 - For a pile of findings, invoke `canon:plan-intake`, for a grown backlog `canon:backlog-triage`, and for open GitHub issues `canon:issue-triage`
 - For an unmeasured state with live approaches, invoke `canon:plan-groundwork`
-- Invoke `canon:plan-feature`, implement, and run the `CLAUDE.md` commands until they pass
+- Invoke `canon:plan-change`, implement, and run the `CLAUDE.md` commands until they pass
 - For UI changes, invoke `canon:ui-checklist`
-- Invoke `canon:context-fold` before closing
+- Invoke `canon:context-sync` before closing
 
 Session 2 invokes `canon:git-ship` to verify, sync docs, commit by concern, and open the pull request.
 
@@ -62,7 +62,7 @@ On a mature stack, approve the plan and invoke `canon:auto-ship` to implement, v
 
 ### Pick where a row starts
 
-Pick by how much you know. Hand a pile of notes to `canon:plan-intake`, which files one item per finding. When a question needs measuring before anyone can plan it, open `canon:plan-groundwork`. If you can already state the row, go straight to `canon:plan-feature`.
+Pick by how much you know. Hand a pile of notes to `canon:plan-intake`, which files one item per finding. When a question needs measuring before anyone can plan it, open `canon:plan-groundwork`. If you can already state the row, go straight to `canon:plan-change`.
 
 - Run `canon:backlog-triage` first when the backlog has grown and you doubt every row still earns its place
 - Run `canon:issue-triage` first when the work sits in open GitHub issues
@@ -71,7 +71,7 @@ Pick by how much you know. Hand a pile of notes to `canon:plan-intake`, which fi
 
 For a small row, launch `/canon:auto-ship --plan-first <task>`. One session writes the plan, then builds it, and a larger or heavy plan stops before the build. Add `--stop-after-plan` to read the plan before anything is built, and review stays a separate session.
 
-A row too big for one pull request splits into batches that each build in their own session. An integrator merges them into one pull request, as the batches reference of `canon:plan-feature` states.
+A row too big for one pull request splits into batches that each build in their own session. An integrator merges them into one pull request, as the batches reference of `canon:plan-change` states.
 
 ### Unattended, attended, and talk runs
 

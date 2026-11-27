@@ -65,7 +65,7 @@ Every local `claude --bg` launch but a talk one denies the question tool, so suc
 A technical question is one the plan's `- Suggested:` line and the tree settle between them, such as which of two files a helper belongs in.
 
 - Answer from that suggestion, checked against the tree, and relay it through `canon:session-relay` with the `Answer at:` line that skill states
-- Record each answer in the task's `## Findings` as a line labeled with this session and the date, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
+- Record each answer in the task's `## Findings` as a line labeled with this session and the date, per `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`
 - The answer commits a branch before anyone reads it, which is why the report lists each one beside its pull request
 
 ### What the run parks

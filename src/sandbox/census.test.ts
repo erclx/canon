@@ -53,10 +53,10 @@ afterEach(() => {
 describe('listSkills', () => {
   it('should enumerate the shipped skills rather than the internal ones', () => {
     skill('git-commit')
-    skill('context-fold')
+    skill('context-sync')
     write('.claude/skills/internal-scripts/SKILL.md', '# internal\n')
 
-    expect(listSkills(root)).toEqual(['context-fold', 'git-commit'])
+    expect(listSkills(root)).toEqual(['context-sync', 'git-commit'])
   })
 
   it('should report no skills when the plugin tree is absent', () => {
@@ -80,7 +80,7 @@ describe('skillForScenario', () => {
   })
 
   it('should pair no skill for a scenario exercising a CLI domain', () => {
-    const skills = new Set(['context-fold'])
+    const skills = new Set(['context-sync'])
 
     expect(skillForScenario('infra', 'gov', skills)).toBeUndefined()
   })
@@ -245,7 +245,7 @@ describe('collectCensus', () => {
   })
 
   it('should exclude a scenario driving no skill from the census', () => {
-    skill('context-fold')
+    skill('context-sync')
     scenario('infra', 'gov')
     declaration('infra', 'gov', '')
 

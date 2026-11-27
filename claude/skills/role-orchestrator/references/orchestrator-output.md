@@ -18,7 +18,7 @@ Ready to build (hand each to its own worker):
 
 <feature>
   no plan yet. A handoff without a plan has no scope
-  → /plan-feature here first
+  → /plan-change here first
 
 In flight (this session's workers, building now):
 

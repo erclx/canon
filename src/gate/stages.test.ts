@@ -437,7 +437,7 @@ describe('the record examples stage', () => {
   it('should run on a changed example or a changed skill standard', () => {
     expect(stage?.scope?.test('examples/planning/priority.md')).toBe(true)
     expect(
-      stage?.scope?.test('claude/skills/plan-feature/references/plan.md'),
+      stage?.scope?.test('claude/skills/plan-change/references/plan.md'),
     ).toBe(true)
     expect(stage?.scope?.test('claude/skills/review-address/SKILL.md')).toBe(
       true,
