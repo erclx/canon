@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.130.0](https://github.com/erclx/canon/compare/v5.129.0...v5.130.0) (2026-11-27)
+
+
+### Features
+
+* **skills:** rename seven skills and migrate targets in one pass ([#3594](https://github.com/erclx/canon/issues/3594)) ([a066d71](https://github.com/erclx/canon/commit/a066d7140de31cbd8ec63ba03351b2cdfa9927fd))
+
 ## [5.129.0](https://github.com/erclx/canon/compare/v5.128.0...v5.129.0) (2026-11-25)
 
 
