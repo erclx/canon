@@ -13,7 +13,7 @@ An empty operator slot reads as consent under a blank-means-accept contract, whi
 
 ## Must
 
-- Route each item on whether the repository can answer it today, sending experiments to `plan-groundwork` and decided work to `plan-feature`
+- Route each item on whether the repository can answer it today, sending experiments to `plan-groundwork` and decided work to `plan-change`
 - Measure every problem line against the tree, running a defect's one-command repro read-only or marking it not reproduced here
 - Close every item with a verdict and a suggested pick on each question, and treat an empty operator slot as unread
 - Reserve the index number, carry the domain in every other filename, and number a new folder past the highest ordinal across intake and groundwork
@@ -30,6 +30,6 @@ An empty operator slot reads as consent under a blank-means-accept contract, whi
 ## Out of scope
 
 - Measuring one question in depth, which `plan-groundwork` owns
-- Planning a promoted item, which `plan-feature` owns
+- Planning a promoted item, which `plan-change` owns
 - Promoting an item onto the board, which `task-board` owns
 - Enforcing any of this, which no check does since the folder is gitignored

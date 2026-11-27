@@ -510,7 +510,7 @@ function commandFor(
     return `Run /canon:role-reviewer, then /canon:review-pr ${pr}`
   }
 
-  return `Run /canon:role-planner, then /canon:plan-feature .canon/tasks/${task.stem}.md`
+  return `Run /canon:role-planner, then /canon:plan-change .canon/tasks/${task.stem}.md`
 }
 
 /**

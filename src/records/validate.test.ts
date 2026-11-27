@@ -809,7 +809,7 @@ describe('checkPlan', () => {
       ['a member access', '`process.env`'],
       ['a URL', '`https://example.com/a.md`'],
       ['a slash command', '`/session-worktree`'],
-      ['a plugin slash command', '`/canon:plan-feature`'],
+      ['a plugin slash command', '`/canon:plan-change`'],
       ['an absolute path', '`/src/real.ts`'],
       ['a flag', '`--root=src/x`'],
       ['a remote branch', '`origin/main`'],

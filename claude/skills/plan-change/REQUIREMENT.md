@@ -1,9 +1,9 @@
 ---
-name: plan-feature
+name: plan-change
 description: What feature planning is for, the gaps it closes, and why it stops before implementing
 ---
 
-# Plan feature requirement
+# Plan change requirement
 
 ## Gap
 

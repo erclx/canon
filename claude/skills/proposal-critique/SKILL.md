@@ -123,4 +123,4 @@ Verdict: <go|probe first|absorb|stop>, decided by <the questions that settled it
 - Batching questions only the operator can answer: `decision-escalate`
 - Investigating a failure already in hand: `systematic-debugging`
 - Judging a finished change: `review-pr`
-- Writing the plan the verdict lets through: `plan-feature`
+- Writing the plan the verdict lets through: `plan-change`

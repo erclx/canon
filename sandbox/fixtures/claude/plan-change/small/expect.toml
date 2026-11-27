@@ -1,4 +1,4 @@
-purpose = "Small-mode /canon:plan-feature on a specified prose-only ask prints the plan to chat and writes no plan file."
+purpose = "Small-mode /canon:plan-change on a specified prose-only ask prints the plan to chat and writes no plan file."
 
 max_turns = 30
 

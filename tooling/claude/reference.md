@@ -60,7 +60,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 - Fill in the seed's placeholder project name, description, and key paths after init
 - Keep its sections `Context`, `Commands`, and `Key paths`, since skills detect, extend, or skip by heading
 - Group `Key paths` under H3s, each opening on a lead sentence, before it runs past 5 bullets. `canon markdown audit` and `canon claude sync` both report a longer run.
-- Keep the `Context` section to one line pointing at the state docs, since `plan-feature` does the parallel read when invoked
+- Keep the `Context` section to one line pointing at the state docs, since `plan-change` does the parallel read when invoked
 
 ## Seed docs
 
@@ -107,7 +107,7 @@ A pass still prompts for `gh api`, `curl`, and `canon pr preview --check` under 
 
 ### The plan guard
 
-`plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-feature` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
+`plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-change` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
 
 That log also names each plan's owner, the session on the last `pass` line for it, and guards a write onto an existing plan.
 

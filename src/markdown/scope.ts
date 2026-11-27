@@ -152,7 +152,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/git-worktree/REQUIREMENT.md',
   'claude/skills/issue-triage/REQUIREMENT.md',
   'claude/skills/markdown-craft/REQUIREMENT.md',
-  'claude/skills/plan-feature/REQUIREMENT.md',
+  'claude/skills/plan-change/REQUIREMENT.md',
   'claude/skills/plan-groundwork/REQUIREMENT.md',
   'claude/skills/plan-intake-answer/REQUIREMENT.md',
   'claude/skills/plan-intake/REQUIREMENT.md',

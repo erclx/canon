@@ -5,7 +5,7 @@ description: How auto-ship stops a fan-in member after its push and how an integ
 
 # Fan-in
 
-The session reads this file at one of two points in `auto-ship`. A member reads `## Member exit` after Step 4, and an integrator reads `## Integrator merge` at the opening of Step 2. When to fan in and how a plan declares its side are in `${CLAUDE_SKILL_DIR}/../plan-feature/references/batches.md`.
+The session reads this file at one of two points in `auto-ship`. A member reads `## Member exit` after Step 4, and an integrator reads `## Integrator merge` at the opening of Step 2. When to fan in and how a plan declares its side are in `${CLAUDE_SKILL_DIR}/../plan-change/references/batches.md`.
 
 ## Member exit
 

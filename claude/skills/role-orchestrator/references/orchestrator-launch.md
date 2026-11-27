@@ -64,7 +64,7 @@ Never depend on the `Skill` tool route for such a skill. A refusal there tells t
 
 ### Shapes needing no expansion
 
-The review-address and planning shapes below, and the reviewer shapes in `orchestrator-reviewer-launch.md`, depend on no expansion. None of `role-worker`, `review-address`, `role-planner`, `plan-feature`, `role-reviewer`, or `review-pr` carries the flag, so each keeps its leading word whatever the delimiter or position.
+The review-address and planning shapes below, and the reviewer shapes in `orchestrator-reviewer-launch.md`, depend on no expansion. None of `role-worker`, `review-address`, `role-planner`, `plan-change`, `role-reviewer`, or `review-pr` carries the flag, so each keeps its leading word whatever the delimiter or position.
 
 The same rule reaches a human relay. Hand an operator one message carrying one command at position zero, since two blocks pasted as separate messages can land as one, where the second never fires.
 
@@ -107,7 +107,7 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 
 ## Dispatch to plan a row
 
-`plan-feature` is a procedure rather than a role, so a launch naming it alone reaches no `role-planner` and owes no message. Reach the role directly, the way the build shape reaches `role-worker`, rather than retyping its obligations as prose.
+`plan-change` is a procedure rather than a role, so a launch naming it alone reaches no `role-planner` and owes no message. Reach the role directly, the way the build shape reaches `role-worker`, rather than retyping its obligations as prose.
 
 No branch and no worktree exist here and none is created. A planner writes one gitignored file at the main worktree root, so this shape names the row's task file and opens with the role.
 
@@ -116,7 +116,7 @@ No branch and no worktree exist here and none is created. A planner writes one g
 - A planner's plan announcement owes no `canon tasks promote`, since its `plan-link` already moved the row to `## Up next`. Promote at the build dispatch instead.
 
 ```bash
-claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-feature <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."
+claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-change <task>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the plan lands, carrying the path and what the task file got wrong, and message it again if you stop on a question."
 ```
 
 `<task>` is the row's task file path and `<slug>` the slug its plan will take, resolved off the row. `<dispatcher-id>`, `<model>`, `<effort>`, and `<project>` resolve as above, and the prefix reads `planner-` because it marks the role of the session it names. Then wait per `orchestrator-planning-wait.md`.
@@ -126,11 +126,11 @@ claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion 
 A row whose task reports an intermittent failure with no finding naming its cause swaps the middle of the brief. The planner measures under groundwork's experiment rules, then plans the fix in the same session.
 
 ```bash
-claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-groundwork <task>, then /canon:plan-feature <task> once the track closes. Your controller is ..."
+claude --bg --model <model> --effort <effort> --disallowedTools AskUserQuestion -n "planner-<project>-<slug>" "Run /canon:role-planner, then /canon:plan-groundwork <task>, then /canon:plan-change <task> once the track closes. Your controller is ..."
 ```
 
 - Read intermittent as a failure that differs between runs of the same code and inputs, judged from the task rather than matched on a word
-- A failure that reproduces on demand, such as a deterministic timeout or perf bug, keeps `plan-feature`
+- A failure that reproduces on demand, such as a deterministic timeout or perf bug, keeps `plan-change`
 - The ellipsis stands for the message clauses above, unchanged
 
 ### Which checks bind

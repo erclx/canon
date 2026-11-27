@@ -349,7 +349,7 @@ The suggestion line is the planner's, and the answer line belongs to whoever own
 
 ### Predicted questions
 
-Before Step 3, `plan-feature` predicts the operator's answer to the next three questions about what the ask must achieve, and each prediction lands by how sure it is.
+Before Step 3, `plan-change` predicts the operator's answer to the next three questions about what the ask must achieve, and each prediction lands by how sure it is.
 
 - A predictable answer settles its criterion, which Step 3 writes as a `## Verification` bullet rather than a question
 - Only a prediction still open goes under `## Questions` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# A new plan passes only on an unspent `canon:plan-feature` invocation or an
+# A new plan passes only on an unspent `canon:plan-change` invocation or an
 # `auto-ship` naming its path, since a heredoc loads no path-scoped rule. It
 # backs the rule up, since a hook fails open on a timeout or an unread input.
 IFS= read -r -d '' -t 2 input
@@ -167,13 +167,13 @@ if [ -f "$marker" ]; then
 fi
 case "$spent" in '' | *[!0-9]*) spent=0 ;; esac
 
-# A Skill call or a typed slash command prints as `P <line>`, ordered against
-# the spent marker, and `auto-ship` as `A <args>`, since a worker writes the
-# plan its launch names verbatim without planning it.
+# A Skill call or a typed command, as `plan-change` or `plan-feature` for one
+# release past the rename, prints as `P <line>` against the spent marker, and
+# `auto-ship` as `A <args>`, since a worker writes its launch's plan verbatim.
 read_transcript() {
   lines=$(wc -l <"$transcript" 2>/dev/null | tr -d ' ')
   lines=${lines:-0}
-  invocations=$(grep -n -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
+  invocations=$(grep -n -e 'plan-change' -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
     def text: if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end;
     def skill($name): .type == "tool_use" and .name == "Skill"
       and ((.input.skill // "") | test("^(canon:)?" + $name + "$"));
@@ -182,12 +182,12 @@ read_transcript() {
     | ($l.j | fromjson? // empty) as $o
     | if $o.type == "assistant" then
         ($o.message.content[]? | select(type == "object")
-          | if skill("plan-feature") then "P \($l.n)"
+          | if skill("plan-change") or skill("plan-feature") then "P \($l.n)"
             elif skill("auto-ship") then "A \(.input.args // "" | tostring)"
             else empty end)
       elif $o.type == "user" then
         (($o.message.content // "") | text)
-        | if typed("plan-feature") then "P \($l.n)"
+        | if typed("plan-change") or typed("plan-feature") then "P \($l.n)"
           elif typed("auto-ship") then "A \(gsub("\n"; " "))"
           else empty end
       else empty end' 2>/dev/null)
@@ -302,12 +302,12 @@ if licensed; then
 fi
 
 if [ -z "$latest" ]; then
-  why='This session has not invoked canon:plan-feature'
+  why='This session has not invoked canon:plan-change'
 elif [ "$latest" -eq "$spent" ]; then
-  why="The latest canon:plan-feature invocation in this session, at transcript line $latest, was spent on .canon/plans/${spent_plan:-another plan}"
+  why="The latest canon:plan-change invocation in this session, at transcript line $latest, was spent on .canon/plans/${spent_plan:-another plan}"
 else
-  why="The latest canon:plan-feature invocation in this session, at transcript line $latest, is not after line $spent, which was spent on .canon/plans/${spent_plan:-another plan}"
+  why="The latest canon:plan-change invocation in this session, at transcript line $latest, is not after line $spent, which was spent on .canon/plans/${spent_plan:-another plan}"
 fi
 log_decision block
-printf '%s, so %s would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write. A session writing several plans invokes it once per new plan.\n' "$why" "$new" >&2
+printf '%s, so %s would be written outside the skill that owns its shape. Invoke the canon:plan-change skill for this plan, then resend the write. A session writing several plans invokes it once per new plan.\n' "$why" "$new" >&2
 exit 2

@@ -634,7 +634,7 @@ describe('referencesIn', () => {
     it('should report a placeholder stack seeds path, which no target holds under any name', () => {
       expect(
         referencesIn(
-          'claude/skills/plan-feature/references/plan.md',
+          'claude/skills/plan-change/references/plan.md',
           'A counterpart under `tooling/<stack>/seeds/` ships with it.',
           root,
         ).map((reference) => [reference.kind, reference.text]),

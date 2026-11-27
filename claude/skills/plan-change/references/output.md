@@ -1,11 +1,11 @@
 ---
 title: Planning output
-description: The two output modes of plan-feature Step 4, the checks on a written plan, the chat output with its Next table, and the shape of a discussion round
+description: The two output modes of plan-change Step 4, the checks on a written plan, the chat output with its Next table, and the shape of a discussion round
 ---
 
 # Planning output
 
-Applies to `plan-feature` Step 4, after Step 3 built the plan, and to the discussion rounds that follow it. The body decides the mode, and this file carries what each mode writes and says.
+Applies to `plan-change` Step 4, after Step 3 built the plan, and to the discussion rounds that follow it. The body decides the mode, and this file carries what each mode writes and says.
 
 ## Step 4: output
 

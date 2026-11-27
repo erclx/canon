@@ -17,7 +17,7 @@ The test is one question. Can the item be answered by reading the repository tod
 
 - Yes: intake owns it, and the cost is a session of grepping
 - No, because it needs an experiment or a source outside the project: route it to `plan-groundwork`, where the cost is measured in runs and days
-- Already decided, with only the work left: route it to `plan-feature`
+- Already decided, with only the work left: route it to `plan-change`
 
 Apply the test per item rather than per dump. A dump of forty items typically yields one groundwork candidate, so routing the whole dump on its worst item buys a folder nobody can close.
 
@@ -26,7 +26,7 @@ The wrong surface fails either way. Intake on a question that needs measuring yi
 ## Guards
 
 - If no dump is given, stop: `❌ No dump to file. Paste the notes or name what to triage.`
-- If the dump is one question rather than a set of findings, stop: `❌ One question, not a dump. Run /plan-groundwork to measure it or /plan-feature to plan it.`
+- If the dump is one question rather than a set of findings, stop: `❌ One question, not a dump. Run /plan-groundwork to measure it or /plan-change to plan it.`
 - Do not pause for approval between steps. The write scope below is what makes that safe.
 
 ## Write scope
@@ -69,7 +69,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live item needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
-For each domain an item touches, read its context entry through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`, since the entry records the traps a grep will not show.
+For each domain an item touches, read its context entry through the lookup in `${CLAUDE_SKILL_DIR}/../plan-change/references/onboarding.md`, since the entry records the traps a grep will not show.
 
 ## Step 3: measure against the tree
 

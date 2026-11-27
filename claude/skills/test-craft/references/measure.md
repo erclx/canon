@@ -18,7 +18,7 @@ Read this before a plan or a pull request claims one commit is faster than anoth
 Measure on a machine nothing else uses. Parallel sessions share one machine's cores, so a number taken there carries their load and takes the cores their builds need.
 
 - Run a measurement on a CI runner, or on hardware an operator holds, and never on the shared machine
-- Name that place in the plan's Verification, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
+- Name that place in the plan's Verification, per `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`
 - Build the workflow that carries it from `${CLAUDE_SKILL_DIR}/../ci-workflow/references/comparison.md`, which owns its shape
 
 ## The method

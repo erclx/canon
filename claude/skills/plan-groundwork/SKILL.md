@@ -1,6 +1,6 @@
 ---
 name: plan-groundwork
-description: Opens and runs a numbered groundwork folder under `.canon/groundwork/<nn>-<slug>/` for a topic that has to be measured before it can be planned. Detects open, resume, and close from the folder itself. Use when asked to "research X", "dig into X", "work out what we should do about X", "measure this before we commit", "open a groundwork folder", or "retell the groundwork". Do NOT use to write a feature plan or to implement. That is `plan-feature`.
+description: Opens and runs a numbered groundwork folder under `.canon/groundwork/<nn>-<slug>/` for a topic that has to be measured before it can be planned. Detects open, resume, and close from the folder itself. Use when asked to "research X", "dig into X", "work out what we should do about X", "measure this before we commit", "open a groundwork folder", or "retell the groundwork". Do NOT use to write a feature plan or to implement. That is `plan-change`.
 metadata:
   family: decide
 ---
@@ -22,7 +22,7 @@ Read `${CLAUDE_SKILL_DIR}/references/groundwork.md` before writing any file in t
 
 Apply it in open mode alone, after Step 1 resolves the mode and before the folder is created. Two of three must hold, being an unknown current state, more than one live approach, and a wrong commitment costing more than a day of measuring.
 
-- When one or fewer holds, stop: `❌ Already decided enough to plan. Run /plan-feature instead.`
+- When one or fewer holds, stop: `❌ Already decided enough to plan. Run /plan-change instead.`
 - Resume and close are exempt, since a measured track fails the test by definition and applying it would refuse the folder it admitted
 - A launch naming a finished `design-pick` run's picked page is exempt, per `${CLAUDE_SKILL_DIR}/references/design-run-record.md`
 - A refused topic that is a broad dump rather than one question routes to `plan-intake`, which dispositions many findings in breadth, not to the planning skill the stop names
@@ -32,7 +32,7 @@ Apply it in open mode alone, after Step 1 resolves the mode and before the folde
 Write only inside `.canon/groundwork/<nn>-<slug>/`. A feature plan, source changes, a standard, a rule, and a reference doc all live outside it, so this one rule forbids every one of them.
 
 - One exception, at close only, is the conclusion recorded into the task the launch named, or one new task file when the launch named neither a task nor a controller
-- The plan close Step 7 writes is no exception, since `plan-feature` writes it under its own scope after this skill's steps end
+- The plan close Step 7 writes is no exception, since `plan-change` writes it under its own scope after this skill's steps end
 - A second exception is a large fixture a spike reads as bulk input, under `.canon/tmp/runs/groundwork-fixtures/<slug>/` so mode detection never matches it as a track
 - A fixture a headless run is pointed at goes outside the repository instead, per `## Running a spike`
 - An arm script and a checkout a claim rests on are not fixtures, and go inside the track under `scripts/` and `clones/`, per the standard
@@ -109,9 +109,9 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: scope and non-goals
 - `.canon/tasks/index.md`: what is already tracked, and what a prior track concluded. Open a task file only when its entry looks related.
 
-Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at. For each domain the topic touches, read its context entry ahead of measuring, through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`.
+Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at. For each domain the topic touches, read its context entry ahead of measuring, through the lookup in `${CLAUDE_SKILL_DIR}/../plan-change/references/onboarding.md`.
 
-- Run the build or adopt check from `${CLAUDE_SKILL_DIR}/../plan-feature/references/procedure.md`, recording each call in the topic file
+- Run the build or adopt check from `${CLAUDE_SKILL_DIR}/../plan-change/references/procedure.md`, recording each call in the topic file
 - Dispatch no subagents, since fanning out loses the reasoning, and a search too large to run inline means the question is too broad
 
 ## Open questions in chat
@@ -143,7 +143,7 @@ The standard sets the open question format inside a topic file and in `00-scope.
 4. Record the conclusion, even when it is to do nothing, by the route `### Close routes` below picks.
 5. When the conclusion Step 4 recorded or handed off does not cover every finding the track surfaced, route what it leaves out through `plan-intake`. Skip this step when it does.
 6. Report each statement about an outside source carrying neither a link nor a lead entry. Report and do not block, because judging what counts as an external claim is the call a checker gets wrong.
-7. Plan the conclusion in this session through `canon:plan-feature` by the route Step 4 took, per `### Close routes` below, or name the handoff.
+7. Plan the conclusion in this session through `canon:plan-change` by the route Step 4 took, per `### Close routes` below, or name the handoff.
 
 Aside from an experiment fixture and the track's board project, Steps 4, 5, and 7 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
 
@@ -155,7 +155,7 @@ Read `${CLAUDE_SKILL_DIR}/references/close.md` on reaching Step 4. It holds the 
 
 ## Check the folder
 
-Run `canon records validate groundwork <nn>-<slug>` on the folder this run wrote, in every mode, before reporting. Fix each entry its `structure` array names, against `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+Run `canon records validate groundwork <nn>-<slug>` on the folder this run wrote, in every mode, before reporting. Fix each entry its `structure` array names, against `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`.
 
 - Pass the slug every time, since the bare kind reads every old track and buries this one under their entries
 - Read the array rather than the exit, which a structure entry never sets

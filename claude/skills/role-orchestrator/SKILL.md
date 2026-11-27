@@ -84,8 +84,8 @@ Re-invoke `/canon:role-orchestrator` first whenever the session has run long or 
 
 The cross-feature call stays here, being which rows conflict, what merges before what, and whether a row runs at all. Every plan written here carries a constraint per track in flight, per `### Constraints from the tracks in flight` below.
 
-- Per-row planning runs through `plan-feature` here, the session that measured the row, or a cold planner under `role-planner`, per `orchestrator-launch.md`
-- A flaky row with no named cause launches `plan-groundwork` ahead of `plan-feature`, per `### A flaky row` in that file
+- Per-row planning runs through `plan-change` here, the session that measured the row, or a cold planner under `role-planner`, per `orchestrator-launch.md`
+- A flaky row with no named cause launches `plan-groundwork` ahead of `plan-change`, per `### A flaky row` in that file
 - That file's talk shape launches a planner the operator shapes the row with, its several-row shape one planner for rows sharing a surface, and its plan-and-build shape a small row by default
 - An oversized row takes the fan-in offer in `orchestrator-planner-reuse.md`
 
@@ -125,7 +125,7 @@ A pass posting anything owed reaches the session holding the branch from the rev
 
 ### Constraints from the tracks in flight
 
-A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from the plan its row links. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from the plan its row links. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`.
 
 - A bare path list leaves the worker guessing, and can end up forbidding the repair of a citation the change broke
 - A shared path forbids an act only where the conflict check in `orchestrator-dispatch.md` holds the pair. Otherwise it names what the second branch to merge rebases over.

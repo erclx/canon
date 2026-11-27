@@ -13,7 +13,7 @@ It also reaches past its seat. A planner reading blockers and file sets writes a
 
 ## Must
 
-- One role covers `plan-feature`, `plan-groundwork`, `plan-intake`, `app-drive`, and `design-pick`, writing records and never source, with each scope's exceptions left to its own skill
+- One role covers `plan-change`, `plan-groundwork`, `plan-intake`, `app-drive`, and `design-pick`, writing records and never source, with each scope's exceptions left to its own skill
 - The in-flight read composes the session roster with open pull requests once per task, and never counts a branch or a worktree as evidence
 - A plan rests on the task file's findings and the source files rather than on counts quoted from the row
 - Every record passes the validate and audit calls before it is announced, and the announcement carries the path and what the row got wrong
@@ -29,7 +29,7 @@ It also reaches past its seat. A planner reading blockers and file sets writes a
 
 ## Out of scope
 
-- Each record's sections, answer contract, write-scope exceptions, and writing steps, which `plan-feature`, `plan-groundwork`, and `plan-intake` own
+- Each record's sections, answer contract, write-scope exceptions, and writing steps, which `plan-change`, `plan-groundwork`, and `plan-intake` own
 - Resolving an addressee, which `session-relay` owns
 - The branch, the build, and the pull request, which `role-worker` and `auto-ship` own
 - Choosing which rows run, their order, and the dispatch with its collision and conflict checks, which `role-orchestrator` owns

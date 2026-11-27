@@ -1,4 +1,4 @@
-purpose = "Full-mode /canon:plan-feature on the seeded task API writes a plan with the required sections, names the two seeded files the task's outcomes touch, and links it from the task."
+purpose = "Full-mode /canon:plan-change on the seeded task API writes a plan with the required sections, names the two seeded files the task's outcomes touch, and links it from the task."
 
 max_turns = 30
 

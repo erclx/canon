@@ -12,7 +12,7 @@ Step 0 of `auto-ship`. The session reads this file when the launch carries `--pl
 The plan lands as a validated, linked file before any edit to a tracked file, so scope is never written after the build. No plan exists when the dispatcher runs its checks, so steps 3 to 6 run them here instead.
 
 1. Read the task. When it already carries a `Plan:` line, write nothing and continue with that plan, so a re-dispatch resumes.
-2. Otherwise invoke `canon:plan-feature <task>` and ask it for a file. It validates the plan and links it, which moves the row to `## Up next`.
+2. Otherwise invoke `canon:plan-change <task>` and ask it for a file. It validates the plan and links it, which moves the row to `## Up next`.
 3. Decide whether this session builds the plan, reading the tests under `## Whether this session builds` in their order.
 4. Run `canon tasks plan-branch <plan> --json`, then `canon sessions list --branch <branch> --json`, and read `claimed` against the stops below.
 5. Send the controller the plan path per `canon:role-worker`, naming the step 3 reading, each suggested question this run executes, and any it waits on.
@@ -62,6 +62,6 @@ An unverified `claimed: false` is one carrying `sessionsReadable` or `refsReadab
 
 Three rules hold on every plan-first run.
 
-- The launch is the go-ahead `plan-feature` waits for before implementation, so its stop after the plan ends that skill and not this chain
-- Step 5 stands in for the `Next:` message `plan-feature` would send, so send one, not both
+- The launch is the go-ahead `plan-change` waits for before implementation, so its stop after the plan ends that skill and not this chain
+- Step 5 stands in for the `Next:` message `plan-change` would send, so send one, not both
 - Name the worktree from the plan these steps wrote or found, and pass that path to Step 1 as the caller-supplied plan

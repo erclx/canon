@@ -56,7 +56,7 @@ Each tier stops with its own message on a file that does not resolve.
 - Task: `❌ No task at <path>. Path was supplied, not derived, so check it and re-run.`
 - Plan: `❌ No plan at <path>. Path was supplied, not derived, so check it and re-run.`
 - Derived, which stops on the longer message below:
-  - `❌ No approved plan at .canon/plans/feature-<slug>.md, derived from branch <branch>. No argument was passed, so pass a plan or task path, or run /plan-feature first.`
+  - `❌ No approved plan at .canon/plans/feature-<slug>.md, derived from branch <branch>. No argument was passed, so pass a plan or task path, or run /plan-change first.`
 
 ### When a tier fails
 
@@ -64,13 +64,13 @@ Tier 1 stops on a `Plan:` line linking several plans, on a task carrying none, a
 
 ### Test the plan's shape
 
-Test the shape of whatever `<plan>` resolved to before reading it, after all three tiers, since a file resolving under any tier can be the wrong document. Look for a `**Files to touch:**` or `## Files to touch` marker per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, which a plan always carries and a task never does.
+Test the shape of whatever `<plan>` resolved to before reading it, after all three tiers, since a file resolving under any tier can be the wrong document. Look for a `**Files to touch:**` or `## Files to touch` marker per `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`, which a plan always carries and a task never does.
 
 If neither form is present, stop: `❌ <path> carries no plan sections. A plan lives at .canon/plans/feature-<slug>.md, and a task reaches one through its Plan: line only from .canon/tasks/. Point autoship at either and re-run.` Otherwise read `<plan>` at the main worktree root, which is the scope for this run.
 
 ### Unanswered questions
 
-Read `## The suggested-and-answer contract` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` before acting on a question, for what it resolves to and the form an override takes. A question left open is a decision this run executes rather than a reason to stop.
+Read `## The suggested-and-answer contract` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md` before acting on a question, for what it resolves to and the form an override takes. A question left open is a decision this run executes rather than a reason to stop.
 
 Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 

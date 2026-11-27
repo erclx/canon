@@ -124,7 +124,7 @@ Only a shared file bundles, since separate branches on one file rebase on each o
 
 An item whose claim is a defect may carry one run of its repro, and the run is where intake's measuring stops. A repro that needs more is groundwork's.
 
-- Run one command in a form that writes nothing, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`, and put what it showed on `Problem:`
+- Run one command in a form that writes nothing, per `${CLAUDE_SKILL_DIR}/../plan-change/references/onboarding.md`, and put what it showed on `Problem:`
 - Mark the item `not reproduced here` on the same line when the repro needs a fixture project, repeated runs, a write, or another project's paths
 - Send the marked item to `plan-groundwork` only when its answer decides a plan, since a claim read from code alone is a reported defect and not a confirmed one
 - Never adapt a repro silently, because a changed command measures something the reporter did not
@@ -158,7 +158,7 @@ A field keeps all its content on its own line, with no nested list, paragraph, o
 - Split an item too big for its fields into two, numbered as `3a` and `3b`, rather than stretching one field across lines
 - `canon records validate intake <slug>` reports each block sitting under a field as `intake-spill` under `structure`
 
-Two heading levels is the right depth inside a cluster file. A third means the cluster should have been its own file. A cluster file otherwise holds to the six structure criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, with an item's fields exempt from `S4` and its numbered heading from `S3`.
+Two heading levels is the right depth inside a cluster file. A third means the cluster should have been its own file. A cluster file otherwise holds to the six structure criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-change/references/plan.md`, with an item's fields exempt from `S4` and its numbered heading from `S3`.
 
 ## The answer contract
 
