@@ -6,13 +6,15 @@ on:
     branches:
       - main
     paths:
-      # The page builds from web/, assets/, and src/design/ and reads no catalog.
+      # The page builds from web/, assets/, and src/design/, its record sheets
+      # render from examples/, and it reads no catalog.
       # src/pr/preview.test.ts holds a change outside this list off the site deploy.
       - 'web/**'
       - 'assets/**'
       # Pull request screenshots, which the page never reads.
       - '!assets/evidence/**'
       - 'src/design/**'
+      - 'examples/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
   # A closed pull request runs only the cleanup job below, which deletes the
