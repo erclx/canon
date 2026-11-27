@@ -4,7 +4,7 @@ import { join, normalize, relative, resolve, sep } from 'node:path'
 import { listRuleFiles } from '@/gov/payload'
 
 /**
- * The six shape limits a rule body is held to. `create-rule`'s `references/rule.md`
+ * The six shape limits a rule body is held to. `write-rule`'s `references/rule.md`
  * states the same six numbers and nothing compares the two, so a change to one
  * is a change to both in the same commit.
  */
@@ -18,7 +18,7 @@ export const RULE_LIMITS = {
 } as const
 
 /**
- * `create-rule`'s `references/rule.md` caps the directives beside a skill
+ * `write-rule`'s `references/rule.md` caps the directives beside a skill
  * pointer at five. It is a judgment about a rule's shape, so it reports and
  * never joins `findings`, which `--gate` reads.
  */

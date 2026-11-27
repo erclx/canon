@@ -1,13 +1,13 @@
 ---
-name: create-rule
-description: Scaffolds a project-specific governance rule into `.claude/rules/project/<subdir>/<slug>.md` with correct frontmatter and a slug no other rule in that subdir takes. Use when asked to "add a rule", "create a governance rule", "write a project rule", "add a project convention", "add this convention to CLAUDE.md", or when a project needs a rule the toolkit does not ship. Do NOT use to edit toolkit source rules under `governance/rules/`.
+name: write-rule
+description: Scaffolds or edits a governance rule, a project rule going to `.claude/rules/project/<subdir>/<slug>.md`. Use when asked to "add a rule", "create a governance rule", "write a project rule", "add a project convention", "add this convention to CLAUDE.md", or before a hand edit to a rule. Do NOT use for a toolkit source rule's install and sync, which is `internal-governance`.
 metadata:
   family: generate
 ---
 
-# Create rule
+# Write rule
 
-Author a project-local governance rule. The rule lives in the target project, not the toolkit, so `canon gov sync` never overwrites it.
+Author or edit a governance rule. A new rule is project-local, and an edit to an existing rule, including a toolkit source rule, takes the same shape from `${CLAUDE_SKILL_DIR}/references/rule.md` and the Step 5 checklist, with Steps 1 to 3 skipped. The rule lives in the target project, not the toolkit, so `canon gov sync` never overwrites it.
 
 The sync engine orphans anything under `.claude/rules/project/` by location, before checking its name against the toolkit catalog. A rule elsewhere under `.claude/rules/` survives too, and the report offers it the path under the project subfolder.
 

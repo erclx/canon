@@ -7,7 +7,7 @@ description: Folder layout, filename convention, file format, origin lines, and 
 
 Applies to `.canon/tasks/`. Tracks what is being built and why, at the level of features and outcomes, one file per task. Update a task when it starts, completes, or changes scope.
 
-- When to open a task at all is project policy rather than a shape rule, and lives in a project rule written through `canon:create-rule`
+- When to open a task at all is project policy rather than a shape rule, and lives in a project rule written through `canon:write-rule`
 - The folder is gitignored, since committing board state would put a claim about the future into an unrelated pull request
 
 ## Contents

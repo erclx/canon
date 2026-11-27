@@ -61,9 +61,9 @@ Owns the gov half of every verb, being the stack reader, the rule lookup, the ca
 - `canon gov citations` gates on a dead rule citation or internal glob, and `canon gov audit` on a rule past a shape limit or short of a ledger in a gated folder, bar an exempt file
 - `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and a call with no terminal on stdin takes each confirm's first option but not the stack picker
 
-### `claude/skills/create-rule/`
+### `claude/skills/write-rule/`
 
-Holds the standard for what a rule states, being its shape limits, content test, and one-copy test, and the bullet checklist `create-rule` runs over a rule after writing it.
+Holds the standard for what a rule states, being its shape limits, content test, and one-copy test, and the bullet checklist `write-rule` runs over a rule after writing it.
 
 - A rule passes when its invariant fires on a path edit and violating it ships silently, and a rejected candidate is recorded by which half failed
 - A claude rule carries at most five directives beside its pointer, since past that it reproduces the standard's structure rather than what must not go wrong
@@ -78,7 +78,7 @@ Holds `governance.toml`, which names the one stack and extras this repository co
 - `canon gov regen` resolves the record through the install machinery into `.claude/rules/canon/`, and `internal/rules/` installs beside it into `.claude/rules/internal/`
 - A new rule must be named in a stack, the record's `add` list, or `internal/rules/`, since the drift assertion passes on a rule nothing names
 - Nothing mirrors `internal/` into a path this repository resolves, and `internal/rules/claude/authoring-layout.md` states the root each carrier resolves against
-- A target's own rules go to `.claude/rules/project/<subdir>/` through `create-rule`, and `canon gov sync` never reads them
+- A target's own rules go to `.claude/rules/project/<subdir>/` through `write-rule`, and `canon gov sync` never reads them
 - A file under `.claude/rules/canon/` that no source names is `orphaned` with no destination offered
 
 ### Other folders

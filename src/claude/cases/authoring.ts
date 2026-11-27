@@ -12,7 +12,7 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Scaffold a brand-new SKILL.md for this capability.',
-    expect: 'create-skill',
+    expect: 'write-skill',
   },
   {
     prompt:

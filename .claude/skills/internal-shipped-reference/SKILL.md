@@ -53,11 +53,11 @@ Ask whether any target session acts on the line, whatever its wording.
 - **Fine.** A target session follows it. A sentence where "this repository" means the reader's own, as in `proposal-critique`, passes, since the match is on who acts and not on the phrase.
 - **Fails.** Only a session in this checkout ever acts on it, stated outright or worded as a condition only this checkout meets, such as a rule for "a project keeping a stack under `tooling/<stack>/`"
 
-An `In the toolkit:` branch is Fine in `create-skill`, which exists to write into this checkout, and Fails in `plan-feature`, whose every reader is planning a target's feature.
+An `In the toolkit:` branch is Fine in `write-skill`, which exists to write into this checkout, and Fails in `plan-feature`, whose every reader is planning a target's feature.
 
 ### Toolkit-facing skills
 
-These skills exist to reach the toolkit checkout or to report against it, so a toolkit-only line in them speaks to their own audience. They are `canon-feedback`, `create-rule`, `create-skill`, `session-retro`, `target-check`, `target-scaffold`, `target-setup`, and `target-update`.
+These skills exist to reach the toolkit checkout or to report against it, so a toolkit-only line in them speaks to their own audience. They are `canon-feedback`, `write-rule`, `write-skill`, `session-retro`, `target-check`, `target-scaffold`, `target-setup`, and `target-update`.
 
 This list is the one place the exemption lives, and `authoring-layout.md` points here rather than copying it. A new skill whose job reaches the checkout reports findings until it joins, so a stale list surfaces as a finding rather than a silent pass. `document-repair` joins only if its checkout refusal keeps a toolkit branch.
 

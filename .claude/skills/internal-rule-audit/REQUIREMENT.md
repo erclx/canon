@@ -27,4 +27,4 @@ The bullet checklist does not close this. A well-formed bullet loading in a proj
 
 ## Out of scope
 
-- Judging one bullet of a rule just written, which `create-rule` owns
+- Judging one bullet of a rule just written, which `write-rule` owns

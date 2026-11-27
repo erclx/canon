@@ -28,4 +28,4 @@ The cause is shared. The Claude surfaces reach a target on three channels, the p
 
 - The shape of a context entry or other prose document, which `internal-docs` owns
 - Reporting which changed skills lack a paired scenario edit at ship time, which `internal-sandbox-check` owns
-- Creating a rule inside a target project, which `create-rule` owns
+- Creating a rule inside a target project, which `write-rule` owns

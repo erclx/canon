@@ -26,6 +26,6 @@ An unregistered rule passes every gate. A source rule with a free slug and a cor
 
 ## Out of scope
 
-- The frontmatter, headings, and bullets a rule file carries, and creating a rule inside a target, which `create-rule` owns
+- The frontmatter, headings, and bullets a rule file carries, and creating a rule inside a target, which `write-rule` owns
 - The reference a rule routes to, which `internal-claude` owns
 - The verdict on whether a rule earns its place, its load mode, and its reach, which `internal-rule-audit` owns

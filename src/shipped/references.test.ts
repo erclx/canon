@@ -573,7 +573,7 @@ describe('referencesIn', () => {
     it('should pass a folder mention that names no rule file', () => {
       expect(
         referencesIn(
-          'claude/skills/create-rule/SKILL.md',
+          'claude/skills/write-rule/SKILL.md',
           'Project rules live under `.claude/rules/project/`, beside index.md.',
           root,
         ),
@@ -583,7 +583,7 @@ describe('referencesIn', () => {
     it('should pass a rule path illustrating a placeholder shape', () => {
       expect(
         referencesIn(
-          'claude/skills/create-rule/SKILL.md',
+          'claude/skills/write-rule/SKILL.md',
           'Repoint the citation at `.claude/rules/project/<subdir>/<slug>.md`.',
           root,
         ),

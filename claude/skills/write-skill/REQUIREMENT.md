@@ -1,9 +1,9 @@
 ---
-name: create-skill
+name: write-skill
 description: What skill creation is for, the gaps it closes, and why it confirms before writing where a person can answer
 ---
 
-# Create skill requirement
+# Write skill requirement
 
 ## Gap
 
@@ -28,5 +28,5 @@ Nothing checks the folder before it exists, so a skill appears for a moment a ru
 
 ## Out of scope
 
-- Editing an existing skill, which the authoring standard and the skill's own requirement govern
+- Whether a hand edit stays inside the skill's own requirement, which that requirement and the authoring standard govern
 - Whether anything ends up invoking the new skill, which the toolkit's usage census owns

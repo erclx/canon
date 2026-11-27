@@ -40,7 +40,7 @@ Does not govern:
 - **the `write-human` skill**: voice, rhythm, and sentence construction in a skill body
 - **`markdown.md`**: punctuation, formatting, and word choice in a skill body
 - **`slug.md`**: the transform from a branch name to a filename slug
-- **the `create-skill` skill and the creation-time bullet in the `skill` governance rule**: whether a new skill earns its place, by the three-question test
+- **the `write-skill` skill and the creation-time bullet in the `skill` governance rule**: whether a new skill earns its place, by the three-question test
 
 ## Changing a skill
 

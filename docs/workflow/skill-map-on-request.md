@@ -12,8 +12,8 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 
 | Skill                   | When to use                                       |
 | ----------------------- | ------------------------------------------------- |
-| `canon:create-rule`     | A project rule the toolkit does not ship          |
-| `canon:create-skill`    | A new `SKILL.md`                                  |
+| `canon:write-rule`      | A project rule the toolkit does not ship          |
+| `canon:write-skill`     | A new `SKILL.md`                                  |
 | `canon:write-doc`       | A new `docs/` page, context entry, or `README.md` |
 | `canon:draw-figure`     | A figure or architecture view inside a doc        |
 | `canon:ci-workflow`     | A GitHub Actions workflow file                    |
