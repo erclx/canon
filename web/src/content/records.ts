@@ -95,7 +95,7 @@ export const records: readonly RecordSheet[] = [
   {
     name: 'Context',
     by: 'Written by the worker. Keeps what a change taught for the next session.',
-    path: 'canon/context/alerts.md', // Tidewell's entry <!-- audit-ignore-citations: canon/context/alerts.md -->
+    path: 'canon/context/alerts.md', // the fictional project's entry <!-- audit-ignore-citations: canon/context/alerts.md -->
     source: 'project/context-alerts.md',
   },
   {
