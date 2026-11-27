@@ -1,5 +1,4 @@
-// The base for the built landing page, web/dist/index.html. The sheets under
-// web/src/content/records/ extend it from .htmlvalidate-records.cjs.
+// The rules for the built landing page, web/dist/index.html.
 module.exports = {
   extends: ['html-validate:recommended'],
   rules: {
