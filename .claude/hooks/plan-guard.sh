@@ -167,13 +167,13 @@ if [ -f "$marker" ]; then
 fi
 case "$spent" in '' | *[!0-9]*) spent=0 ;; esac
 
-# A Skill call or a typed command, as `plan-change` or `plan-feature` for one
+# A Skill call or a typed command, as `plan-change` or `plan-feature` for one (canon-keep-retired)
 # release past the rename, prints as `P <line>` against the spent marker, and
 # `auto-ship` as `A <args>`, since a worker writes its launch's plan verbatim.
 read_transcript() {
   lines=$(wc -l <"$transcript" 2>/dev/null | tr -d ' ')
   lines=${lines:-0}
-  invocations=$(grep -n -e 'plan-change' -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
+  invocations=$(grep -n -e 'plan-change' -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr ' # canon-keep-retired
     def text: if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end;
     def skill($name): .type == "tool_use" and .name == "Skill"
       and ((.input.skill // "") | test("^(canon:)?" + $name + "$"));
@@ -182,12 +182,12 @@ read_transcript() {
     | ($l.j | fromjson? // empty) as $o
     | if $o.type == "assistant" then
         ($o.message.content[]? | select(type == "object")
-          | if skill("plan-change") or skill("plan-feature") then "P \($l.n)"
+          | if skill("plan-change") or skill("plan-feature") then "P \($l.n)" # canon-keep-retired
             elif skill("auto-ship") then "A \(.input.args // "" | tostring)"
             else empty end)
       elif $o.type == "user" then
         (($o.message.content // "") | text)
-        | if typed("plan-change") or typed("plan-feature") then "P \($l.n)"
+        | if typed("plan-change") or typed("plan-feature") then "P \($l.n)" # canon-keep-retired
           elif typed("auto-ship") then "A \(gsub("\n"; " "))"
           else empty end
       else empty end' 2>/dev/null)

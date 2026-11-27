@@ -46,7 +46,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     })
   const SKILL_CALL = skillCall('canon:plan-change')
   // The name before the rename, still licensing a plan for one release.
-  const LEGACY_SKILL_CALL = skillCall('canon:plan-feature')
+  const LEGACY_SKILL_CALL = skillCall('canon:plan-feature') // canon-keep-retired
   // A tool call naming no plan skill reads as today's format with no invocation, not an unread one.
   const OTHER_CALL = JSON.stringify({
     message: {
@@ -354,7 +354,7 @@ describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
     ['a Skill tool call under the old name', LEGACY_SKILL_CALL],
     [
       'a typed slash command under the old name',
-      slashCommand('canon:plan-feature'),
+      slashCommand('canon:plan-feature'), // canon-keep-retired
     ],
   ])('should pass a new plan after %s', async (_, line) => {
     const project = planProject(`${line}\n`)
