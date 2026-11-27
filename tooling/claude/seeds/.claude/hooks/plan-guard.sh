@@ -167,10 +167,9 @@ if [ -f "$marker" ]; then
 fi
 case "$spent" in '' | *[!0-9]*) spent=0 ;; esac
 
-# A Skill call or a typed slash command prints as `P <line>`, ordered against
-# the spent marker, and `auto-ship` as `A <args>`, since a worker writes the
-# plan its launch names verbatim without planning it. The `plan-feature` name
-# from before the rename licenses a plan for one release, then goes.
+# A Skill call or a typed command, as `plan-change` or `plan-feature` for one
+# release past the rename, prints as `P <line>` against the spent marker, and
+# `auto-ship` as `A <args>`, since a worker writes its launch's plan verbatim.
 read_transcript() {
   lines=$(wc -l <"$transcript" 2>/dev/null | tr -d ' ')
   lines=${lines:-0}
