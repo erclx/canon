@@ -478,7 +478,7 @@ export function useFixture(): Context {
       },
       'plan-guard.sh': {
         code: 2,
-        expect: 'Invoke the canon:plan-feature skill',
+        expect: 'Invoke the canon:plan-change skill',
         payload: (nonce) => {
           const key = nonce.replace(/[^A-Za-z0-9_.-]/g, '_')
           const transcriptPath = join(ctx.fixture, `plan-guard-${key}.jsonl`)
