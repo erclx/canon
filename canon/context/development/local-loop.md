@@ -25,7 +25,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 | `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                                 |
 | `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                              |
 | `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                           |
-| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning, then html-validate on the sheets.             |
+| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning.                                               |
 | `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                                     |
 | `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                                      |
 | `bun run test:e2e`      | The `*.e2e.test.ts` suites every `check` skips and CI runs, or those under a path. Queues on the Tests lock. |
