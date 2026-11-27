@@ -27,10 +27,10 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:plan-groundwork`    | The state is unmeasured and approaches compete        |
 | `canon:decision-escalate`  | Open decisions turn on your preference                |
 | `canon:proposal-critique`  | A proposal needs questioning before it is built       |
-| `canon:design-references`  | A design round has no real site to look at            |
+| `canon:design-gather`      | A design round has no real site to look at            |
 | `canon:design-pick`        | The call is taste, wanting candidates side by side    |
-| `canon:task-board`         | A decided item needs a file on the board              |
-| `canon:plan-feature`       | The approach is settled and needs a plan              |
+| `canon:task-create`        | A decided item needs a file on the board              |
+| `canon:plan-change`        | The approach is settled and needs a plan              |
 | `canon:codebase-layout`    | A change adds a file and needs a folder               |
 
 ## Build the feature
@@ -59,7 +59,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:code-health`     | Source files must answer for length and drift  |
 | `canon:document-health` | Documents must answer for length and staleness |
 | `canon:ui-audit`        | To read UI source for missing states           |
-| `canon:ui-measure`      | To measure paint, processor, and layout cost   |
+| `canon:ui-performance`  | To measure paint, processor, and layout cost   |
 | `canon:app-drive`       | To drive a built app with the operator         |
 
 ## Ship it
@@ -67,7 +67,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | Skill                 | When to use                                   |
 | --------------------- | --------------------------------------------- |
 | `canon:git-ship`      | To run the post-feature chain through open PR |
-| `canon:context-fold`  | The diff left a context entry untrue          |
+| `canon:context-sync`  | The diff left a context entry untrue          |
 | `canon:design-record` | A picked design needs landing in the record   |
 | `canon:task-complete` | After the fold, to mark shipped outcomes      |
 | `canon:docs-sync`     | A change left `README.md` or `docs/` stale    |
