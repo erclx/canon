@@ -74,6 +74,22 @@
     box-shadow var(--duration-move) var(--ease-standard);
 }
 
+/*
+ * A sticky last child: a short page leaves it as padding below its last line,
+ * and a page clipped at the sheet's height pins it to the bottom edge, so the
+ * text fades out there and the sheet never scrolls on its own.
+ */
+#records .sheet::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 56px;
+  margin-top: -16px;
+  background: linear-gradient(to bottom, transparent, var(--card) 60%);
+  pointer-events: none;
+}
+
 #records .sheet[data-at='0'] {
   z-index: 3;
   visibility: visible;
@@ -321,7 +337,7 @@
   }
 }
 
-/* A phone shows the front page alone, at its own height. */
+/* A phone shows the front page alone, and a long one fades at the sheet's height. */
 @media (max-width: 640px) {
   #records .chips {
     margin-top: 24px;
@@ -340,6 +356,5 @@
     left: 0;
     display: block;
     width: auto;
-    max-height: none;
   }
 }
