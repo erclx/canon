@@ -106,12 +106,12 @@ On the full chain, either defer and author a rule in the toolkit before re-runni
 
 On the `gov` phase, stop and present four options rather than picking:
 
-1. Author a rule in the toolkit at `governance/rules/<domain>/<num>-<name>.md` per `${CLAUDE_SKILL_DIR}/../create-rule/references/rule.md`, commit, and re-run install, when every project should get it.
-2. Invoke `create-rule`, which scaffolds the file into the target project at a non-colliding number. Take this when the rule is project-specific and no sync should overwrite it.
+1. Author a rule in the toolkit at `governance/rules/<domain>/<num>-<name>.md` per `${CLAUDE_SKILL_DIR}/../write-rule/references/rule.md`, commit, and re-run install, when every project should get it.
+2. Invoke `write-rule`, which scaffolds the file into the target project at a non-colliding number. Take this when the rule is project-specific and no sync should overwrite it.
 3. Install the matching non-`<tech>` rules and skip the tech-specific layer.
 4. Abort.
 
-`--skip-gaps` takes option 3 ahead of the prompt, which keeps the phase non-interactive. This skill authors no rule itself, since option 1 writes in the toolkit and option 2 hands the file to `create-rule`.
+`--skip-gaps` takes option 3 ahead of the prompt, which keeps the phase non-interactive. This skill authors no rule itself, since option 1 writes in the toolkit and option 2 hands the file to `write-rule`.
 
 ## Preview
 

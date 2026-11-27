@@ -1,11 +1,13 @@
 ---
-name: create-skill
-description: Creates a new `SKILL.md` in `.claude/skills/` in a target project, or in the toolkit's own checkout under `claude/skills/` for a plugin skill and `.claude/skills/` for an `internal-*` one. Use when asked to "create a skill", add a skill, or make a new skill.
+name: write-skill
+description: Creates or edits a `SKILL.md` in a target project's `.claude/skills/`, or in the toolkit checkout under `claude/skills/` or `.claude/skills/`. Use when asked to "create a skill", add a skill, or make a new skill, and before a hand edit to a `SKILL.md`.
 metadata:
   family: generate
 ---
 
-# Create skill
+# Write skill
+
+This skill covers a first creation and every later hand edit. For an edit, read the references below, skip the three creation-time questions, and run Steps 6 and 7 over what changed.
 
 Read these files in parallel:
 

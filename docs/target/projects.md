@@ -88,7 +88,7 @@ Init then lists each markdown root that already passes the density limits in `ca
 Install one domain without re-running `canon init`.
 
 - A rule for a newly adopted library: run `canon gov detect <path> --json`, then `canon gov install --add <rule> <path>`
-- A project-specific rule: invoke `canon:create-rule`, which writes into `.claude/rules/project/`. A rule under `.claude/rules/canon/` is deleted on the next sync.
+- A project-specific rule: invoke `canon:write-rule`, which writes into `.claude/rules/project/`. A rule under `.claude/rules/canon/` is deleted on the next sync.
 - An `index.md` system for a markdown-heavy folder: invoke `canon:target-setup indexes`
 
 For a leftover `.claude/snippets/` see [target migrations by hand](../migrations/by-hand.md).

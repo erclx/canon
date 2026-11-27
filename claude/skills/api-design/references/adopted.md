@@ -43,7 +43,7 @@ A stored key honored on retry, an atomic claim under a unique constraint, a reus
 
 ### The closing sections
 
-The same source's skill anatomy supplies the excuses, red flags, and closing checklist, adopted toolkit-wide through `${CLAUDE_SKILL_DIR}/../create-skill/references/skill-practice.md`. Each excuse row here rebuts a reason a session gives when about to break a caller, such as "nobody depends on that field".
+The same source's skill anatomy supplies the excuses, red flags, and closing checklist, adopted toolkit-wide through `${CLAUDE_SKILL_DIR}/../write-skill/references/skill-practice.md`. Each excuse row here rebuts a reason a session gives when about to break a caller, such as "nobody depends on that field".
 
 ## Declined
 

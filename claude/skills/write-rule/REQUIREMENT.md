@@ -1,9 +1,9 @@
 ---
-name: create-rule
+name: write-rule
 description: Why a project-local rule needs a subdir, a slug free in it, and a scope key that decides when it fires
 ---
 
-# Create rule requirement
+# Write rule requirement
 
 ## Gap
 
@@ -21,13 +21,12 @@ The subdir gets picked by feel, so a UI copy rule loads on every session. The sc
 
 ## Must not
 
-- Edit a toolkit source rule, which is authored in the toolkit and would be overwritten here
+- Install or sync a toolkit source rule, which `internal-governance` owns
 - Work the body shape or the frontmatter from memory
 - Overwrite a project rule already holding the slug
 - Write more than one topic into a single rule
 
 ## Out of scope
 
-- Editing a rule that already exists, which the rule standard governs
-- Toolkit source rules, which the toolkit authors rather than a target
+- The install and sync path of a toolkit source rule, which `internal-governance` owns
 - Installing the rules the toolkit ships, which `target-setup` owns

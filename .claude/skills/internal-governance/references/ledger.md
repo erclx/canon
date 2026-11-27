@@ -26,7 +26,7 @@ Coverage grows only as core rules are touched, since nobody wrote down the reaso
 
 ## Shape and rows
 
-The shipped `claude/skills/create-rule/references/ledger.md` owns the row shape both audits check, one table per H2 and one row per bullet, and the sourced and house-choice rows. Only that copy reaches a project, so this file adds the toolkit's paths above and the two row kinds a core rule takes below.
+The shipped `claude/skills/write-rule/references/ledger.md` owns the row shape both audits check, one table per H2 and one row per bullet, and the sourced and house-choice rows. Only that copy reaches a project, so this file adds the toolkit's paths above and the two row kinds a core rule takes below.
 
 - **Core decision:** a house choice naming what the bullet prevents and the option it beat, with the decision date alone in `Read`
 - **Core, reason lost:** `House choice: Unknown` where nobody remembers why a touched bullet exists, which marks it for `internal-rule-audit`

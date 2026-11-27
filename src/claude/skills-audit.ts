@@ -19,14 +19,14 @@ import {
 /** Returned when a skill folder carries no `REQUIREMENT.md`, the gating check. */
 export const EXIT_MISSING_REQUIREMENT = 2
 
-/** The description ceiling stated in the frontmatter rules of `claude/skills/create-skill/references/skill.md`. */
+/** The description ceiling stated in the frontmatter rules of `claude/skills/write-skill/references/skill.md`. */
 export const DESCRIPTION_LIMIT = 1024
 
 /** The two headings the requirement template declares, matched at any level. */
 export const REQUIREMENT_SECTIONS: readonly string[] = ['Gap', 'Must']
 
 /**
- * The caps `claude/skills/create-skill/references/skill-requirement.md` states.
+ * The caps `claude/skills/write-skill/references/skill-requirement.md` states.
  * Words count body tokens carrying a letter or digit, so a heading or bullet
  * marker costs nothing and frontmatter is left out.
  */
@@ -52,7 +52,7 @@ export const CORPORA: readonly string[] = [
 ]
 
 /**
- * The practice skills `claude/skills/create-skill/references/skill-practice.md` describes, keyed by
+ * The practice skills `claude/skills/write-skill/references/skill-practice.md` describes, keyed by
  * corpus-relative folder. The list lives here, since a skill declaring its own
  * kind could exempt itself.
  */
@@ -299,7 +299,7 @@ interface SkillText {
 }
 
 /**
- * Measures both skill corpora against the rules `claude/skills/create-skill/references/skill.md` states
+ * Measures both skill corpora against the rules `claude/skills/write-skill/references/skill.md` states
  * mechanically. Reads raw frontmatter rather than `listSkills`, which prefers
  * the folder name and so never surfaces a disagreement.
  */

@@ -15,8 +15,8 @@ The rule is a core rule, so every row is a house choice rather than a citation. 
 
 ## Rule files
 
-| Bullet                          | Source                                                                                                                                                                                          | Read       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Load create-rule before an edit | House choice: a session hand-editing rules without the skill shipped defects `canon gov audit` passed (issue 2842). It beat relying on the audit alone                                          | 2026-10-29 |
-| Report an unresolved skill      | House choice: a project that installed governance without the plugin has no `create-rule`, and a silent skip hides that. It beat omitting the line                                              | 2026-10-29 |
-| Audit each touched rule         | House choice: the audit catches the shape and ledger defects the skill's checklist names, so running it before the commit closes the loop. It beat leaving the audit to the pre-push gate alone | 2026-10-29 |
+| Bullet                         | Source                                                                                                                                                                                          | Read       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Load write-rule before an edit | House choice: a session hand-editing rules without the skill shipped defects `canon gov audit` passed (issue 2842). It beat relying on the audit alone                                          | 2026-10-29 |
+| Report an unresolved skill     | House choice: a project that installed governance without the plugin has no `write-rule`, and a silent skip hides that. It beat omitting the line                                               | 2026-10-29 |
+| Audit each touched rule        | House choice: the audit catches the shape and ledger defects the skill's checklist names, so running it before the commit closes the loop. It beat leaving the audit to the pre-push gate alone | 2026-10-29 |

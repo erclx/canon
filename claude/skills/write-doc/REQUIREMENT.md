@@ -31,6 +31,6 @@ The document then ships unread against its kind's standard and unchecked against
 
 - Rewriting or syncing an existing `docs/` page or an authored README against a diff, which `docs-sync` owns
 - Refreshing an existing context entry, which `context-fold` owns
-- Drafting a governance rule, which `create-rule` owns
+- Drafting a governance rule, which `write-rule` owns
 - Drawing a figure or a diagram for a document, which `draw-figure` owns
 - Voice, rhythm, and word choice in the drafted document, which `write-human` owns
