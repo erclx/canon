@@ -49,7 +49,7 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 
 ### Building against design references and images
 
-Read `${CLAUDE_SKILL_DIR}/references/design-references.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the board frames this session may write.
+Read `${CLAUDE_SKILL_DIR}/references/build-to-design.md` before editing a surface a plan's `## Design references` or `## Reference images` names. It names the board frames this session may write.
 
 ## Scope after dispatch
 

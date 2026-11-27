@@ -60,7 +60,7 @@ When the pick lands relative to the build is the design-reference rule's call, s
 
 A redraw follows an intentional design change and nothing else. Keep the group file, change the sync's mapping only where the frame moved on the canvas, and run the sync so it rewrites the files.
 
-- Who redraws a board frame a build makes untrue, the worker or a sketch round, is the call `${CLAUDE_SKILL_DIR}/../role-worker/references/design-references.md` makes
+- Who redraws a board frame a build makes untrue, the worker or a sketch round, is the call `${CLAUDE_SKILL_DIR}/../role-worker/references/build-to-design.md` makes
 - A worker it clears runs this step after drawing the frame
 
 Retire a reference in the change that removes its surface from the app.
