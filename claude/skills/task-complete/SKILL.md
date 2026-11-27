@@ -1,13 +1,13 @@
 ---
 name: task-complete
-description: Marks the outcomes a branch's diff shipped `[x]` on the task board, sweeps the review receipts whose branch is gone, and archives a shipped task by hand where the `post-merge` hook could not. Use when asked to "mark what shipped", "tick the outcomes", "close out a shipped task", or "archive that task", or as the ship-chain step after `context-fold`. Do NOT use to create or decline a task, which is `task-board`, or to update the context entries, which is `context-fold`.
+description: Marks the outcomes a branch's diff shipped `[x]` on the task board, sweeps the review receipts whose branch is gone, and archives a shipped task by hand where the `post-merge` hook could not. Use when asked to "mark what shipped", "tick the outcomes", "close out a shipped task", or "archive that task", or as the ship-chain step after `context-sync`. Do NOT use to create or decline a task, which is `task-create`, or to update the context entries, which is `context-sync`.
 metadata:
   family: ship
 ---
 
 # Task complete
 
-Owns the two operations that settle a task once its work exists: marking the outcomes the diff shipped, and archiving a task whose work reached `main`. `task-board` brings a task into existence and declines one, and `context-fold` writes the context entries. Do not create a task here, and do not move a plan by hand: the archive carries it.
+Owns the two operations that settle a task once its work exists: marking the outcomes the diff shipped, and archiving a task whose work reached `main`. `task-create` brings a task into existence and declines one, and `context-sync` writes the context entries. Do not create a task here, and do not move a plan by hand: the archive carries it.
 
 ## Guards
 

@@ -62,12 +62,12 @@ describe('parseMovedBodies', () => {
       '',
       'claude/skills/git-pr/SKILL.md',
       'claude/skills/bash-script/SKILL.md',
-      'claude/skills/context-fold/SKILL.md',
+      'claude/skills/context-sync/SKILL.md',
     ].join('\n')
 
     expect(parseMovedBodies(output).map((entry) => entry.name)).toEqual([
       'bash-script',
-      'context-fold',
+      'context-sync',
       'git-pr',
     ])
   })

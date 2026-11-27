@@ -1,0 +1,3 @@
+# Feature: unlinked plan
+
+Decoy scratch with no task backlink. The context-sync skill should NOT sweep this file.

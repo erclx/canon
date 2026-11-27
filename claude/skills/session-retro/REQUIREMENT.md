@@ -17,7 +17,7 @@ A session asked for candidates lists volume over value, files a repeat of an ope
 - Match each candidate against the open feedback issues through the CLI, so a repeat becomes a follow-up, and say so when the match did not run
 - Match against the open rows `canon tasks list --json` lists too when the CLI's `route` reads `board`
 - Cap the shortlist at five, ranked by observed cost, and propose nothing when the session holds no toolkit friction
-- File only the operator's picks, one record each, through `canon-feedback`, or through `task-board` when the CLI's `route` reads `board`
+- File only the operator's picks, one record each, through `canon-feedback`, or through `task-create` when the CLI's `route` reads `board`
 
 ## Must not
 
@@ -28,5 +28,5 @@ A session asked for candidates lists volume over value, files a repeat of an ope
 ## Out of scope
 
 - Building and sending one report, which `canon-feedback` owns
-- Placing a project row on the board, which `task-board` owns
+- Placing a project row on the board, which `task-create` owns
 - Draining the toolkit's feedback queue, which the toolkit's maintainers do

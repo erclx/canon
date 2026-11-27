@@ -144,7 +144,7 @@ Read the record's `coverage` rather than the exit, which also carries findings
 this phase does not report on.
 
 - On `kind: 'measured'`, list each folder in `coverage.findings.unnamed` as a code folder no entry's Layout names
-- Report each as a finding, never a failure, and name `/canon:context-fold` as the step that writes the Layout line
+- Report each as a finding, never a failure, and name `/canon:context-sync` as the step that writes the Layout line
 - Write no Layout line here, since what a folder does is the first build session's call and a line setup guesses is a stale claim
 - On any other `kind`, report it in one line, such as `no-root` for a project with no code root yet
 

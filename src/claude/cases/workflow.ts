@@ -27,7 +27,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Fold what we decided this session into the context entries before this branch goes out.',
-    expect: 'context-fold',
+    expect: 'context-sync',
   },
   {
     prompt:
@@ -138,7 +138,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Open a new entry on the task board for this piece of work.',
-    expect: 'task-board',
+    expect: 'task-create',
   },
   {
     prompt:
@@ -161,7 +161,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Tell me the paint and layout cost of this page right now.',
-    expect: 'ui-measure',
+    expect: 'ui-performance',
   },
   {
     prompt:
@@ -234,6 +234,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Tell me the render cost of this page in the browser.',
-    expect: 'ui-measure',
+    expect: 'ui-performance',
   },
 ]

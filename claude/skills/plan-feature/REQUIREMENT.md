@@ -30,6 +30,6 @@ A constraint naming a surface to leave alone forbids two acts at once, conformin
 ## Out of scope
 
 - Executing the plan, which `auto-ship` owns
-- Creating a task for the plan, which `task-board` owns
-- Reconciling the context entries after the work lands, which `context-fold` owns
+- Creating a task for the plan, which `task-create` owns
+- Reconciling the context entries after the work lands, which `context-sync` owns
 - Marking the board, which `task-complete` owns

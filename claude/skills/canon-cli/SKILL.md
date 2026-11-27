@@ -49,7 +49,7 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 | Shoot a page as one PNG per section          | `canon capture --sections` | none                        |
 | Serve a directory and print the link         | `canon serve`              | none                        |
 | Count computed values on routes or frames    | `canon inventory`          | `canon:target-check`        |
-| Walk a page through interactions and measure | `canon drive`              | `canon:ui-measure`          |
+| Walk a page through interactions and measure | `canon drive`              | `canon:ui-performance`      |
 | Drive the pinned agent browser               | `canon browser`            | `canon:review-ui`           |
 | Film a web app with a click log and camera   | `canon take`               | `canon:ui-film`             |
 | Fetch a YouTube transcript                   | `canon transcripts`        | `canon:youtube-transcripts` |

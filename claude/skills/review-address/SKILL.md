@@ -46,9 +46,9 @@ Run the project check (`bun run check` or the project's documented equivalent). 
 
 ## Step 4: refresh stale docs
 
-The fixes may have changed behavior that `.claude/` context entries or docs describe. Refresh them with the `context-fold` skill, which maps changed files to the entries citing them and rewrites the stale sections.
+The fixes may have changed behavior that `.claude/` context entries or docs describe. Refresh them with the `context-sync` skill, which maps changed files to the entries citing them and rewrites the stale sections.
 
-Do not reimplement that mapping here. When a fix adds a capability with no existing entry, `context-fold` flags it rather than creating one.
+Do not reimplement that mapping here. When a fix adds a capability with no existing entry, `context-sync` flags it rather than creating one.
 
 ## Step 5: rebase a stale branch
 

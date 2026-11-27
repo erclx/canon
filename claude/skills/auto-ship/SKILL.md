@@ -47,7 +47,7 @@ Read `${CLAUDE_SKILL_DIR}/references/worktree-name.md` before invoking `canon:se
 
 Resolve `<plan>` in this order, stopping at the first match. Only a path reaches tier 1, and a bare slug is read as a plan's throughout, since the two would collide on any similar name.
 
-1. **Caller-supplied task.** A path under `.canon/tasks/`. Take what its first `Plan:` line names, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, after reading `tier-failures.md`.
+1. **Caller-supplied task.** A path under `.canon/tasks/`. Take what its first `Plan:` line names, per `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`, after reading `tier-failures.md`.
 2. **Caller-supplied plan.** Anything else, a plan path or a bare slug, as `session-worktree` tier 0 takes it. A slug resolves to `.canon/plans/feature-<slug>.md`, and a path is taken from the main root.
 3. **Derived.** `.canon/plans/feature-<slug>.md`, from the `<slug>` the Guards derived.
 
@@ -72,7 +72,7 @@ If neither form is present, stop: `❌ <path> carries no plan sections. A plan l
 
 Read `## The suggested-and-answer contract` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` before acting on a question, for what it resolves to and the form an override takes. A question left open is a decision this run executes rather than a reason to stop.
 
-Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md` fixes.
 
 ## Step 2: implement
 

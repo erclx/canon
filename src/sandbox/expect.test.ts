@@ -44,7 +44,7 @@ function write(path: string, body: string): void {
 }
 
 /**
- * The tree a correct `/context-fold` run leaves behind on the drift arm. Every
+ * The tree a correct `/context-sync` run leaves behind on the drift arm. Every
  * negative case mutates exactly one thing from here, so a case that goes red
  * names which assertion caught it.
  */
@@ -1208,7 +1208,7 @@ describe('parseTarget', () => {
   })
 
   it('should reject a target with no separator', () => {
-    expect(parseTarget('context-fold')).toBeUndefined()
+    expect(parseTarget('context-sync')).toBeUndefined()
   })
 
   it('should reject a target with an empty half', () => {

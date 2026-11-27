@@ -7,7 +7,7 @@ metadata:
 
 # Session retro
 
-Turn what this session cost into toolkit feedback with evidence behind it. The scan, the filter, and the issue match run here. Filing belongs to `canon-feedback` or `task-board`, which this skill hands each pick to and never stands in for.
+Turn what this session cost into toolkit feedback with evidence behind it. The scan, the filter, and the issue match run here. Filing belongs to `canon-feedback` or `task-create`, which this skill hands each pick to and never stands in for.
 
 ## Guards
 
@@ -67,7 +67,7 @@ Label the pick question's options with the shortlist's short titles, so the oper
 
 File each pick by the `route` Step 3 read, one record per pick.
 
-- `route: board`: invoke `canon:task-board` once per pick, carrying the evidence in full. Strip nothing, since the board is not public.
+- `route: board`: invoke `canon:task-create` once per pick, carrying the evidence in full. Strip nothing, since the board is not public.
 - A follow-up on an open row names that row.
 - Any other route: invoke `canon:canon-feedback` once per pick, as below.
 
@@ -79,6 +79,6 @@ Each pick becomes a public issue. Strip every project path and project name from
 
 - A new report goes through as a new issue
 - A follow-up names its issue number, so `canon-feedback` builds the follow-up block
-- A project-only candidate the operator picks anyway goes to the project's own board through `task-board`, never to the toolkit
+- A project-only candidate the operator picks anyway goes to the project's own board through `task-create`, never to the toolkit
 
-Report each URL `canon-feedback` returns, or each row path `task-board` writes, on its own line, and each pick refused with the reason given.
+Report each URL `canon-feedback` returns, or each row path `task-create` writes, on its own line, and each pick refused with the reason given.

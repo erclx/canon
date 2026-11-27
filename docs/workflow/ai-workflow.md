@@ -45,7 +45,7 @@ Plan and build in session 1, then review and ship in a fresh session 2 when you 
 - For an unmeasured state with live approaches, invoke `canon:plan-groundwork`
 - Invoke `canon:plan-feature`, implement, and run the `CLAUDE.md` commands until they pass
 - For UI changes, invoke `canon:ui-checklist`
-- Invoke `canon:context-fold` before closing
+- Invoke `canon:context-sync` before closing
 
 Session 2 invokes `canon:git-ship` to verify, sync docs, commit by concern, and open the pull request.
 

@@ -14,7 +14,7 @@ Write the answer to the first of these that fits, in the plan or task this build
 - A decision no question covers, with a plan, takes a new question written already settled, per `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
   - Give it an `- Evidence:` line citing what this build read, or `none, settled by the operator` where the call rests on no fact
 - A decision no question covers, with no plan yet, takes a dated line under the task's `## Findings`
-  - Open it with the bold label `**operator, <YYYY-MM-DD>:**`, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
+  - Open it with the bold label `**operator, <YYYY-MM-DD>:**`, per `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md`
 - A build with no plan and no task has no slot to write, so write nothing and relay the answer with `Answer at: none`
 
 ## Relay it

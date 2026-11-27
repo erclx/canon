@@ -1,6 +1,6 @@
 ---
 title: Project name
-description: How a design-pick or design-references run names the Frameboard project its pages go in, from the three homes a pick has and the rule for reusing one
+description: How a design-pick or design-gather run names the Frameboard project its pages go in, from the three homes a pick has and the rule for reusing one
 ---
 
 # Project name
@@ -29,4 +29,4 @@ An older round named its project for the surface alone, such as `landing` or `pi
 - Finish a round still open there in that project
 - Start a new pick in a `pick-<nn>-<topic>` project, unless the ask names the older one
 
-A standalone `design-references` run names its project by the same rule, from the surface the operator's ask names, and asks when the ask names none.
+A standalone `design-gather` run names its project by the same rule, from the surface the operator's ask names, and asks when the ask names none.

@@ -16,7 +16,7 @@ The claude stack installs the Claude Code workflow into a project through `canon
 
 - `.canon/tasks/` holds one file per task plus a generated `index.md`, local scratch only, with `archive/` holding the tasks that shipped
 - `.canon/plans/` holds execution detail for multi-step tasks, and `canon tasks archive` moves a `feature-*.md` plan into `archive/` when the `post-merge` hook archives its task
-- `.canon/review/` holds the reports a review or measurement skill writes, such as `ui-measure-<slug>.md`
+- `.canon/review/` holds the reports a review or measurement skill writes, such as `ui-performance-<slug>.md`
 - `.canon/tmp/` is ephemeral scratch, safe to delete without loss
 - `.claude/worktrees/` is where `EnterWorktree` creates a linked worktree, which is why it stays under `.claude/`
 
@@ -41,7 +41,7 @@ A project installed before the split holds its records under `.claude/`. `canon 
 
 A project installed before the board became a folder still holds `.claude/TASKS.md`, and nothing migrates it. `canon claude init` seeds an empty `.canon/tasks/index.md` beside it, so every skill reads the empty catalog while the real board sits unreferenced.
 
-1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the `task-board` skill requires. Compare each new file against its source block.
+1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the `task-create` skill requires. Compare each new file against its source block.
 2. Run `canon indexes regen --no-stage --root . .canon/tasks/<any-task>.md` to build the catalog.
 3. Delete `.claude/TASKS.md`, and swap its `.gitignore` entry for `.canon/tasks/`.
 

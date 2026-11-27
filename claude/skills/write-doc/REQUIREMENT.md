@@ -1,13 +1,13 @@
 ---
 name: write-doc
-description: Why a brand-new project document needs its kind's standard, a catalog collision check, and a confirm step, not the rewrite and refresh paths docs-sync and context-fold already own
+description: Why a brand-new project document needs its kind's standard, a catalog collision check, and a confirm step, not the rewrite and refresh paths docs-sync and context-sync already own
 ---
 
 # Write doc requirement
 
 ## Gap
 
-Without this skill, a session drafting a document with no prior version invents a shape from memory or reaches for a rewrite surface. `docs-sync` and `context-fold` read an existing document and a diff, so a new one reads as unrelated to any change.
+Without this skill, a session drafting a document with no prior version invents a shape from memory or reaches for a rewrite surface. `docs-sync` and `context-sync` read an existing document and a diff, so a new one reads as unrelated to any change.
 
 The document then ships unread against its kind's standard and unchecked against the catalog for a sibling covering the same ground. Split into one skill per kind, the procedure drifts and the descriptions compete for one trigger.
 
@@ -30,7 +30,7 @@ The document then ships unread against its kind's standard and unchecked against
 ## Out of scope
 
 - Rewriting or syncing an existing `docs/` page or an authored README against a diff, which `docs-sync` owns
-- Refreshing an existing context entry, which `context-fold` owns
+- Refreshing an existing context entry, which `context-sync` owns
 - Drafting a governance rule, which `create-rule` owns
 - Drawing a figure or a diagram for a document, which `draw-figure` owns
 - Voice, rhythm, and word choice in the drafted document, which `write-human` owns

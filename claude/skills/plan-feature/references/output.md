@@ -72,7 +72,7 @@ Then output in chat:
 Next: <line from the table below>
 ```
 
-Pick the `Next:` line from the roster check `${CLAUDE_SKILL_DIR}/../task-board/SKILL.md` states under `### Check for a live orchestrator`, read there rather than restated here.
+Pick the `Next:` line from the roster check `${CLAUDE_SKILL_DIR}/../task-create/SKILL.md` states under `### Check for a live orchestrator`, read there rather than restated here.
 
 | Roster read                                                                | `Next:` line                                                                                         |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |

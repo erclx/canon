@@ -14,7 +14,7 @@ Drafts one brand-new project document end to end: resolve its kind, read the sta
 Each kind has one standard and one reference. Load the reference for the resolved kind and no other, since every step below that differs by kind lives there.
 
 - **docs** lands at a page under `docs/`. Standard `${CLAUDE_SKILL_DIR}/../docs-sync/references/docs.md`, reference `${CLAUDE_SKILL_DIR}/references/docs.md`.
-- **context** lands at an entry under `canon/context/`. Standard `${CLAUDE_SKILL_DIR}/../context-fold/references/context.md`, reference `${CLAUDE_SKILL_DIR}/references/context.md`.
+- **context** lands at an entry under `canon/context/`. Standard `${CLAUDE_SKILL_DIR}/../context-sync/references/context.md`, reference `${CLAUDE_SKILL_DIR}/references/context.md`.
 - **wiki** lands at a reference page on a subject owned outside this project. Standard `${CLAUDE_SKILL_DIR}/references/wiki.md`, reference `${CLAUDE_SKILL_DIR}/references/wiki-kind.md`.
 - **readme** lands at a `README.md`, at the root or in a folder. Standard `${CLAUDE_SKILL_DIR}/../docs-sync/references/readme.md`, reference `${CLAUDE_SKILL_DIR}/references/readme.md`.
 

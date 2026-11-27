@@ -40,7 +40,7 @@ Leave the build passing at every commit. A slice that cannot pass on its own is 
 
 A defect outside the plan that turns up mid-build is a finding, not a slice. Fixing it on this branch widens a diff the plan scoped and hides the fix inside an unrelated review.
 
-- Write it as one line under the task's `## Findings`, naming the file and the fault when the build closes a task, opening with the label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes
+- Write it as one line under the task's `## Findings`, naming the file and the fault when the build closes a task, opening with the label `${CLAUDE_SKILL_DIR}/../task-create/references/tasks.md` fixes
 - Carry it in the handover message instead when no task exists, and never create a file to hold it.
 - Leave the file as it is, even when the fix is one line.
 - Fix it here only when the plan's own change cannot pass without it, and then say so in the commit that does.

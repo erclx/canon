@@ -7,7 +7,7 @@ description: Why the backlog gets a measured verdict per row with a lean toward 
 
 ## Gap
 
-Without this skill, the backlog only grows. `task-board` declines one named task and `task-complete` archives one, but nothing reads the backlog as a whole, and the orchestrator's re-test only clears a row upward. A long backlog has no surface that can say which rows still matter.
+Without this skill, the backlog only grows. `task-create` declines one named task and `task-complete` archives one, but nothing reads the backlog as a whole, and the orchestrator's re-test only clears a row upward. A long backlog has no surface that can say which rows still matter.
 
 Judged by its own task file, every row reads live and stays. Applied without the operator, verdicts decline rows on silence, on a board with no history to restore them. Measuring only that a defect still exists keeps nearly everything, since a row filed against the tree almost always reproduces.
 
@@ -31,6 +31,6 @@ Judged by its own task file, every row reads live and stays. Applied without the
 
 - Filing a brain dump, which `plan-intake` owns
 - Answering the filed items, which `plan-intake-answer` owns
-- Creating or declining one named task outside a triage, which `task-board` owns
+- Creating or declining one named task outside a triage, which `task-create` owns
 - Archiving one named task outside a triage, which `task-complete` owns
 - Ordering the rows a promote lands under `## Needs a plan`, which `role-orchestrator` owns

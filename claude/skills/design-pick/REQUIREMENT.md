@@ -64,5 +64,5 @@ An app pick is judged by clicking it, and a hand-built prototype grows by reques
 - Planning the work once the answer is settled, which `plan-feature` owns
 - Trying a built app for what is wrong with it, which `app-drive` owns
 - Finding roughness by reading source, which `ui-audit` owns
-- Measuring what a running interface costs to paint, which `ui-measure` owns
+- Measuring what a running interface costs to paint, which `ui-performance` owns
 - Listing what to look at on a change already made, which `ui-checklist` owns

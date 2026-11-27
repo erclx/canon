@@ -593,7 +593,7 @@ describe('referencesIn', () => {
     it("should pass a rule path cited from a skill's own REQUIREMENT.md, which a maintainer reads rather than a session", () => {
       expect(
         referencesIn(
-          'claude/skills/task-board/REQUIREMENT.md',
+          'claude/skills/task-create/REQUIREMENT.md',
           'See `.claude/rules/canon/canon/tasks.md` for the file shape.',
           root,
         ),

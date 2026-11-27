@@ -12,7 +12,7 @@ Applies to every candidate `session-retro` collects. A candidate is proposed onl
 1. **Observed cost.** The friction cost this session something that happened. A plausible failure names nothing.
    - The cost is an extra session, an extra review round, a wait, a wrong output, or an operator intervention
 2. **Toolkit cause.** A skill, the CLI, a rule, a template, or a default caused it.
-   - Friction the project caused fails here, and is offered for the project's own board through `task-board` instead
+   - Friction the project caused fails here, and is offered for the project's own board through `task-create` instead
 3. **Recurs.** It was seen twice or more, or once on a path every later session takes, such as a fixed default or a contract step.
 4. **Fix direction.** A concrete change can be named, even roughly.
 5. **Not already filed.** No open feedback issue covers it, and on the board arm no open row does either. A candidate one does cover passes as a follow-up on that issue or open row rather than failing.

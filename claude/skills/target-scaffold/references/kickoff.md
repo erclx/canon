@@ -15,7 +15,7 @@ Does not govern:
 
 - A handoff within one repository across a compaction: `../session-compact/references/handoff-note.md`
 - The plan the note points at: `../plan-feature/references/plan.md`
-- A task row the first session files from the note: `../task-board/references/tasks.md`
+- A task row the first session files from the note: `../task-create/references/tasks.md`
 - Voice, rhythm, and sentence construction: the `write-human` skill
 - Punctuation, formatting, and word choice: `../markdown-craft/references/markdown.md`
 

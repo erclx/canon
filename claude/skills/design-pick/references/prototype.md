@@ -33,7 +33,7 @@ A request arriving after the build that adds a flow goes back through the same q
 
 ## Data
 
-Every record is invented, and none comes from a real product, account, or person, per `design-references`. Write enough rows to fill each screen at desktop, plus one long value per list to show truncation.
+Every record is invented, and none comes from a real product, account, or person, per `design-gather`. Write enough rows to fill each screen at desktop, plus one long value per list to show truncation.
 
 - Fix the prototype's now to one date and time, and show it on screen beside the flow note, so a relative date such as `2 days ago` reads the same on every open
 - Hold state in memory alone, so a reload resets every flow to its starting rows. Write nothing to `localStorage`, which survives the reload and hides a broken reset.
