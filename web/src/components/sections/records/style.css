@@ -74,6 +74,22 @@
     box-shadow var(--duration-move) var(--ease-standard);
 }
 
+/*
+ * A sticky last child: a short page leaves it as padding below its last line,
+ * and a page clipped at the sheet's height pins it to the bottom edge, so the
+ * text fades out there and the sheet never scrolls on its own.
+ */
+#records .sheet::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 56px;
+  margin-top: -16px;
+  background: linear-gradient(to bottom, transparent, var(--card) 60%);
+  pointer-events: none;
+}
+
 #records .sheet[data-at='0'] {
   z-index: 3;
   visibility: visible;
@@ -177,15 +193,15 @@
   color: var(--ink);
 }
 
-#records .md a {
+/* A link drawn as its text, since a record's addresses are fiction. */
+#records .md .ln {
   color: var(--ink);
   text-decoration: underline;
   text-decoration-color: var(--outline);
   text-underline-offset: 3px;
 }
 
-#records .md code,
-#records .md .sev {
+#records .md code {
   padding: 1px 4px;
   border-radius: var(--radius-chip);
   background: var(--band);
@@ -208,6 +224,7 @@
   padding: 4px 6px 4px 0;
   border-bottom: 1px solid var(--line);
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 #records .md th {
@@ -236,26 +253,6 @@
   color: var(--ink);
 }
 
-#records .md .tree {
-  margin: 0 0 10px;
-  padding: 0;
-  list-style: none;
-  font-family: var(--mono);
-  font-size: var(--size-view-small);
-  line-height: 1.7;
-}
-
-#records .md .tree span {
-  display: block;
-}
-
-#records .md .fn {
-  margin: 14px 0 6px;
-  font-family: var(--mono);
-  font-size: var(--size-view-small);
-  color: var(--muted);
-}
-
 /* A checklist line: its box drawn in ink, ticked in the accent as the state the record carries. */
 #records .md li.ck {
   display: flex;
@@ -263,12 +260,6 @@
   gap: 8px;
   margin-left: -18px;
   list-style: none;
-}
-
-#records .md .ckl {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
 }
 
 #records .md .box {
@@ -299,74 +290,36 @@
 }
 
 /*
- * A drawn shot of the toolbar under review, its Save button focused. Each shot
- * keeps the theme it was taken in, whatever theme the page is in, and a cut
- * shot clips the bar at Save's edge so its ring shows broken.
+ * A screenshot the record points at, drawn as a labeled frame rather than
+ * loaded, since its address is fiction and the page pastes in no screenshot.
  */
-#records .md .pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin: 6px 0;
-}
-
 #records .md .thumb {
-  --t-ground: var(--color-light-band);
-  --t-bar: var(--color-light-window);
-  --t-line: var(--color-light-border);
-  --t-key: var(--color-light-surface);
-  --t-text: var(--color-light-text-body);
-  --t-ring: var(--color-light-accent);
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 64px;
-  overflow: hidden;
+  margin: 4px 0 8px;
+  padding: 6px 10px;
+  border: 1.5px dashed var(--outline);
   border-radius: var(--radius-chip);
-  background: var(--t-ground);
+  background: var(--band);
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  line-height: 1.3;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
-/* A dark shot stays dark under the light theme, so it reads the theme-fixed dark family. */
-#records .md .thumb.dk {
-  --t-ground: var(--color-dark-band);
-  --t-bar: var(--color-dark-window);
-  --t-line: var(--color-dark-border);
-  --t-key: var(--color-dark-chrome);
-  --t-text: var(--color-dark-text-body);
-  --t-ring: var(--color-dark-accent);
+/* A folded section's summary, kept as a line once its fold is dropped. */
+#records .md .sum {
+  font-family: var(--mono);
+  font-size: var(--size-view-small);
+  color: var(--muted);
 }
 
-#records .md .tt .bar {
-  display: flex;
-  gap: 4px;
-  padding: 5px;
-  border-radius: 6px;
-  background: var(--t-bar);
-  box-shadow: 0 0 0 1px var(--t-line);
-  transform: scale(0.8);
-}
-
-#records .md .tt.cut .bar {
-  overflow: hidden;
-  padding-right: 0;
-}
-
-#records .md .tt .b {
-  display: flex;
-  flex: none;
-  align-items: center;
-  height: 18px;
-  padding: 0 6px;
-  border-radius: 4px;
-  background: var(--t-key);
-  box-shadow: 0 0 0 1px var(--t-line);
-  font: 500 10px/1 var(--sans);
-  color: var(--t-text);
-}
-
-#records .md .tt .b.f {
-  outline: 2px solid var(--t-ring);
-  outline-offset: 2px;
+#records .md blockquote {
+  margin: 0 0 8px;
+  padding-left: 10px;
+  border-left: 1.5px solid var(--outline);
+  color: var(--muted);
 }
 
 @media (max-width: 900px) {
@@ -384,7 +337,7 @@
   }
 }
 
-/* A phone shows the front page alone, at its own height. */
+/* A phone shows the front page alone, and a long one fades at the sheet's height. */
 @media (max-width: 640px) {
   #records .chips {
     margin-top: 24px;
@@ -403,6 +356,5 @@
     left: 0;
     display: block;
     width: auto;
-    max-height: none;
   }
 }

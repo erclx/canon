@@ -14,6 +14,7 @@ on:
       # Pull request screenshots, which the page never reads.
       - '!assets/evidence/**'
       - 'src/design/**'
+      - 'examples/**'
       - '.github/workflows/deploy-site.yml'
       - 'tooling/web/configs/e2e/**'
   workflow_dispatch:

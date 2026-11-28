@@ -12,7 +12,7 @@ import './style.css'
 const FRONT = 2
 const pages = records.map((record) => ({
   name: record.name,
-  ...renderedPage(record.html),
+  ...renderedPage(record),
 }))
 const half = Math.floor(pages.length / 2)
 /** How far a page sits from the front, wrapping so each side holds the nearest. */
