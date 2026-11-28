@@ -29,6 +29,7 @@ import {
 import { requirementsRel } from '@/context/requirements'
 import {
   type BehaviorRow,
+  normalizeBehaviorText,
   normalizeEntryText as normalizeGoal,
   normalizeSurface,
   readBehaviorRows,
@@ -347,7 +348,7 @@ function parseScripts(scripts: unknown): DriveScript[] | string {
 }
 
 function behaviorKey(surface: string, behavior: string): string {
-  return `${normalizeSurface(surface)}: ${normalizeGoal(behavior)}`
+  return `${normalizeSurface(surface)}: ${normalizeBehaviorText(behavior)}`
 }
 
 /** Each Behavior row or entry that fails, read the three ways a goal fails. */

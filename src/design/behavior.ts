@@ -23,6 +23,15 @@ export function normalizeEntryText(text: string): string {
     .trim()
 }
 
+/**
+ * A Behavior row's text as the drive and the plan checks both compare it. Text
+ * bold end to end is unwrapped first, since the label rule would drop all of it.
+ */
+export function normalizeBehaviorText(text: string): string {
+  const whole = /^\*\*([^*]+)\*\*(\.?)$/.exec(text.trim())
+  return normalizeEntryText(whole ? `${whole[1]}${whole[2]}` : text)
+}
+
 export function normalizeSurface(text: string): string {
   return text.replace(/`/g, '').trim()
 }
@@ -39,7 +48,7 @@ export function readBehaviorRows(root: string): BehaviorRow[] {
     .flat()
     .map((row) => ({
       surface: normalizeSurface(row.Surface?.value ?? ''),
-      behavior: normalizeEntryText(row.Behavior?.value ?? ''),
+      behavior: normalizeBehaviorText(row.Behavior?.value ?? ''),
     }))
     .filter((row) => row.surface !== '' && row.behavior !== '')
 }
