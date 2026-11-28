@@ -1257,6 +1257,74 @@ describe('validateRecords', () => {
     })
   })
 
+  describe('Behavior rows', () => {
+    async function seedDesignRecord(): Promise<void> {
+      mkdirSync(join(ROOT, 'canon'), { recursive: true })
+      await writeFile(
+        join(ROOT, 'canon', 'DESIGN.md'),
+        [
+          '# Design',
+          '',
+          '## Behavior',
+          '',
+          '| Surface   | Behavior                       |',
+          '| --------- | ------------------------------ |',
+          '| `shell`   | Escape closes the command menu |',
+          '',
+        ].join('\n'),
+      )
+    }
+
+    function citingPlan(rows: string): string {
+      return conformingPlan().replace(
+        '**Verification:**',
+        `## Design references\n\n- \`canon/design/shell/\`: built against, the shell\n\n${rows}**Verification:**`,
+      )
+    }
+
+    it('should report a cited row the plan does not name', async () => {
+      await seedDesignRecord()
+      await seedPlan('feature-a-b.md', citingPlan(''))
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual([
+        'behavior-unstated',
+      ])
+    })
+
+    it('should pass a cited row the section rules out with a reason', async () => {
+      await seedDesignRecord()
+      await seedPlan(
+        'feature-a-b.md',
+        citingPlan(
+          '## Behavior rows\n\n- Escape closes the command menu: out, the menu ships later\n\n',
+        ),
+      )
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && outcome.findings).toEqual([])
+    })
+
+    it('should skip the check where no design record exists', async () => {
+      await seedPlan('feature-a-b.md', citingPlan(''))
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && outcome.findings).toEqual([])
+    })
+
+    it('should owe nothing for a plan citing no group', async () => {
+      await seedDesignRecord()
+      await seedPlan('feature-a-b.md', conformingPlan())
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && outcome.findings).toEqual([])
+    })
+  })
+
   it('should resolve a cited path against the root it validates', async () => {
     mkdirSync(join(ROOT, 'src'), { recursive: true })
     await writeFile(join(ROOT, 'src/real.ts'), '')
