@@ -5,6 +5,9 @@ import { join } from 'node:path'
 import { execa } from 'execa'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { findShell } from '@/take/shell'
+// Spawns `canon take` through the CLI, so vitest selects this suite on a change
+// to the command only through this import.
+import '@/commands/take'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')

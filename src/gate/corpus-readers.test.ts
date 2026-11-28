@@ -106,6 +106,7 @@ describe('e2eCliSpawners', () => {
 
   it('should hold that every real suite imports the command module it drives', () => {
     const drives: Record<string, string> = {
+      'src/commands/take.e2e.test.ts': '@/commands/take',
       'src/take/film-step.e2e.test.ts': '@/commands/take',
       'src/browser/swipe.e2e.test.ts': '@/commands/browser',
     }
