@@ -38,7 +38,10 @@ describe('E2E_GROUPS', () => {
 
 describe('groupFiles', () => {
   it('should give the whole group when no scope is passed', () => {
-    expect(groupFiles('reel', [])).toEqual(['src/take/reel.e2e.test.ts'])
+    expect(groupFiles('reel', [])).toEqual([
+      'src/commands/take.e2e.test.ts',
+      'src/take/reel.e2e.test.ts',
+    ])
   })
 
   it('should keep only the scoped suites the group holds', () => {
@@ -65,7 +68,7 @@ describe('groupOutput', () => {
   it('should tell the leg to run when its group holds a scoped suite', () => {
     expect(groupOutput('reel', [])).toEqual({
       run: 'true',
-      files: 'src/take/reel.e2e.test.ts',
+      files: 'src/commands/take.e2e.test.ts src/take/reel.e2e.test.ts',
     })
   })
 

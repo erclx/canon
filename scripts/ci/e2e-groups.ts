@@ -15,7 +15,7 @@ export const E2E_GROUPS = {
     'src/take/film-glide.e2e.test.ts',
     'src/take/film-step.e2e.test.ts',
   ],
-  reel: ['src/take/reel.e2e.test.ts'],
+  reel: ['src/commands/take.e2e.test.ts', 'src/take/reel.e2e.test.ts'],
   motion: [
     'src/take/film-canvas.e2e.test.ts',
     'src/take/film-contextmenu.e2e.test.ts',
