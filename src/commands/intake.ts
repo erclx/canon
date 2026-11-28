@@ -219,9 +219,15 @@ export function register(program: Command): void {
         '                   finding, with no evidence/baseline/00-current image',
         '  skippedVisible   a Drawn skip on a finding whose intake item names a',
         '                   rendered-surface file in its Fix or Worth it line',
+        '  behavior         a ## Behavior row in canon/DESIGN.md with no',
+        '                   behaviors entry, one not-driven with no reason, or',
+        '                   an entry naming no row, each prefixed unmapped,',
+        '                   unreasoned, or unknown',
         '',
         'A goal matches by its text with any bold label and trailing period',
-        'dropped. A changed path is named and never reverted.',
+        'dropped, and a Behavior row by its Surface and Behavior cells read the',
+        'same way. A project with no design record or no Behavior section has',
+        'no rows. A changed path is named and never reverted.',
         '',
         'Read `reason` off the record: `recorded` for a baseline, `clean` or',
         '`failed` for a check, and a refusal otherwise.',
@@ -604,6 +610,7 @@ const FINDING_LABELS: Record<keyof DriveFindings, string> = {
   undrawn: 'Decisions with nothing drawn',
   uncaptured: 'Board drive with no current-page capture',
   skippedVisible: 'Drawing skipped on a visible change',
+  behavior: 'Behavior rows not driven',
 }
 
 function reportDriveCheck(
@@ -625,6 +632,7 @@ function reportDriveCheck(
         slug: outcome.slug,
         reason: outcome.reason,
         goals: outcome.goals,
+        behaviors: outcome.behaviors,
         findings: outcome.findings,
       })}\n`,
     )
@@ -636,7 +644,7 @@ function reportDriveCheck(
   if (outcome.reason === 'clean') {
     logStep('Clean')
     logInfo(
-      `${outcome.goals} goal(s) mapped, the checkout untouched, the evidence in place, every decision drawn.`,
+      `${outcome.goals} goal(s) and ${outcome.behaviors} behavior row(s) mapped, the checkout untouched, the evidence in place, every decision drawn.`,
     )
     outro()
     return code

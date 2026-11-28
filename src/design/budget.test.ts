@@ -84,6 +84,19 @@ describe('measureDesignProse', () => {
     expect(measureDesignProse(source)).toEqual([])
   })
 
+  it('passes a Behavior table holding more rows than the rule cap', () => {
+    const behavior = [
+      '| Surface | Behavior |',
+      '| ------- | -------- |',
+      ...Array.from(
+        { length: DESIGN_BUDGET.rules + 2 },
+        (_, index) => `| board | ${words(30)} ${index} |`,
+      ),
+    ].join('\n')
+
+    expect(measureDesignProse(record({ Behavior: behavior }))).toEqual([])
+  })
+
   it('excludes a row whose code span carries a pipe or a tag', () => {
     const row = `| \`a | b\` | ${words(30)} | #fff ? verify |`
     const source = record({ Color: `${TABLE}\n${row}` })

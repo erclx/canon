@@ -11,7 +11,7 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 ## Research
 
 - [Intake folder](research/intake/03-tide-feedback/): spring beta feedback sorted into advisory and tide-time items, one of them sent on to groundwork. Read against `claude/skills/plan-intake/references/intake.md` at `338f8f72`.
-- [App drive](research/drive/05-tide-drive/): a drive of the station week view, its log, its `drive.json`, and the two items it decided. Read against `claude/skills/app-drive/references/drive-record.md` at `3dc5a647` and `claude/skills/plan-intake/references/intake.md` at `338f8f72`.
+- [App drive](research/drive/05-tide-drive/): a drive of the station week view, its log, its `drive.json`, and the two items it decided. Read against `claude/skills/app-drive/references/drive-record.md` at `0a93e324` and `claude/skills/plan-intake/references/intake.md` at `338f8f72`.
 - [Groundwork track](research/groundwork/04-surge-alerts/): a closed track measuring how a surge advisory reaches a closed app, ending on push. Read against `claude/skills/plan-groundwork/references/groundwork.md` at `11b4687c`.
 
 ## Planning
@@ -31,7 +31,7 @@ Filled-in canon records for Tidewell, an invented tide-table app, following one 
 
 ## Project
 
-- [Design record](project/DESIGN.md): Tidewell's intent record, naming each role's custom property and no value. Read against `claude/skills/design-record/references/design.md` at `e2d7a926`.
+- [Design record](project/DESIGN.md): Tidewell's intent record, naming each role's custom property and no value. Read against `claude/skills/design-record/references/design.md` at `d9b86330`.
 - [Requirements record](project/REQUIREMENTS.md): Tidewell's goals, non-goals, and constraints under its word cap. Read against `claude/skills/write-doc/references/requirements.md` at `510b4d90`.
 - [Context entry](project/context-alerts.md): the alerts domain after the surge alert change. Read against `claude/skills/context-sync/references/context.md` at `f96255ee`.
 

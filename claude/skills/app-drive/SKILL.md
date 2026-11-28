@@ -41,14 +41,15 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for the `[drive]` table of `cano
 
 Read `${CLAUDE_SKILL_DIR}/references/drive-record.md` before the first finding, for the drive log's shape, the severity scale, and the record the check reads.
 
-Work through four sources in this order, and name the source on every finding:
+Work through five sources in this order, and name the source on every finding:
 
 1. **`script`.** Run each file the config's `scripts` key names once per persona, first, so the basics run alike every drive. A missing file is `not-driven` with the reason.
 2. **`last-drive`.** Open the previous drive's intake folder, when one exists, and re-drive each of its findings. Mark each as fixed, still open, or changed.
 3. **`goal`.** Turn each `## Goals` bullet into a drive step, once per persona the config names. A goal the build cannot reach is marked `not-driven` with the reason, never left out.
-4. **`operator`.** Take each ask as it arrives. Reproduce and measure it before answering, and record the operator's call as a decision rather than a proposal.
+4. **`behavior`.** Try each row of the design record's `## Behavior` table, per `drive-record.md`.
+5. **`operator`.** Take each ask as it arrives. Reproduce and measure it before answering, and record the operator's call as a decision rather than a proposal.
 
-A finding naming none of the four is opinion and sorts as taste.
+A finding naming none of the five is opinion and sorts as taste.
 
 ### Driving the page
 

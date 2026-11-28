@@ -1095,3 +1095,173 @@ describe('checkDrive current page and visible skips', () => {
     })
   })
 })
+
+describe('checkDrive behavior rows', () => {
+  const DESIGN = [
+    '# Design',
+    '',
+    '## Iconography',
+    '',
+    'Lucide at 16px.',
+    '',
+    '## Behavior',
+    '',
+    '| Surface | Behavior |',
+    '| ------- | -------- |',
+    '| `board` | A frame resizes from its corner grips, 120px to 1600px. |',
+    '| `export` | **Export.** The export menu opens on tap and closes on Escape. |',
+    '',
+  ].join('\n')
+
+  const GRIPS = {
+    surface: 'board',
+    behavior: 'A frame resizes from its corner grips, 120px to 1600px',
+    status: 'driven',
+  }
+  const MENU = {
+    surface: 'export',
+    behavior: 'The export menu opens on tap and closes on Escape.',
+    status: 'driven',
+  }
+
+  beforeEach(() => {
+    write('canon/DESIGN.md', DESIGN)
+    git('add', '.')
+    git('commit', '-q', '-m', 'design record')
+  })
+
+  it('should pass a drive that mapped every behavior row', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN, behaviors: [GRIPS, MENU] })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+      behaviors: 2,
+      findings: { behavior: [] },
+    })
+  })
+
+  it('should report each row unmapped when the record carries no behaviors list', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: true,
+      reason: 'failed',
+      findings: {
+        behavior: [
+          'unmapped: board: A frame resizes from its corner grips, 120px to 1600px',
+          'unmapped: export: The export menu opens on tap and closes on Escape',
+        ],
+      },
+    })
+  })
+
+  it('should pass a row marked not driven with a reason', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      behaviors: [
+        GRIPS,
+        { ...MENU, status: 'not-driven', reason: 'no export on this target' },
+      ],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+    })
+  })
+
+  it('should report a row marked not driven with no reason as unreasoned', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      behaviors: [GRIPS, { ...MENU, status: 'not-driven', reason: ' ' }],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: {
+        behavior: [
+          'unreasoned: export: The export menu opens on tap and closes on Escape',
+        ],
+      },
+    })
+  })
+
+  it('should report a reworded row as unmapped and its entry as unknown', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      behaviors: [
+        GRIPS,
+        { ...MENU, behavior: 'The export menu opens on hover' },
+      ],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: {
+        behavior: [
+          'unmapped: export: The export menu opens on tap and closes on Escape',
+          'unknown: export: The export menu opens on hover',
+        ],
+      },
+    })
+  })
+
+  it('should report an entry under a surface the row does not sit under as unknown', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      behaviors: [GRIPS, MENU, { ...GRIPS, surface: 'canvas' }],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      findings: {
+        behavior: [
+          'unknown: canvas: A frame resizes from its corner grips, 120px to 1600px',
+        ],
+      },
+    })
+  })
+
+  it('should pass with no behavior finding when the record has no Behavior section', async () => {
+    write('canon/DESIGN.md', '# Design\n\n## Colors\n\n- Ink on paper.\n')
+    git('commit', '-q', '-am', 'drop behavior')
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+      behaviors: 0,
+      findings: { behavior: [] },
+    })
+  })
+
+  it('should pass with no behavior finding in a project with no design record', async () => {
+    rmSync(join(ROOT, 'canon/DESIGN.md'))
+    git('commit', '-q', '-am', 'drop design')
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+      behaviors: 0,
+      findings: { behavior: [] },
+    })
+  })
+
+  it('should refuse a behaviors entry carrying no surface', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({
+      goals: BOTH_DRIVEN,
+      behaviors: [{ behavior: GRIPS.behavior, status: 'driven' }],
+    })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      ok: false,
+      reason: 'bad-record',
+    })
+  })
+})

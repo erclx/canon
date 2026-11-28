@@ -40,7 +40,7 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on i
 - `<nn>` numbers findings in the order they were found, and the frame carries the same number
 - A screenshot is `frames/<nn>-<name>.png`, moved under `evidence/<surface>/` once cited. A drawn frame takes the drawing guide's name, such as `<section>-<arm>-<px>`.
 - The title names what the persona met, in sentence case with no trailing period
-- The meta line holds the severity, the source, and the persona, in that order. The source is `script`, `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
+- The meta line holds the severity, the source, and the persona, in that order. The source is `script`, `goal`, `last-drive`, `behavior`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
 
 ### A finding after the close
@@ -95,7 +95,7 @@ Leave a board page out of `Drawn`, since the check reads every code span there a
 
 ### Passed goals
 
-A goal tried and passed takes a heading too, so the next drive can tell a goal checked from one skipped. Its meta line reads `pass` · goal · persona, and it carries `Did` and `Evidence` alone.
+A goal tried and passed takes a heading too, so the next drive can tell a goal checked from one skipped. Its meta line reads `pass` · goal · persona, and it carries `Did` and `Evidence` alone. A Behavior row tried and passed takes the same heading, with `behavior` as its source.
 
 ### Passed scripts
 
@@ -150,6 +150,13 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
       "reason": "export needs a signed build"
     }
   ],
+  "behaviors": [
+    {
+      "surface": "board",
+      "behavior": "A frame resizes from its corner grips, 120px to 1600px",
+      "status": "driven"
+    }
+  ],
   "target": null,
   "scripts": [
     {
@@ -167,6 +174,15 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
 - `status` is `driven` or `not-driven`, and a `not-driven` entry carries the `reason` the goal could not be reached
 - `evidence` lists every frame a finding cites and every image the operator pasted, reference shots included, each a path under `evidence/` relative to the intake folder
 - `worktree` is the throwaway worktree's path, which the check fails on while it still exists. A drive of the live app writes `"worktree": null`, and the check refuses an empty string.
+
+### Behaviors
+
+The design record's `## Behavior` table lists the interactions a design session settled, one row per surface and interaction. The drive tries each row once, on the persona who meets that surface.
+
+- `behaviors` holds one entry per row, with `surface` copied from the Surface cell, code span dropped, and `behavior` from the Behavior cell
+- An entry takes the `status` and `reason` a goal entry takes, so a row the build cannot reach is `not-driven` with the reason
+- The list is empty or absent when the project has no `canon/DESIGN.md` or the record has no `## Behavior` section
+- A record carrying no list while rows exist reads every row as unmapped, rather than being refused
 
 ### Target and scripts
 
@@ -191,3 +207,4 @@ A failed check names each finding by list, and an empty list is a clean axis.
 | `missingEvidence` | an evidence path holding no file                                     |
 | `undrawn`         | a logged decision with no drawn outcome or reason                    |
 | `worktreeLeft`    | the `worktree` path still on disk                                    |
+| `behavior`        | a Behavior row unmapped, unreasoned, or unknown, named by its prefix |
