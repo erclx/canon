@@ -1,6 +1,6 @@
 ---
 title: Measured runs
-description: Where a worker runs a measurement, which is never the shared machine, and what it does when the plan names a place it cannot reach
+description: Where a worker runs a measurement, which is never the shared machine, what it does when the plan names a place it cannot reach, and why it never loads the machine to reproduce a failing test
 ---
 
 # Measured runs
@@ -31,5 +31,14 @@ Stop and ask rather than measuring beside the other sessions.
 
 - A `CI` place with no comparison workflow in the project is a plan defect. Send the controller the gap, and build nothing in its place.
 - A plan naming no place for a measured run reads as a question for the controller, since the plan check reports it and never refuses
+
+## A failing test
+
+Read this when a test fails and the cause is unclear. Reproducing a flaky failure by loading the machine slows every session sharing it, and one worker's 40 busy loops had to be stopped by the operator.
+
+- Generate no load, since a busy loop, a stress tool, or a parallel run on this machine is a measured run in disguise
+- Keep the failing run's unfiltered output, with the failing test's name, since a filtered run hides which test failed
+- Rerun once, and report the failure as unexplained when it does not repeat
+- Leave an unreproduced failure to CI, which runs apart from the other sessions, rather than a second local loop
 
 The method that makes the numbers worth reading is in `${CLAUDE_SKILL_DIR}/../test-craft/references/measure.md`.
