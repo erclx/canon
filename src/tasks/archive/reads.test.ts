@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   archiveDir,
+  cellHolder,
   describeUnmatchedStem,
   planCitations,
   readOutcomes,
@@ -627,5 +628,37 @@ describe('planCitations', () => {
       ok: false,
       reason: 'no-board',
     })
+  })
+})
+
+describe('cellHolder', () => {
+  const entry = (name: string) => ({ name, sessionId: `id-${name}` })
+
+  it('should keep the worker when a reviewer trails it', () => {
+    expect(cellHolder([entry('worker-a'), entry('reviewer-a')])).toEqual(
+      entry('worker-a'),
+    )
+  })
+
+  it('should take a second worker recorded after a reviewer', () => {
+    expect(
+      cellHolder([entry('worker-a'), entry('reviewer-a'), entry('worker-b')]),
+    ).toEqual(entry('worker-b'))
+  })
+
+  it('should return undefined when only reviewers are recorded', () => {
+    expect(
+      cellHolder([entry('reviewer-a'), entry('reviewer-b')]),
+    ).toBeUndefined()
+  })
+
+  it('should count a hand-named session with no role prefix as a holder', () => {
+    expect(cellHolder([entry('my-session')])).toEqual(entry('my-session'))
+  })
+
+  it('should read only the prefix of a name', () => {
+    expect(cellHolder([entry('worker-reviewer-fix')])).toEqual(
+      entry('worker-reviewer-fix'),
+    )
   })
 })

@@ -1,7 +1,12 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { readPullRequest, readSessions, tasksDir } from '@/tasks/archive'
+import {
+  cellHolder,
+  readPullRequest,
+  readSessions,
+  tasksDir,
+} from '@/tasks/archive'
 import { parseBoard } from '@/tasks/board'
 import { orderingPath } from '@/tasks/validate'
 
@@ -85,7 +90,7 @@ async function readRow(
 ): Promise<FlightRow> {
   const file = join(dir, `${stem}.md`)
   const text = existsSync(file) ? await readFile(file, 'utf8') : ''
-  const session = readSessions(text).at(-1) ?? null
+  const session = cellHolder(readSessions(text)) ?? null
   const live = session && roster ? roster.has(session.sessionId) : null
   const pullRequest = readPullRequest(text).at(-1) ?? null
   const row = { task: stem, session, live, pullRequest }

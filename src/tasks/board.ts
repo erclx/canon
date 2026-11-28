@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { open, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import {
+  cellHolder,
   linkTo,
   readPlanTargets,
   readSessions,
@@ -447,7 +448,7 @@ export async function deriveCells(
     plan: plans
       .map((plan) => `[${planLabel(plan)}](${linkTo(dir, plan)})`)
       .join(', '),
-    session: readSessions(text).at(-1)?.name,
+    session: cellHolder(readSessions(text))?.name,
     paths,
   }
 }
@@ -930,7 +931,7 @@ async function latestSessionName(
 ): Promise<string | undefined> {
   const file = join(tasksDir(root), `${stem}.md`)
   if (!existsSync(file)) return undefined
-  return readSessions(await readFile(file, 'utf8')).at(-1)?.name
+  return cellHolder(readSessions(await readFile(file, 'utf8')))?.name
 }
 
 async function removeFromBacklog(root: string, stem: string): Promise<boolean> {

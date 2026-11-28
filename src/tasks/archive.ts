@@ -379,6 +379,20 @@ export function readSessions(text: string): readonly SessionEntry[] {
   return entries
 }
 
+/** The roster prefix of a dispatched reviewer, which never holds the branch. */
+const REVIEWER_PREFIX = 'reviewer-'
+
+/**
+ * Picks the session the In flight Session cell names, being the last entry
+ * whose name does not start with `reviewer-`. A reviewer recorded after the
+ * worker is a reader of the branch, not its holder, so a handback goes past it.
+ */
+export function cellHolder(
+  entries: readonly SessionEntry[],
+): SessionEntry | undefined {
+  return entries.findLast((entry) => !entry.name.startsWith(REVIEWER_PREFIX))
+}
+
 /** A markdown link on a `Plan:` line, its target captured. */
 const PLAN_LINK_PATTERN = /\[[^\]]*\]\(([^)]+)\)/g
 

@@ -94,6 +94,21 @@ describe('readFlight', () => {
     })
   })
 
+  it('should report the worker when a reviewer is recorded after it', async () => {
+    const REVIEWER = '33333333-3333-4333-8333-333333333333'
+    await seedTask('v1.0-one', {
+      sessions: `worker-one (${WORKER}), reviewer-one (${REVIEWER})`,
+    })
+    await seedBoard('v1.0-one')
+
+    const result = await readFlight(ROOT, readers([WORKER, REVIEWER]))
+
+    expect(result.ok && result.rows[0].session).toEqual({
+      name: 'worker-one',
+      sessionId: WORKER,
+    })
+  })
+
   it('should read stopped for a recorded session the roster no longer lists', async () => {
     await seedTask('v1.0-one', { sessions: `worker-one (${WORKER})` })
     await seedBoard('v1.0-one')

@@ -344,6 +344,25 @@ describe('deriveCells', () => {
     })
   })
 
+  it('should name the worker in the session cell when a reviewer is recorded after it', async () => {
+    await seedPlan('one', ['src/a.ts'])
+    mkdirSync(tasksDir(ROOT), { recursive: true })
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-one.md'),
+      [
+        '# v1.0: One',
+        '',
+        'Plan: [feature-one](../plans/feature-one.md)',
+        'Sessions: worker-one (22222222-2222-4222-8222-222222222222), reviewer-one (33333333-3333-4333-8333-333333333333)',
+        '',
+      ].join('\n'),
+    )
+
+    const cells = await deriveCells(ROOT, { stem: 'v1.0-one', label: '' })
+
+    expect(cells.session).toBe('worker-one')
+  })
+
   it('should keep the row label when the task file is gone', async () => {
     expect(
       await deriveCells(ROOT, { stem: 'v1.0-gone', label: 'v1.0: Gone' }),
@@ -802,6 +821,35 @@ describe('promoteTask', () => {
         '',
         'Plan: [feature-one](../plans/feature-one.md)',
         'Sessions: planner-one (11111111-1111-4111-8111-111111111111), worker-one (22222222-2222-4222-8222-222222222222)',
+        '',
+        '## Outcomes',
+        '',
+        '- [ ] it ships',
+        '',
+      ].join('\n'),
+    )
+    await seedBoard(
+      ...UP_NEXT,
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | Planned, not dispatched yet |',
+    )
+
+    await promoteTask(ROOT, 'v1.0-one')
+
+    expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
+      '| [v1.0: One](v1.0-one.md) | 1 file | worker-one |',
+    )
+  })
+
+  it('should keep the worker in the Session cell when a reviewer is recorded after it', async () => {
+    await seedPlan('one', ['a.ts'])
+    mkdirSync(tasksDir(ROOT), { recursive: true })
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-one.md'),
+      [
+        '# v1.0: One',
+        '',
+        'Plan: [feature-one](../plans/feature-one.md)',
+        'Sessions: worker-one (22222222-2222-4222-8222-222222222222), reviewer-one (33333333-3333-4333-8333-333333333333)',
         '',
         '## Outcomes',
         '',
