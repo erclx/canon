@@ -1,6 +1,6 @@
 ---
 name: operator-walk
-description: Writes every step the operator does by hand to one file, then walks it with them one step per turn, each with the exact action, what to expect, what to do when it differs, and the read-only check that marks it done. Use when a plan or an ask leaves console or terminal steps to the operator, or when asked to "walk me through it" or "which steps are left". Do NOT use to set up a deploy, which is `deploy-app`.
+description: Writes the operator's hand steps to one file, then walks it one step per turn, marking each from a read-only check. Use when a plan or an ask leaves console or terminal steps to the operator, or when asked to "walk me through it" or "which steps are left". Do NOT use to set up a deploy, which is `deploy-app`.
 metadata:
   family: answer
 ---
