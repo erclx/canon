@@ -67,14 +67,9 @@ jobs:
     name: 🐧 Linux Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: changes
-    # The ruleset requires this check, so a Markdown-only change skips it by
-    # condition, which reports success. Only a detector that succeeded skips it.
-    if: >-
-      !cancelled() && github.event_name != 'schedule' &&
-      !(github.event_name == 'pull_request' &&
-      needs.changes.result == 'success' &&
-      needs.changes.outputs.code == 'false')
+    # Markdown-only changes run it too, since unit tests read Markdown corpora
+    # such as the skill headings, and Static Checks no longer runs the suite.
+    if: github.event_name != 'schedule'
     steps:
       - name: Checkout
         uses: actions/checkout@v7

@@ -7,7 +7,7 @@ description: The GitHub Actions workflows that gate pull requests into main, sca
 
 ## Overview
 
-Owns the workflows in `.github/workflows/` that verify a pull request, scan its text, release after a merge, and refresh the home baseline. CI runs the gate through one entry point, `bun run check:ci`, and `check:install` beside it. The stages themselves sit in `src/gate/` and are described in `canon/context/development/local-loop.md`.
+Owns the workflows in `.github/workflows/` that verify a pull request, scan its text, release after a merge, and refresh the home baseline. CI runs `bun run check:static`, the `🐧 Linux Unit Tests` job, and `check:install`. The stages themselves sit in `src/gate/` and are described in `canon/context/development/local-loop.md`.
 
 ## Layout
 
@@ -62,7 +62,7 @@ Holds the groups, balanced by each suite's mean time on a runner. Vitest's `--sh
 
 ### `scripts/ci/docs-only.sh`
 
-A pull request changing only `.md` files skips `🐧 Linux Unit Tests` and `🍎 macOS Unit Tests`, the slowest checks. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
+A pull request changing only `.md` files skips `🍎 macOS Unit Tests`, the slowest check. `🐧 Linux Unit Tests` always runs, since tests read Markdown corpora. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
 
 - The skip lives in the job's `if:` rather than a path filter, since a job skipped by its condition reports success and a skipped workflow never reports, which would strand a required check
 - `!cancelled()` keeps the job running when `🔍 Changes` is skipped on a push or fails, so only a detector that succeeded can skip the tests
@@ -116,7 +116,7 @@ The root owns this config and the manifests it versions.
 The CI programs, the install check, and a version pin sit beside the workflows.
 
 - `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh`, `refresh-frames-pr.sh`, and `install-playwright-deps.sh`, and a step past five lines moves there
-- `scripts/core/` owns `install-check.ts`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
+- `scripts/core/` owns `install-check.ts`, run in CI after `check:static` and kept out of the local gate because a cold pack-and-install is unmeasured
 - `src/gate/workflow-timeouts.test.ts` fails a job with no `timeout-minutes` in canon's or any stack's workflows and skips one that sets `uses:`. A timeout never reaches a run that starts no job.
 - `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade
 
