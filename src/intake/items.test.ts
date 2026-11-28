@@ -256,3 +256,27 @@ describe('Decided field', () => {
     expect(parseDecided('evidence/drive-log.md')).toBeUndefined()
   })
 })
+
+describe('Drawn field', () => {
+  it('should read the drawing an item cites as written', () => {
+    const text = cluster(item({ label: '1' })).replace(
+      '- **You:**',
+      '- **Drawn:** `evidence/layers/02-options.png`\n- **You:**',
+    )
+
+    expect(readItems(text)[0].drawn).toBe('`evidence/layers/02-options.png`')
+  })
+
+  it('should leave an item with no Drawn line undrawn', () => {
+    expect(readItems(cluster(item({ label: '1' })))[0].drawn).toBeUndefined()
+  })
+
+  it('should read an empty Drawn line as no drawing', () => {
+    const text = cluster(item({ label: '1' })).replace(
+      '- **You:**',
+      '- **Drawn:**\n- **You:**',
+    )
+
+    expect(readItems(text)[0].drawn).toBeUndefined()
+  })
+})
