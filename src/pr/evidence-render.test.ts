@@ -1469,7 +1469,7 @@ describe('reels at several widths', () => {
     expect(body).toContain('**No reel at 768:** no-visible-change')
   })
 
-  it('should split across no width when there is no checklist to owe one', () => {
+  it('should write no skip line once a reel covers the head and no checklist owes a width', () => {
     const body = renderEvidenceBody(
       [],
       'o/r',
@@ -1482,7 +1482,7 @@ describe('reels at several widths', () => {
       { reel: 'deferred: behind #1' },
     )
 
-    expect(body).not.toContain('No reel at')
+    expect(body).not.toContain('No reel')
   })
 
   it('should drop the line naming every width once each owed width has a covering reel', () => {
