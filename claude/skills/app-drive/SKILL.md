@@ -98,7 +98,7 @@ A few cases bend those steps.
 - Write `Drawn: skipped, <reason>` only for a change with nothing visible, such as an exit code or a file format
 - Never write a mock into a tracked path, `canon/design/`, or a page holding the accepted design. An accepted design reaches those through `design-pick` or `design-record` once its fix ships.
 
-Decide a finding about cross-section behavior on `drawing.md`'s live prototype.
+Decide a finding about cross-section behavior on the served copy, per `drive-board.md`.
 
 ### Drawing on the board
 

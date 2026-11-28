@@ -1,6 +1,6 @@
 ---
 title: Drive board
-description: How app-drive draws on its own board project, from the start at the first visible finding through the page order, the caption on each row, the frame lift with every earlier pick applied, the capture, and the refusals that end the board
+description: How app-drive draws on its own board project, from the start at the first visible finding through the whole page, the page order, the caption on each row, the frame lift with every earlier pick applied, the capture, the served copy, and the refusals that end the board
 ---
 
 # Drive board
@@ -26,9 +26,21 @@ Do these once, while the copy still runs, since a copy the close removed has no 
 
 1. Write the board's address and project as the drive log's `Board` row.
 2. Hand the operator the board's address.
-3. Draw the shipped page whole on `00-current`, as `drawing.md` states.
+3. Draw the shipped page whole on `00-current`, as `## The whole page` below states.
 
 On a finding raised after the close, with the copy gone, add that finding's section alone to `00-current`, as `from-finding.md` beside `drawing.md` states.
+
+## The whole page
+
+A drive draws the shipped surface whole on `00-current` before the first finding it draws, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied. Both pages' frames take no device and are fitted, so each section shows at its full length.
+
+- Draw one frame per section at each width, never the whole page in one frame. A page frame 12,000px tall is one nobody reads.
+- Give each section one row in page order, desktop first, then tablet, then phone
+- Put the site header in the first section's frames and the footer in the last's
+- Leave `00-current` as the shipped page for the whole drive, and apply each pick to `00-next` alone
+- Log the page's measured height at 1280 on both pages under the finding that asked for a shorter page, when one did
+
+Copy both pages' captures into the drive's `evidence/baseline/` as its whole-page comparison.
 
 ## Drawing on the board
 
@@ -50,6 +62,14 @@ A frame lifted after a pick lands shows the page the operator is building toward
 - Leave every frame already drawn as it stands, an earlier topic's current set and `00-current` included, since each was drawn against the page the operator saw then
 - Say in a later finding's `Saw` when it was met on a part an earlier pick changed, since the shipped build does not carry that part
 - Apply nothing for an undecided finding, since no option has been picked
+
+### The served copy as a prototype
+
+A finding about behavior across sections, such as scroll, a sticky or pinned element, a fixed header, or a theme switch, is decided on the drive's served copy rather than on a board frame, per `## The live prototype` in `drawing.md`.
+
+- Apply each decision to the copy as it lands, and hand the operator its address beside the board's
+- Copy its source into `evidence/mocks/<section>/` like any mock, since the copy is gone once the drive closes
+- Keep composition on the board, where the options sit side by side
 
 ### Addresses and refusals
 

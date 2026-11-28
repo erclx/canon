@@ -43,15 +43,7 @@ A drive numbers and orders its pages by the findings they serve.
 
 ## A drive's whole page
 
-A drive draws the shipped surface whole on `00-current` before the first finding it draws, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied. Both pages' frames take no device and are fitted, so each section shows at its full length.
-
-- Draw one frame per section at each width, never the whole page in one frame. A page frame 12,000px tall is one nobody reads.
-- Give each section one row in page order, desktop first, then tablet, then phone
-- Put the site header in the first section's frames and the footer in the last's
-- Leave `00-current` as the shipped page for the whole drive, and apply each pick to `00-next` alone
-- Log the page's measured height at 1280 on both pages under the finding that asked for a shorter page, when one did
-
-Copy both pages' captures into the drive's `evidence/baseline/` as its whole-page comparison.
+A drive draws its shipped surface whole on `00-current` and the page with every pick applied on `00-next`, one fitted frame per section at each width, as `${CLAUDE_SKILL_DIR}/../app-drive/references/drive-board.md` states.
 
 ## A standalone pick's next page
 
@@ -189,9 +181,4 @@ End the run on one review of every held pick, ahead of the close.
 
 A board frame is one section fitted to its content, so it cannot show how an element behaves across the page. Decide a finding about behavior across sections on a served prototype of the whole page instead.
 
-A picked app or product surface takes the board prototype `prototype.md` beside this file states, being one page of device frames with a checked flow list. The bullets below cover a drive's served copy alone.
-
-- Behavior across sections covers scroll, a sticky or pinned element, a fixed header, and a theme switch
-- Serve the prototype from the drive's copy, apply each decision to it as it lands, and hand the operator its address beside the board's
-- Copy its source into `evidence/mocks/<section>/` like any mock, since the copy is gone once the drive closes
-- Keep composition on the board, where the options sit side by side
+Behavior across sections covers scroll, a sticky or pinned element, a fixed header, and a theme switch, while composition stays on the board. A picked app or product surface takes the board prototype `prototype.md` beside this file states, and a drive serves its own copy, as `${CLAUDE_SKILL_DIR}/../app-drive/references/drive-board.md` states.
