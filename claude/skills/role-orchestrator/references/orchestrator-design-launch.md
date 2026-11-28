@@ -37,7 +37,7 @@ claude --bg --model <model> --effort <effort> -n "judge-<project>-<topic>" "Run 
 - `<log>` is the drive's `evidence/drive-log.md`, or `no drive log` for a standalone pick
 - `<table>` is `evidence/judge.md` in the drive's intake folder, or `.canon/tmp/<topic>/judge.md` for a pick keeping no `evidence/`
 
-Read the judge's sessionId from `canon sessions list --json`, then add one sentence to the design session's brief: `Your judge is the session whose sessionId is <judge-id>, so send it each round first and close on one batch review, as drawing.md's Asking section states.`
+Read the judge's sessionId from `canon sessions list --json`, then add one sentence to the design session's brief: `Your judge is the session whose sessionId is <judge-id> and its verdict table is <table>, so send it each round first and close on one batch review, as drawing.md's Asking section states.`
 
 ## Landing the pick
 

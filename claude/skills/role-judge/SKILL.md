@@ -20,7 +20,8 @@ This body states the role, the reads, the verdict, and the channel. `design-pick
 A judge reading the options alone agreed with the operator on about 13 of 21 recorded picks. Given the design record and the earlier picks first, it agreed on 18. Read both before opening the first round.
 
 - Read `canon/DESIGN.md`, whose rules outrank taste
-- Read the operator's earlier decisions as precedent, being each `Decision (operator)` line in the drive log the launch names, or the picks the design session sends when it keeps no log
+- Read the operator's earlier decisions as precedent, being each `Decision (operator)` line in the drive log the launch names
+- Start on `DESIGN.md` alone when the launch names no log, as for a standalone pick, and mark a round `close call` when the record alone cannot decide it
 - Read each decision the design session reports during the run before the next round, since a pick made an hour ago is precedent for this one
 - Never build a profile of the operator's taste from those lines, since few carry a reason and a profile would invent one
 
