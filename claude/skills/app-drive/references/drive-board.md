@@ -37,6 +37,7 @@ The drive's project holds `00-current`, a page per topic, and `00-next`, as `dra
 - Add each page and frame by the name, place, and height `drawing.md` gives, and take theming and font from `design-pick`'s Step 2
 - Lift the copy's rendered markup per `${CLAUDE_SKILL_DIR}/../design-pick/references/live-arms.md`, since the board cannot reach a stylesheet inside the copy
 - Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<surface>/<nn>-options.png`
+  - Capture each continuation page the same way into its own `evidence/<surface>/<nn>-options-<k>.png`, so a drawn finding cites every page its options sit on
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
 - Draw `00-next` once the operator's picks settle, and copy both whole-page captures into `evidence/baseline/` as `00-current` and `00-next`, where a `-` or `.` suffix such as `-1440.light` is read
 
