@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.133.0](https://github.com/erclx/canon/compare/v5.132.0...v5.133.0) (2026-11-28)
+
+
+### Features
+
+* **cloudflare:** add staging and a D1 restore point to Worker deploys ([#3617](https://github.com/erclx/canon/issues/3617)) ([522d946](https://github.com/erclx/canon/commit/522d946a58f85f913471225e27ddd971250445c4))
+* **gate:** add --skip and run the unit suite as its own CI job ([#3622](https://github.com/erclx/canon/issues/3622)) ([752ce42](https://github.com/erclx/canon/commit/752ce428f0f675eb1a096c577c64cc8734e96ad9))
+* **records:** fail a plan that skips a cited group's behavior rows ([#3616](https://github.com/erclx/canon/issues/3616)) ([7371822](https://github.com/erclx/canon/commit/73718221c447c4a1ad844e592e00f11cf98f1093))
+* **worker:** keep load off the shared machine when a test fails ([#3613](https://github.com/erclx/canon/issues/3613)) ([9ec2acf](https://github.com/erclx/canon/commit/9ec2acf15268fd75d7395ced67d72958754208d0))
+
+
+### Bug Fixes
+
+* **pr:** read no design frame as evidence ([#3620](https://github.com/erclx/canon/issues/3620)) ([220557a](https://github.com/erclx/canon/commit/220557ac12f2de95bcd333200b06306addb5e78c))
+
 ## [5.132.0](https://github.com/erclx/canon/compare/v5.131.0...v5.132.0) (2026-11-28)
 
 
