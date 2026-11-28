@@ -481,11 +481,11 @@ export const skillFamily: Measure = async (ctx) => {
 }
 
 /**
- * Sized from the corpus total once the 400-character target applied, since
- * `skillOverrides` cannot mark a plugin skill name-only. Raising it is a
- * deliberate edit naming which skill grew the listing.
+ * Sized from the corpus total under the 400-character target, since `skillOverrides`
+ * cannot mark a plugin skill name-only. A raise names the skill that grew the
+ * listing, here `operator-walk` and room for a queued 400-character `role-judge`.
  */
-export const SKILL_DESCRIPTION_CEILING = 31_250
+export const SKILL_DESCRIPTION_CEILING = 31_650
 
 /**
  * The plugin's description characters against one ceiling, since past the
