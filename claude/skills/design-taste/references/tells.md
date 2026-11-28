@@ -33,6 +33,7 @@ The five restate the calibration list in Anthropic's [frontend-design](https://g
 - **One motif down the page.** The same terminal, chat thread, or card pictures every section. Give each section the form of its own outcome, such as a record, a board, a diff, or a rendered page.
 - **Boxes everywhere in one tone.** Every block sits in a one-color bordered panel, so nothing leads. Box only a separate object, in its own tone. App record cards keep one tone, per `kinds.md`.
 - **A figure of identical parts.** Three branch curves that share one shape, size, and spacing though each branch differs. Vary each part by its own data, never for variety alone.
+- **The narrow centered column on an app screen.** A tool's working area held to reading width in the middle of a wide window. Fill the window, per `kinds.md`, and cap measure on prose alone.
 
 ## Content and labels
 
@@ -57,6 +58,7 @@ The five restate the calibration list in Anthropic's [frontend-design](https://g
 - **Saturation everywhere.** A full-saturation accent beside tinted neutrals leaves nothing to anchor on. Desaturate the neutrals and let one accent carry.
 - **The gradient as a substitute for a decision.** A gradient over a section, a heading, or a button set because flat looked plain. Flat composition is fixed by composition, not gradient.
 - **Uniform radius and uniform elevation.** Every card at the same radius with the same shadow flattens hierarchy. Let the thing that matters differ.
+- **The blue-tinted dark.** A dark theme drawn in navy because nothing chose its hue. Start from a neutral dark gray, as Material's [baseline dark](https://github.com/material-components/material-components-android/blob/master/docs/theming/Dark.md) does. A chosen tint stays.
 
 ## Platform surfaces
 

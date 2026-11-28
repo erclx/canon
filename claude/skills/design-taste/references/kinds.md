@@ -41,6 +41,16 @@ Dashboards, tools, admin surfaces, agentic and assistant interfaces. The reader 
 
 The direction limits and the category check restate [Impeccable](https://github.com/pbakaus/impeccable)'s guidance for app screens. The shortcut placement follows [NN/g](https://www.nngroup.com/articles/ui-copy/).
 
+### Where a screen spends its space
+
+A generated app screen tends to borrow a reading page's proportions, so the task shrinks to a column, swells on a phone, or slips below the fold.
+
+- **The working area fills the window.** A wider window shows more of the task, such as a list and its detail side by side. Measure caps prose, never the screen around it.
+- **Text and controls stay at platform size.** Body text keeps the platform's default text size, left unset at the root on the web, and a control stops at the target in the `ui-craft` pointer reference.
+- **The screen's own item shows without scrolling.** What the screen exists for, such as the record being edited, sits in view at the narrowest width the product supports.
+
+Android's [canonical layouts](https://developer.android.com/develop/ui/views/layout/canonical-layouts) back the full working area. Apple's [typography guidance](https://developer.apple.com/design/human-interface-guidelines/typography) backs the platform size, since a fixed figure overrides a person's own text setting. Most viewing time falls above the fold, per NN/g on [scrolling and attention](https://www.nngroup.com/articles/scrolling-and-attention/).
+
 ### What a screen keeps and shows
 
 A screen built under the tells can strip what its category relies on, and a build that never rendered can ship two states at once.
