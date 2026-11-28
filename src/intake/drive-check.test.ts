@@ -1141,6 +1141,50 @@ describe('checkDrive behavior rows', () => {
     })
   })
 
+  describe('a row bold end to end', () => {
+    const SHARE = {
+      surface: 'share',
+      behavior: 'The share sheet closes on Escape',
+      status: 'driven',
+    }
+
+    beforeEach(() => {
+      write(
+        'canon/DESIGN.md',
+        DESIGN.replace(
+          '| `export` |',
+          '| `share` | **The share sheet closes on Escape.** |\n| `export` |',
+        ),
+      )
+      git('add', '.')
+      git('commit', '-q', '-m', 'bold row')
+    })
+
+    it('should report the row unmapped when no entry maps it', async () => {
+      await recordBaseline(ROOT, 'app-drive-1-0')
+      writeRecord({ goals: BOTH_DRIVEN, behaviors: [GRIPS, MENU] })
+
+      expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+        reason: 'failed',
+        behaviors: 3,
+        findings: {
+          behavior: ['unmapped: share: The share sheet closes on Escape'],
+        },
+      })
+    })
+
+    it('should pass once the drive maps the row', async () => {
+      await recordBaseline(ROOT, 'app-drive-1-0')
+      writeRecord({ goals: BOTH_DRIVEN, behaviors: [GRIPS, MENU, SHARE] })
+
+      expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+        reason: 'clean',
+        behaviors: 3,
+        findings: { behavior: [] },
+      })
+    })
+  })
+
   it('should report each row unmapped when the record carries no behaviors list', async () => {
     await recordBaseline(ROOT, 'app-drive-1-0')
     writeRecord({ goals: BOTH_DRIVEN })
