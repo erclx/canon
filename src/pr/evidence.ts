@@ -138,6 +138,7 @@ export type EvidenceReading =
 export type ExistsAtBase = (path: string) => Promise<boolean>
 
 function evidencePosition(path: string): number {
+  if (path.startsWith(DESIGN_FOLDER)) return -1
   return path.split('/').indexOf(EVIDENCE_SEGMENT)
 }
 
