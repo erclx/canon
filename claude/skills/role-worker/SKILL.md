@@ -140,6 +140,8 @@ A launch whose brief says it is a talk session puts the operator in this one. Ev
 - Send the controller a close message when the operator ends the conversation, beside the announcements the channel above owes.
 - Keep the before-prompt block message for a block the operator cannot answer. A question put to the operator who is in the session needs none.
 
+Load `operator-walk` when the plan leaves steps for the operator to do by hand, and walk them from its file rather than from the chat.
+
 ## Refusing is part of the job
 
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and the consequences of complying, rather than reporting reluctance.

@@ -151,6 +151,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'I have to set up the DNS records and the dashboard settings myself. Take me through each one and keep track of which are left.',
+    expect: 'operator-walk',
+  },
+  {
+    prompt:
       'The restyle is finished. Write down what a reviewer has to look at by eye, and which behaviors have no test.',
     expect: 'ui-checklist',
   },
