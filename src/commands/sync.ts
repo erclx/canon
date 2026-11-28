@@ -1,12 +1,14 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Command } from 'commander'
+import { retiredStackMessage } from '@/cli/retired'
 import { cliPath, cliRun } from '@/cli/run'
 import { PROJECT_ROOT } from '@/roots/project'
 import {
   buildCheckReport,
   type CheckReport,
   hasDrift,
+  type ToolingReport,
   uncoveredDomains,
 } from '@/sync/check'
 import { createGitRunner, createPullRequestOpener, hasGh } from '@/sync/git'
@@ -138,6 +140,10 @@ function renderCheck(report: CheckReport): void {
       logInfo(`Synced from ${domain.commit} on ${domain.syncedAt}`)
     }
 
+    for (const name of domain.retired ?? []) {
+      logWarn(retiredStackMessage(name, 'governance'))
+    }
+
     for (const entry of domain.entries) {
       if (entry.state === 'matching' || entry.state === 'orphaned') continue
       logWarn(entry.notice ?? `${entry.rel} (${entry.state})`)
@@ -251,7 +257,12 @@ function renderTooling(report: CheckReport): void {
   const { tooling } = report
   logStep('tooling')
 
+  for (const name of tooling.retired) {
+    logWarn(retiredStackMessage(name, 'tooling'))
+  }
+
   if (!tooling.measured) {
+    if (tooling.retired.length > 0) return
     logWarn(
       tooling.chain.length === 0
         ? 'Not stamped. No chain recorded, so tooling drift is unmeasured.'
@@ -276,11 +287,20 @@ function renderTooling(report: CheckReport): void {
   for (const [category, count] of Object.entries(tooling.counts)) {
     if (count > 0) logWarn(`${count} ${category}`)
   }
-  logInfo(
-    tooling.changes === tooling.counts.customized
-      ? 'A customized config moved upstream, and no write touches it. Run `canon tooling diff` to see which, and `canon tooling lift <path>` to take it.'
-      : 'Run `canon tooling sync --check` to see which files, `--write` to apply.',
-  )
+  const next = toolingNextStep(tooling)
+  if (next !== undefined) logInfo(next)
+}
+
+/**
+ * The step a drifted tooling section ends on. A chain holding a retired stack
+ * gets none, since a base write over its verify list drops its checks and the
+ * retired line above already carries the safe way forward.
+ */
+export function toolingNextStep(tooling: ToolingReport): string | undefined {
+  if (tooling.retired.length > 0) return undefined
+  return tooling.changes === tooling.counts.customized
+    ? 'A customized config moved upstream, and no write touches it. Run `canon tooling diff` to see which, and `canon tooling lift <path>` to take it.'
+    : 'Run `canon tooling sync --check` to see which files, `--write` to apply.'
 }
 
 /**

@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { basename, join, sep } from 'node:path'
 import { execa } from 'execa'
+import { findRetiredStack } from '@/cli/retired'
 import { gitEnv } from '@/git/env'
 import { createGovAdapter } from '@/gov/adapter'
 import { successorResolver } from '@/gov/renames'
@@ -96,6 +97,8 @@ export interface DomainReport {
    * found a local edit. Only the first is a capability the install lacks.
    */
   readonly historyUnavailable: boolean
+  /** Recorded governance chain names the toolkit retired, set on the governance domain alone. */
+  readonly retired?: readonly string[]
 }
 
 export interface UpstreamCommit {
@@ -130,6 +133,8 @@ export interface ToolingReport {
    * stays distinguishable from a target that recorded none.
    */
   readonly chain: readonly string[]
+  /** Chain names the toolkit retired, which no sync clears and the render names with the way off. */
+  readonly retired: readonly string[]
   readonly commit?: string
   readonly syncedAt?: string
   readonly counts: ToolingCounts
@@ -139,6 +144,7 @@ export interface ToolingReport {
 const UNMEASURED_TOOLING: ToolingReport = {
   measured: false,
   chain: [],
+  retired: [],
   counts: {
     configs: 0,
     customized: 0,
@@ -257,7 +263,8 @@ export function buildToolingReport(
   const chain = stampedChain(stamp, 'tooling')
   const manifests = resolveRecorded(toolkitRoot, chain)
 
-  if (manifests.length === 0) return { ...UNMEASURED_TOOLING, chain }
+  const retired = retiredStacksIn(stamp, 'tooling')
+  if (manifests.length === 0) return { ...UNMEASURED_TOOLING, chain, retired }
 
   const result = scan(manifests, target)
   const record = stamp?.domains.tooling
@@ -265,6 +272,7 @@ export function buildToolingReport(
   return {
     measured: true,
     chain,
+    retired,
     commit: record?.commit,
     syncedAt: record?.syncedAt,
     counts: {
@@ -462,11 +470,23 @@ async function buildDomainReport(
     counts: countStates(plan.entries),
     entries: plan.entries,
     historyUnavailable: plan.historyUnavailable,
+    ...(domain === 'governance'
+      ? { retired: retiredStacksIn(stamp, 'governance') }
+      : {}),
     upstream:
       since === undefined
         ? []
         : await readUpstream(toolkitRoot, since, SYNCED_SOURCES[domain]),
   }
+}
+
+export function retiredStacksIn(
+  stamp: Stamp | undefined,
+  domain: 'tooling' | 'governance',
+): string[] {
+  return stampedChain(stamp, domain).filter(
+    (name) => findRetiredStack(name) !== undefined,
+  )
 }
 
 export function parseUpstream(log: string): UpstreamCommit[] {
