@@ -169,7 +169,13 @@ export default scenario({
         '         options shot, the mock source under evidence/mocks/<surface>/, the address inside',
       )
       ctx.log.info(
-        '         the pick question, the board server ended, and the project still on the board',
+        '         the pick question, the board server ended, and the project still on the board.',
+      )
+      ctx.log.info(
+        '         Every visible finding is drawn, decided or not, each topic row opening on a',
+      )
+      ctx.log.info(
+        '         <section>-caption-<nn> frame, and each filed visible item carries a Drawn: line',
       )
     },
   },

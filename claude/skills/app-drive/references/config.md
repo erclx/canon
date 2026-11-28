@@ -27,7 +27,7 @@ board-folder = "Drives"
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
 - An absent `data` means the app starts empty, and an absent `proposals` means a fallback mock stays in the intake folder's `evidence/`
 - `access` is read by `ui-film` and `review-ui`, which open their address behind it, and a drive ignores it
-- `proposals` holds the fallback mock alone, the standalone HTML a decided finding's frames are lifted into when the copy cannot host them and the drive draws no board
+- `proposals` holds the fallback mock alone, the standalone HTML a finding's frames are lifted into when the copy cannot host them and the drive draws no board
 
 ### Scripts
 

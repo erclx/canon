@@ -81,17 +81,17 @@ The fields under the meta line carry the drive itself, one fact to a line.
 
 ### Drawn outcomes
 
-The check reads `Drawn` and `Decision (operator)` off the log by those exact labels, so a reworded label turns the check off without failing it.
+The check reads `Drawn` and `Decision (operator)` off the log by those exact labels, so a reworded label turns the check off without failing it. Leave a board page out of `Drawn`, since the check reads every code span there as an evidence path, and the `Board` row already names the project.
 
 - Put the options screenshot at `evidence/<surface>/<nn>-options.png`, showing the section as shipped beside every option, with each continuation page's own `<nn>-options-<k>.png` beside it
 - Copy the mock source into `evidence/mocks/<surface>/`, where `<surface>` names the screen or panel drawn on
-- Write `Drawn` above the decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
+- Write `Drawn` on every finding, decided or not and above any decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
 - A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission
-- A decision reading `see <nn>` was drawn under the finding it names and carries no `Drawn` of its own
+- A decision reading `see <nn>` was drawn under the finding it names, and a passed entry found nothing to draw, so neither carries `Drawn`
 
 A skip also fails when the intake item deciding the finding names a rendered-surface file in its `Fix:` or `Worth it:` line, since a person sees that change. Move a path that only explains the defect out of those two lines.
 
-Leave a board page out of `Drawn`, since the check reads every code span there as an evidence path and fails a ref outside `evidence/`. The `Board` setup row already names the project.
+The item filed from a finding copies its `Drawn` paths onto a `Drawn:` line, per `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md`. `canon intake answer` refuses an answer on a visible item carrying none.
 
 ### Passed goals
 
@@ -205,6 +205,6 @@ A failed check names each finding by list, and an empty list is a clean axis.
 | `changed`         | a main checkout path that moved since the baseline                   |
 | `strayEvidence`   | an evidence path outside `evidence/`                                 |
 | `missingEvidence` | an evidence path holding no file                                     |
-| `undrawn`         | a logged decision with no drawn outcome or reason                    |
+| `undrawn`         | a logged finding, decided or not, with no drawn outcome or reason    |
 | `worktreeLeft`    | the `worktree` path still on disk                                    |
 | `behavior`        | a Behavior row unmapped, unreasoned, or unknown, named by its prefix |

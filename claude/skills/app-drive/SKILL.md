@@ -81,15 +81,15 @@ Append each finding to the drive log as it happens, never batched at the end, si
 - Write an operator's decision under the finding it settles, even when later findings already sit below it, since it is the one edit above the end of the log
 - Write `drive.json` into the intake folder in the shape `drive-record.md` sets
 
-### Drawing a decided finding
+### Drawing a visible finding
 
-Draw every finding the operator decides, bug fix, feature, or taste call, before writing its `Decision (operator)` line. A planner reading one line cannot see what the operator saw.
+Draw every finding whose fix a person would see, bug fix, feature, or taste call, decided or not, before writing its `Decision (operator)` line or moving to the next. A planner or an operator answering later from one line cannot see what the drive saw.
 
 Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, since a worker builds against the picked frame, focus return and dismissal included.
 
 1. Draw the section as shipped and one frame per option at each width, on the board per the next section. With no board, draw them inside the copy, on a canvas the app offers or a scratch route.
 2. Screenshot the frames side by side to `evidence/<surface>/<nn>-options.png`, and each continuation page to `<nn>-options-<k>.png`. Open them and ask the pick per `drawing.md`, one per question.
-3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
+3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths. Record the pick as the decision, or leave the finding undecided when the operator defers it.
 
 A few cases bend those steps.
 
@@ -97,15 +97,14 @@ A few cases bend those steps.
 - Copy a mock's source into `evidence/mocks/` wherever it was drawn, since the board can change after the close and the check reads `evidence/` alone
 - Write `Drawn: skipped, <reason>` only for a change with nothing visible, such as an exit code or a file format
 - Never write a mock into a tracked path, `canon/design/`, or a page holding the accepted design. An accepted design reaches those through `design-pick` or `design-record` once its fix ships.
-- Log an undecided taste finding undrawn, as Step 4 hands it to `design-pick`
 
 Decide a finding about cross-section behavior on `drawing.md`'s live prototype.
 
 ### Drawing on the board
 
-Start the board at the first finding the operator decides, while the copy still runs, when the config names `board-project` or `.canon/board/` exists at the main root. With neither, start no server.
+Start the board at the first visible finding, while the copy still runs, when the config names `board-project` or `.canon/board/` exists at the main root. With neither, start no server.
 
-Read `${CLAUDE_SKILL_DIR}/references/drive-board.md` then, for the start, the `Board` row, the shipped page on `00-current`, the drive's pages, the lift from the copy, the capture, and a refusal that ends the board. A drive that decides nothing draws nothing.
+Read `${CLAUDE_SKILL_DIR}/references/drive-board.md` then, for the start, the `Board` row, the shipped page on `00-current`, the drive's pages, the lift from the copy, the capture, and a refusal that ends the board. A drive that finds nothing visible draws nothing.
 
 ## Step 4: sort
 
@@ -113,9 +112,9 @@ Give every finding one kind, and keep the severity it was logged with.
 
 - **Bug.** The app breaks a goal or its own contract. It becomes an item whose fix a worker can build, with the repro and the evidence path. `systematic-debugging` owns finding its cause.
 - **Requirements conflict.** The app does what the record says and the operator wants otherwise, or the record contradicts itself. The item carries the drafted diff as text, and the operator decides.
-- **Taste.** The call is settled by looking. A decided one carries what Step 3 drew. An undecided one is logged undrawn and waits for a `design-pick` pass.
+- **Taste.** The call is settled by looking. Decided or not, it carries what Step 3 drew, one outcome per option on an undecided one.
 
-An undecided taste finding's item takes the operator's `sketch` answer, and the pick draws back on this drive's project, as `${CLAUDE_SKILL_DIR}/../design-pick/references/from-finding.md` states. Never draw its frames here.
+The operator answers an undecided item from those frames. An operator wanting options the drive did not draw answers `sketch`, and the pick draws back on this drive's project, as `${CLAUDE_SKILL_DIR}/../design-pick/references/from-finding.md` states.
 
 ## Step 5: file
 
@@ -124,6 +123,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing a 
 - An item answerable from the code or one read-only command stays in intake
 - An item needing experiments or outside sources before a plan is marked as a groundwork candidate in its item
 - An item already decided goes into the ready list for a row, and takes `Decided:` naming its drive-log finding when its `Fix:` states that decision
+- An item copies its finding's `Drawn` paths onto its own `Drawn:` line, since the answer verb refuses a visible item carrying none
 
 ### Close
 
