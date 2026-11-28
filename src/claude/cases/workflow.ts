@@ -73,6 +73,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'I was launched beside a design session to pick each drawn round the way the operator would. What do I read first, and what do I send back?',
+    expect: 'role-judge',
+  },
+  {
+    prompt:
       'Open the preview for that pull request and click through each box on its visual checklist, then post what happened.',
     expect: 'review-ui',
   },

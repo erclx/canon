@@ -95,6 +95,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | Skill                     | When to use                                         |
 | ------------------------- | --------------------------------------------------- |
 | `canon:role-orchestrator` | To assert the control session that dispatches       |
+| `canon:role-judge`        | To assert the role of a session judging picks       |
 | `canon:role-planner`      | To assert the role of a session writing a plan      |
 | `canon:role-reviewer`     | To assert the role of a session reviewing PRs       |
 | `canon:role-worker`       | To assert the role of a session building one branch |
