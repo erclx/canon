@@ -135,7 +135,7 @@ This grant is a standing authorization the operator gave knowing they would be a
 
 - `standing-stale` carries `moved`, the files the base changed that the branch writes or its examples stamp
 - On `standing-stale`, send the branch's session to update it, then wait for CI and re-read the gates before writing the line again
-- On `standing-stale` with `bot: release-please`, no session owns the branch, so run `gh pr update-branch <number>`, wait for CI, and re-read the gates
+- On `standing-stale` with `bot: release-please`, follow `orchestrator-release.md`
 - `standing-conflict` takes the same route through a rebase
 - `standing-unknown` means the base could not be read, so report it and run the line again only once the remote answers
 
@@ -150,10 +150,7 @@ Write the line only off `already-ready` or `clear` from `canon pr lift <number> 
 
 ### A bot pull request
 
-A release or Dependabot pull request takes no review, so its check read refuses `review-missing` forever, and a lift without `--check` returns it to draft. Never run the non-check lift on one.
-
-- Gate its line on the `ci` entry in `gates` alone, written only when that entry reads `isOk: true`
-- On a pending `ci` entry, wake through `gh pr checks <number> --watch --required` with `run_in_background`, then take a fresh `--check` read before writing the line
+A release or Dependabot pull request takes no review. Gate its line and handle its merge per `orchestrator-release.md`, and never run the non-check lift on one.
 
 ### An unproven painted pull request
 
