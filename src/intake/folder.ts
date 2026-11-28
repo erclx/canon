@@ -297,10 +297,9 @@ export async function readFolder(
 }
 
 /**
- * Lands a batch in one cluster file in one read-modify-write, since a call per
- * selection races on the read. A `decided` label reaching no decision refuses the
- * whole call, as does a filled slot, a pending pick aside, and a visible item
- * citing no drawing, unless the answer itself opens a pick.
+ * Lands a batch in one read-modify-write, since a call per selection races on
+ * the read. A decided label reaching no decision, a filled slot bar a pending
+ * pick, and a visible item citing no drawing each refuse the whole call.
  */
 export async function answerItems(
   root: string,
@@ -373,6 +372,7 @@ export async function answerItems(
     )
   }
 
+  // An answer opening a pick asks for the drawing rather than deciding without one.
   const picking = new Set(
     selections
       .filter((selection) => opensPick(selection.answer))

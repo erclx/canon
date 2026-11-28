@@ -43,10 +43,9 @@ export function citedDrawings(value: string): string[] {
 }
 
 /**
- * Reads the drive log's numbered findings, decided or not, for one with nothing
- * drawn. A `Drawn` field passes when it cites a path in a code span or reads
- * `skipped, <reason>`, a decision reading `see <nn>` was drawn under the finding
- * it names, and a passed entry owes nothing.
+ * Reads every logged finding, decided or not, for one with nothing drawn. A path
+ * in a code span or `skipped, <reason>` passes, and so does a `see <nn>` decision,
+ * drawn under the finding it names. A passed entry owes nothing.
  */
 export function readDrawn(source: string): DrawnReading {
   const undrawn: string[] = []
