@@ -87,11 +87,11 @@ The check reads `Drawn` and `Decision (operator)` off the log by those exact lab
 - Copy the mock source into `evidence/mocks/<surface>/`, where `<surface>` names the screen or panel drawn on
 - Write `Drawn` on every finding, decided or not and above any decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
 - A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission
-- A decision reading `see <nn>` was drawn under the finding it names, and a passed entry found nothing to draw, so neither carries `Drawn`
+- A `see <nn>` decision was drawn under the finding it names, and a pass or a `fixed` re-check has nothing to draw, so none carries `Drawn`
 
 A skip also fails when the intake item deciding the finding names a rendered-surface file in its `Fix:` or `Worth it:` line, since a person sees that change. Move a path that only explains the defect out of those two lines.
 
-The item filed from a finding copies its `Drawn` paths onto a `Drawn:` line, per `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md`. `canon intake answer` refuses an answer on a visible item carrying none.
+The item filed from a finding copies its `Drawn` paths onto a `Drawn:` line, per `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md`. `canon intake answer` refuses a visible item until a path it or its `Decided:` finding cites holds a file.
 
 ### Passed goals
 

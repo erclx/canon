@@ -61,5 +61,5 @@ A drive and a pick are told apart by whether there is an app to test.
 - Reading source for roughness, which `ui-audit` owns
 - Driving one pull request's checklist, which `review-ui` owns
 - Measuring paint and layout cost, which `ui-performance` owns
-- Drawing and picking an undecided taste finding, which `design-pick` owns
+- The later round a `sketch` answer asks for, drawn on this drive's project, which `design-pick` owns
 - Messaging the controller and ending the session, which `role-planner` owns

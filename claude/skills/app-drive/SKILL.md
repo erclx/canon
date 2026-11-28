@@ -171,5 +171,5 @@ Omit the `Board` line when the drive drew no board, then close on the retell `${
 - Controller messages, the talk clause, and the session's end: `role-planner`
 - The intake folder's shape and its routing test: `plan-intake`
 - The cause of a bug: `systematic-debugging`
-- Drawing and picking an undecided taste finding, on this drive's own page: `design-pick`
+- The later round a `sketch` answer asks for, on this drive's own page: `design-pick`
 - The voice of every recorded passage: `write-human`
