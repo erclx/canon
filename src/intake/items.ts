@@ -193,9 +193,14 @@ export function isUnread(item: IntakeItem): boolean {
   return item.answerLine !== undefined && item.answer === undefined
 }
 
+/** An answer that opens a pick rather than deciding, read off its first word. */
+export function opensPick(answer: string): boolean {
+  return PENDING.test(answer)
+}
+
 /** An item whose answer waits on a pick, so it holds no decision yet. */
 export function isPendingPick(item: IntakeItem): boolean {
-  return item.answer !== undefined && PENDING.test(item.answer)
+  return item.answer !== undefined && opensPick(item.answer)
 }
 
 /**

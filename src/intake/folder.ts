@@ -1,13 +1,14 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, join, normalize, relative } from 'node:path'
-import { DRIVE_LOG, readDecisions } from '@/intake/drive-log'
+import { citedDrawings, DRIVE_LOG, readDecisions } from '@/intake/drive-log'
 import {
   INDEX_FILE,
   type IntakeItem,
   isMalformed,
   isPendingPick,
   isUnread,
+  opensPick,
   parseDecided,
   readItems,
   writeAnswerLine,
@@ -24,6 +25,7 @@ export const INTAKE_REFUSALS = [
   'answered',
   'bad-input',
   'undecided',
+  'undrawn',
 ] as const
 
 export type IntakeRefusal = (typeof INTAKE_REFUSALS)[number]
@@ -50,6 +52,8 @@ export interface ResolvedItem extends IntakeItem {
   readonly decision: string | undefined
   /** Whether the answer only opens a pick, which the answer route may replace. */
   readonly pendingPick: boolean
+  /** Whether the item names a rendered surface and cites no drawing, which the answer route refuses. */
+  readonly undrawn: boolean
 }
 
 export interface ClusterItems {
@@ -101,6 +105,18 @@ export function namesRenderedSurface(item: IntakeItem): boolean {
   const text = `${item.fix ?? ''} ${item.worth ?? ''}`
   return [...text.matchAll(/`([^`]+)`/g)].some((span) =>
     RENDERED_SURFACE.test(span[1]),
+  )
+}
+
+/**
+ * A visible item citing no drawing, which nobody can answer from its text. A
+ * pending pick owes nothing, since its round is where the drawing happens.
+ */
+function owesDrawing(item: IntakeItem): boolean {
+  return (
+    namesRenderedSurface(item) &&
+    citedDrawings(item.drawn ?? '').length === 0 &&
+    !isPendingPick(item)
   )
 }
 
@@ -258,6 +274,7 @@ async function readClusters(folder: string): Promise<ClusterItems[]> {
           ...item,
           decision: resolveDecision(item, decisions),
           pendingPick: isPendingPick(item),
+          undrawn: owesDrawing(item),
         }),
       ),
     })),
@@ -282,7 +299,8 @@ export async function readFolder(
 /**
  * Lands a batch in one cluster file in one read-modify-write, since a call per
  * selection races on the read. A `decided` label reaching no decision refuses the
- * whole call, as does a filled slot, a pending pick aside.
+ * whole call, as does a filled slot, a pending pick aside, and a visible item
+ * citing no drawing, unless the answer itself opens a pick.
  */
 export async function answerItems(
   root: string,
@@ -352,6 +370,28 @@ export async function answerItems(
       'answered',
       `${name} item ${filled.join(', ')} already carries an answer.`,
       filled.map((label) => `${label}. ${find(label)?.answer ?? ''}`),
+    )
+  }
+
+  const picking = new Set(
+    selections
+      .filter((selection) => opensPick(selection.answer))
+      .map((selection) => selection.label.toLowerCase()),
+  )
+  const undrawn = named.filter((label) => {
+    const item = find(label)
+    return (
+      item !== undefined &&
+      !picking.has(label.toLowerCase()) &&
+      owesDrawing(item)
+    )
+  })
+
+  if (undrawn.length > 0) {
+    return refuse(
+      'undrawn',
+      `${name} item ${undrawn.join(', ')} names a rendered surface and cites no drawing, so nothing was written. Draw it and record Drawn: first.`,
+      undrawn.map((label) => `${label}. ${find(label)?.title ?? ''}`),
     )
   }
 

@@ -103,6 +103,10 @@ export function register(program: Command): void {
         'An answer opening on the word "sketch" is a pending pick, reported as',
         '`pendingPick` on each item. It is answered and decides nothing.',
         '',
+        'An item whose Fix or Worth it line names a rendered-surface file and',
+        'whose Drawn line cites no path is reported as `undrawn`, which the',
+        'answer verb refuses until the drawing is recorded.',
+        '',
         'Examples:',
         '  canon intake list',
         '  canon intake list toolkit-overview --unread --json',
@@ -149,6 +153,9 @@ export function register(program: Command): void {
         '  undecided       a --decided item carries no Decided: field, or its',
         "                  pointer reaches no decision in this folder's",
         '                  evidence/drive-log.md',
+        '  undrawn         the item names a rendered-surface file in its Fix or',
+        '                  Worth it line and its Drawn line cites no path, and',
+        '                  the answer neither opens nor fills a pending pick',
         '  bad-input       a malformed command line, such as no selection, an empty',
         '                  answer, or two answers for one item, an item under',
         '                  both --set and --decided among them',
@@ -516,7 +523,8 @@ function reportFolder(
     for (const item of cluster.items) {
       const state = isUnread(item) ? 'unread' : (item.answer ?? 'no slot')
       const pending = item.pendingPick ? 'pending pick: ' : ''
-      logInfo(`${item.label}. ${item.title} (${pending}${state})`)
+      const undrawn = item.undrawn ? ', undrawn' : ''
+      logInfo(`${item.label}. ${item.title} (${pending}${state}${undrawn})`)
     }
   }
 
