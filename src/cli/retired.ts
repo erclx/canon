@@ -69,3 +69,42 @@ export function findRetired(args: readonly string[]): RetiredVerb | undefined {
 export function retiredMessage(verb: RetiredVerb): string {
   return `error: 'canon ${verb.path.join(' ')}' was retired in v${verb.release}. The work moved to ${verb.movedTo}.`
 }
+
+export type StackCatalog = 'tooling' | 'governance'
+
+export interface RetiredStack {
+  readonly name: string
+}
+
+/**
+ * Every stack the toolkit stopped shipping, read by each verb that would
+ * otherwise report a bare `Stack not found` and by `canon sync --check` for a
+ * recorded chain. Both catalogs dropped each one together.
+ */
+export const RETIRED_STACKS: readonly RetiredStack[] = [
+  { name: 'go' },
+  { name: 'php' },
+]
+
+export function findRetiredStack(name: string): RetiredStack | undefined {
+  return RETIRED_STACKS.find((stack) => stack.name === name)
+}
+
+/**
+ * A base tooling write replaces `scripts/verify.json` with a list requiring
+ * only `check:format`, and the runner skips every phase it does not require,
+ * so the way off customizes that file first or the project's checks stop.
+ */
+const WAY_OFF: Record<StackCatalog, string> = {
+  tooling:
+    'To keep its checks and move to base, run `canon tooling customize scripts/verify.json`, then `canon tooling sync base --write`.',
+  governance:
+    'Run `canon gov install base` to move to base, which keeps every rule base ships.',
+}
+
+export function retiredStackMessage(
+  name: string,
+  catalog: StackCatalog,
+): string {
+  return `Stack '${name}' is no longer shipped by the toolkit. Its files stay yours. ${WAY_OFF[catalog]}`
+}
