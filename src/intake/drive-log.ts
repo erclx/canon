@@ -112,7 +112,7 @@ export function readDrawn(source: string): DrawnReading {
 
 /**
  * Maps each logged finding's number to the paths its `Drawn` field cites. A
- * `see <nn>` decision takes that finding's paths, one hop only.
+ * `see <nn>` decision adds that finding's paths to its own, one hop only.
  */
 export function readDrawings(source: string): Map<number, string[]> {
   const raw = new Map<number, string[]>()
@@ -133,10 +133,11 @@ export function readDrawings(source: string): Map<number, string[]> {
     if (hop) pointers.set(finding, Number(hop[1]))
   }
 
+  const drawings = new Map(raw)
   for (const [from, to] of pointers) {
-    if (!raw.has(from)) raw.set(from, raw.get(to) ?? [])
+    drawings.set(from, [...(raw.get(from) ?? []), ...(raw.get(to) ?? [])])
   }
-  return raw
+  return drawings
 }
 
 /**

@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path'
 import { execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { checkDrive, readGoals, recordBaseline } from '@/intake/drive-check'
-import { readDecisions, readDrawn } from '@/intake/drive-log'
+import { readDecisions, readDrawings, readDrawn } from '@/intake/drive-log'
 
 let ROOT: string
 
@@ -335,6 +335,39 @@ describe('readDrawn board and skips', () => {
     ].join('\n')
 
     expect(readDrawn(log).skipped).toEqual([])
+  })
+})
+
+describe('readDrawings', () => {
+  it('should give a see finding the paths of the finding it names', () => {
+    const log = [
+      '## 02. Layers click leaves a frame',
+      '',
+      '- **Drawn:** `evidence/layers/02-options.png`',
+      '- **Decision (operator):** close the frame on click',
+      '',
+      '## 04. Layers click on a nested frame',
+      '',
+      '- **Decision (operator):** see 02',
+    ].join('\n')
+
+    expect(readDrawings(log).get(4)).toEqual(['evidence/layers/02-options.png'])
+  })
+
+  it('should give a see finding its target paths past its own skip', () => {
+    const log = [
+      '## 02. The current tide marker sits under the day list',
+      '',
+      '- **Drawn:** `evidence/week/02-options.png`',
+      '- **Decision (operator):** clamp the marker inside the chart',
+      '',
+      '## 03. The week chart scrolls sideways at the reflow floor',
+      '',
+      '- **Drawn:** skipped, the fix restores the layout the record states',
+      '- **Decision (operator):** see 02',
+    ].join('\n')
+
+    expect(readDrawings(log).get(3)).toEqual(['evidence/week/02-options.png'])
   })
 })
 
