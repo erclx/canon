@@ -83,7 +83,7 @@ The fields under the meta line carry the drive itself, one fact to a line.
 
 The check reads `Drawn` and `Decision (operator)` off the log by those exact labels, so a reworded label turns the check off without failing it.
 
-- Put the options screenshot at `evidence/<surface>/<nn>-options.png`, showing the section as shipped beside every option
+- Put the options screenshot at `evidence/<surface>/<nn>-options.png`, showing the section as shipped beside every option, with each continuation page's own `<nn>-options-<k>.png` beside it
 - Copy the mock source into `evidence/mocks/<surface>/`, where `<surface>` names the screen or panel drawn on
 - Write `Drawn` above the decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
 - A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission

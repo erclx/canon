@@ -18,11 +18,11 @@ Draw every frame at the widths `widths.md` beside this file resolves, one per de
 
 A page is what the operator opens, so its name and its place in the order say what it holds.
 
-| Run               | Pages                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| A standalone pick | `00-next` once a pick settles, then `<slug>` per question, with `<slug>-2` and on        |
-| A drive           | `00-current`, then one `<nn>-<section>` page per topic, then `00-next` once picks settle |
-| A track's pick    | The question's `q<n>-<topic>` page, then `q<n>-<topic>-2` and on                         |
+| Run               | Pages                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| A standalone pick | `00-next` once a pick settles, then `<slug>` per question, with `<slug>-2` and on                              |
+| A drive           | `00-current`, one `<nn>-<section>` page per topic and `<nn>-<section>-2` past the height limit, then `00-next` |
+| A track's pick    | The question's `q<n>-<topic>` page, then `q<n>-<topic>-2` and on                                               |
 
 Every page stays on the board after the run closes, so a losing round is still there to reopen. A pick on a drive finding joins that drive's topic page, and one on an intake item joins the item's `<n>-<topic>` page, as `from-finding.md` beside this file states.
 
@@ -82,6 +82,15 @@ The desktop to tablet gap is the laptop body's reach, `20 + round((width + 40) *
 
 A page set on `00-current` or `00-next` is one group at x 0, in a drive and a standalone pick alike.
 
+### A row that outgrows the page
+
+A composite capture accepts 16,384px on both axes, so a row of groups wraps before it can pass that across, and a page continues before it can pass it down.
+
+- Wrap the row once the next group's right edge would pass 16,000px, measured from the page's draw widths, so a project drawing wider than the fallbacks wraps sooner than a fixed count would
+- Start the wrapped row 400px below the lowest bottom edge of the row above, at the x the row above started, so on a topic page at the first arm's x and not the current set's, in the round's arm order
+- Continue a lone round that wraps past 16,000px tall on `<page>-2` at a row boundary, per `### A drive's topic page`
+- Stop at 16,000px rather than 16,384px, since a device body draws past its frame and the margin absorbs it without a per-device sum
+
 ### A pick round
 
 A round draws each arm as one group, in arm order from the left, so the operator reads across for the comparison and down for the page.
@@ -97,6 +106,7 @@ A topic page opens with the section as shipped and puts each round of options to
 - Put each arm of a round in a group of its own to the right of the current set, in arm order
 - Start each later round 80px below the lowest bottom edge of the round before it, its first arm at the x the first round's first arm took
 - Keep the current group where it is while the rounds stack down beside it
+- Start the next round on `<page>-2` when it would push the page past 16,000px tall, opening that page on the current set again at the left, so its capture stands alone beside the options it shows
 
 ## Names
 

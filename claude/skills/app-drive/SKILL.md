@@ -88,7 +88,7 @@ Draw every finding the operator decides, bug fix, feature, or taste call, before
 Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, since a worker builds against the picked frame, focus return and dismissal included.
 
 1. Draw the section as shipped and one frame per option at each width, on the board per the next section. With no board, draw them inside the copy, on a canvas the app offers or a scratch route.
-2. Screenshot the frames side by side to `evidence/<surface>/<nn>-options.png` and open it. Ask the pick as `drawing.md` states under Asking, one finding per question.
+2. Screenshot the frames side by side to `evidence/<surface>/<nn>-options.png`, and each continuation page to `<nn>-options-<k>.png`. Open them and ask the pick per `drawing.md`, one per question.
 3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
 
 A few cases bend those steps.
