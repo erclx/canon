@@ -121,6 +121,41 @@ describe('groupEvidence', () => {
     })
   })
 
+  it('should not read a design section named evidence as a capture', async () => {
+    const reading = await groupEvidence(
+      ['canon/design/landing/evidence/records-1280.png'],
+      async () => true,
+    )
+
+    expect(reading).toEqual({ kind: 'refused', reason: 'no-evidence' })
+  })
+
+  it('should still read a capture beside a design section named evidence', async () => {
+    const reading = await groupEvidence(
+      [
+        'canon/design/landing/evidence/records-1280.png',
+        'assets/evidence/home/health/390--dark.png',
+      ],
+      async () => true,
+    )
+
+    expect(reading).toEqual({
+      kind: 'read',
+      states: [
+        {
+          state: 'home/health',
+          items: [
+            {
+              path: 'assets/evidence/home/health/390--dark.png',
+              stem: '390--dark',
+              added: false,
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   it('should sort states and, within a state, sort entries by stem', async () => {
     const reading = await groupEvidence(
       [
