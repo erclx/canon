@@ -9,7 +9,7 @@ Checked against the [hooks reference](https://code.claude.com/docs/en/hooks) on 
 
 ## Overview
 
-Owns the local development loop, being the run commands, the gate behind `bun run check`, and the Claude Code and git hooks around it. CI runs the same stages through `bun run check:ci`, covered in `canon/context/development/ci.md`.
+Owns the local development loop, being the run commands, the gate behind `bun run check`, and the Claude Code and git hooks around it. CI runs the same stages through `bun run check:static` and a separate unit job, covered in `canon/context/development/ci.md`.
 
 `CONTRIBUTING.md` states the contributor-facing subset, and what each script does is in the entry for its domain.
 
@@ -23,6 +23,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 | ----------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean.             |
 | `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                                 |
+| `bun run check:static`  | Every stage but Tests via `--all --skip tests`, the static job CI runs. Still regenerates.                   |
 | `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                              |
 | `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, `src/`, and `.claude/hooks/`.                           |
 | `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning.                                               |

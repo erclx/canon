@@ -71,7 +71,53 @@ describe('canon gate run in a target', () => {
     },
     RUN_TIMEOUT_MS,
   )
+
+  it(
+    'should record a stage named by --skip as skipped by flag and run the rest',
+    async () => {
+      const result = await runGateIn(target, [
+        '--all',
+        '--json',
+        '--skip',
+        'markdown',
+      ])
+      const record = JSON.parse(result.stdout) as {
+        stages: { id: string; status: string; failure?: string }[]
+      }
+
+      expect(result.exitCode).toBe(0)
+      expect(record.stages.find((s) => s.id === 'markdown')?.status).toBe(
+        'skipped',
+      )
+      expect(
+        record.stages.find((s) => s.id === 'file-length')?.status,
+      ).not.toBe('skipped')
+    },
+    RUN_TIMEOUT_MS,
+  )
+
+  it(
+    'should refuse an unknown --skip id and list the valid ids',
+    async () => {
+      const result = await runGateIn(target, ['--all', '--skip', 'nonsense'])
+
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr).toContain('nonsense')
+      expect(result.stderr).toContain('markdown')
+    },
+    RUN_TIMEOUT_MS,
+  )
 })
+
+function runGateIn(cwd: string, args: string[]) {
+  return execa(process.execPath, [CLI, 'gate', 'run', ...args], {
+    cwd,
+    env: { ...gitEnv(), CI: 'false' },
+    extendEnv: false,
+    reject: false,
+    timeout: RUN_TIMEOUT_MS,
+  })
+}
 
 function stageResult(overrides: Partial<StageResult> = {}): StageResult {
   return {
