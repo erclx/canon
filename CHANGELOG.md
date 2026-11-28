@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.132.0](https://github.com/erclx/canon/compare/v5.131.0...v5.132.0) (2026-11-28)
+
+
+### Features
+
+* **design-record:** add behavior rows that a drive must try ([#3607](https://github.com/erclx/canon/issues/3607)) ([2f1d5b1](https://github.com/erclx/canon/commit/2f1d5b11867e378e6feed331bf087bb45af2b625))
+* **design:** name the app-screen defaults a model reaches for ([#3615](https://github.com/erclx/canon/issues/3615)) ([62efd9e](https://github.com/erclx/canon/commit/62efd9e9828ee462005f6b1af0f85570c03f9389))
+* **design:** wrap a round and continue a page past 16,000px ([#3608](https://github.com/erclx/canon/issues/3608)) ([e605e6c](https://github.com/erclx/canon/commit/e605e6cf6e54de076440cd278197aa2e12f1918e))
+* **pr:** split an all-widths reel skip across the widths left unfilmed ([#3611](https://github.com/erclx/canon/issues/3611)) ([1ccb2ae](https://github.com/erclx/canon/commit/1ccb2aefd1233ccb004d0a1b101bf1a325c58f0c))
+* **skills:** place a lone card or dialog where the eye expects it ([#3614](https://github.com/erclx/canon/issues/3614)) ([13f148b](https://github.com/erclx/canon/commit/13f148beb4ef402ed7abe2b60c4b954e385bdb9d))
+
+
+### Bug Fixes
+
+* **pr:** serve a review pass from its own drive copy root ([#3609](https://github.com/erclx/canon/issues/3609)) ([4d4c1f7](https://github.com/erclx/canon/commit/4d4c1f789fe4f9746d1733aa2914c60329f44bca))
+
 ## [5.131.0](https://github.com/erclx/canon/compare/v5.130.0...v5.131.0) (2026-11-28)
 
 
