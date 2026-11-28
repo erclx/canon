@@ -10,7 +10,7 @@ Steps 4 and 7 of `review-ui`. A preview that saves what the pass drives would ot
 A project names the folders its preview writes under `[preview]` in `canon/config/app.toml`, or in `canon/config/preview.json` before it. The worker starts its server reading a copy of them, and the pass rebuilds that copy at every head so the last pass's drags never reach this one.
 
 - The rebuild resets each declared `writes` path from the worktree and leaves the rest of the copy root alone
-- A `keep` path inside a declared path is state the server owns, so the rebuild neither clears it nor copies the worktree's own
+- A `keep` path inside a declared path is state a server owns, the worker's included, so the rebuild neither clears it nor copies the worktree's own
 - The rebuild then runs the project's `seed`, when the config declares one, so state the project lays into the copy is back on every rebuild with no hand step
 - A page added only to the copy and laid by no seed is gone after the rebuild, so a box can open only a page the worker committed under a declared path or the seed lays
 - The seed is the worktree's own script, run from that tree against the copy. The operator accepted that trade over a snapshot the worker would have to refresh by hand.
@@ -19,10 +19,11 @@ A project names the folders its preview writes under `[preview]` in `canon/confi
 
 A server keeps the files it already opened, so a database or a dependency cache rebuilt under the worker's running server answers 500 or stalls. A project that declares `serve` in the config gets a fresh server per pass instead.
 
-- The verb starts it on the rebuilt copy at the worktree's port band plus 25, so it never meets the worker's port
+- The verb builds and serves `<slug>/pass` beside the worker's `board`, so the rebuild never deletes a state folder the worker's server holds open
+- The verb starts it on that copy at the worktree's port band plus 25, so it never meets the worker's port
 - The worker's server is never stopped or restarted, since it belongs to another session
 - It stands in for the local rung alone, and stops before the post, whatever the verdict
-- A project with no `serve` key drives the worker's server exactly as before
+- A project with no `serve` key drives the worker's server exactly as before, rebuilding `board` under it, so it declares a state folder that server owns as a `keep` path
 
 ### Which rung it serves
 

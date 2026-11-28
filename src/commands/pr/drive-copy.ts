@@ -151,7 +151,9 @@ export function registerDriveCopy(pr: Command): void {
         "record. The worker's own server is never started, stopped, or read.",
         '',
         'The copy lives at `.canon/tmp/pr/review-ui/<slug>/board/` at the main',
-        'worktree root, where `<slug>` is the branch with a leading type',
+        'worktree root, or under `pass/` beside it for a --serve run with a',
+        "`serve` key, so the worker's copy is never rebuilt under its server.",
+        '`<slug>` is the branch with a leading type',
         'segment dropped and each `/` made `-`. With a number the branch is the',
         "pull request's head, and without one it is the checkout's, so the",
         'worker starting its server before a pull request exists and the',
@@ -355,7 +357,8 @@ async function runDriveCopy(
   }
 
   const scratch = join(target.main, REVIEW_UI_SCRATCH)
-  const copyRoot = join(scratch, branchSlug(target.branch), 'board')
+  const slugRoot = join(scratch, branchSlug(target.branch))
+  const boardRoot = join(slugRoot, 'board')
   const baselinePath =
     target.number === undefined
       ? undefined
@@ -370,7 +373,7 @@ async function runDriveCopy(
 
   // A server left by an earlier pass would keep serving files the rebuild replaces.
   if (stop || serve) {
-    const ended = await stopPassPreview(copyRoot)
+    const ended = await stopPassPreview(boardRoot)
     if (ended.kind === 'failed') {
       logWarn(ended.detail)
       return refuseWith(
@@ -426,6 +429,11 @@ async function runDriveCopy(
 
   const config = loadPreviewConfig(worktree)
   if (config.kind === 'refused') return refuse(config.reason, config.detail)
+
+  // Only a pass that starts its own server leaves the worker's copy alone.
+  const ownsServer =
+    serve && config.kind === 'read' && config.config.serve !== undefined
+  const copyRoot = ownsServer ? join(slugRoot, 'pass') : boardRoot
 
   let copy: Record<string, unknown>
   if (config.kind === 'absent') {
