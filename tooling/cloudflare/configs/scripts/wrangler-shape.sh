@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Prints the deploy shape of the Wrangler config in the working directory, and
-# the D1 databases it binds, as `key=value` lines for `$GITHUB_OUTPUT`. Both
-# deploy workflows read it, so one reading decides which of them deploys.
+# Prints the deploy shape of the Wrangler config in the working directory, the
+# D1 databases it binds, and whether it declares `env.staging`, as `key=value`
+# lines for `$GITHUB_OUTPUT`. Both deploy workflows read it, so one reading
+# decides which of them deploys. Add a key as a new line, never by changing one.
 set -euo pipefail
 
 config=""
@@ -13,7 +14,7 @@ for name in wrangler.json wrangler.jsonc wrangler.toml; do
 done
 
 if [ -z "$config" ]; then
-  printf 'shape=none\nd1=\n'
+  printf 'shape=none\nd1=\nstaging=false\n'
   exit 0
 fi
 
@@ -43,4 +44,18 @@ false/true) shape=pages ;;
 esac
 
 databases=$(grep -Eo "$database" <<<"$body" | sed -E 's/.*"([^"]*)"$/\1/' | paste -sd ' ' - || true)
-printf 'shape=%s\nd1=%s\n' "$shape" "$databases"
+
+# A JSON config is parsed rather than matched, so a `staging` key under `vars`
+# is no environment. A config that does not parse reads as having none.
+staging=false
+if [ "$config" = wrangler.toml ]; then
+  grep -Eq '^[[:space:]]*\[\[?[[:space:]]*env\.staging([.[:space:]]|\])' <<<"$body" && staging=true
+else
+  staging=$(perl -MJSON::PP -e '
+    my $config = eval { JSON::PP->new->relaxed->decode(do { local $/; <STDIN> }) };
+    my $env = ref $config eq "HASH" ? $config->{env} : undef;
+    print ref $env eq "HASH" && ref $env->{staging} eq "HASH" ? "true" : "false";
+  ' <<<"$body")
+fi
+
+printf 'shape=%s\nd1=%s\nstaging=%s\n' "$shape" "$databases" "$staging"
