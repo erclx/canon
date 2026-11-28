@@ -56,10 +56,51 @@ jobs:
         run: bun install -g @anthropic-ai/claude-code@2.1.302
 
       - name: Verify
-        run: bun run check:ci
+        run: bun run check:static
 
       - name: Verify install
         run: bun run check:install
+
+  # The unit suite on its own job, so a lint or type error reports in about a
+  # minute rather than behind the suite. Reason in canon/context/development/ci.md
+  linux-unit-tests:
+    name: 🐧 Linux Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: changes
+    # The ruleset requires this check, so a Markdown-only change skips it by
+    # condition, which reports success. Only a detector that succeeded skips it.
+    if: >-
+      !cancelled() && github.event_name != 'schedule' &&
+      !(github.event_name == 'pull_request' &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.code == 'false')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Full history, so origin/main resolves for the merge-base reads.
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Shell Tools
+        run: |
+          bash scripts/ci/prefer-archive-mirror.sh
+          sudo apt-get install -y shfmt shellcheck
+
+      - name: Install Plugin CLI
+        # Pinned with the static job's copy. Reason in canon/context/development/ci.md
+        run: bun install -g @anthropic-ai/claude-code@2.1.302
+
+      - name: Unit Tests
+        run: bun run test
 
   changes:
     name: 🔍 Changes

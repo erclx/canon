@@ -23,9 +23,9 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 
 ### `verify.yml`
 
-Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, neither on the weekly cron. The macOS job runs `bun run test` alone, since lint, types, format, shell, build, and browser results do not differ by platform.
+Runs `🛡️ Static Checks` and `🐧 Linux Unit Tests` on Linux and `🍎 macOS Unit Tests` beside them, none on the weekly cron. Static Checks runs `bun run check:static`, the gate minus the tests stage. The unit jobs run `bun run test` alone, and Linux copies the static install steps for the tools tests read.
 
-- The macOS job blocks a merge, since the ruleset requires it beside `🛡️ Static Checks` as of 2026-11-06, and `canon pr lift` and `canon pr merge` gate by the required checks
+- The ruleset requires `🛡️ Static Checks` and `🐧 Linux Unit Tests`, and `canon pr lift` and `canon pr merge` gate by them. The macOS job is advisory, at 4 to 7 minutes on `main`.
 - A new push to a pull request cancels its older run. Every other event keys its group on the commit, so `main`, `merge_group`, and the cron never cancel.
 - The Pin Stock Bash step links `/bin/bash` 3.2 first on `PATH`, and the next step fails on any other major version, so every test spawning `bash` runs on what a Mac ships
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
@@ -62,12 +62,12 @@ Holds the groups, balanced by each suite's mean time on a runner. Vitest's `--sh
 
 ### `scripts/ci/docs-only.sh`
 
-A pull request changing only `.md` files skips `🍎 macOS Unit Tests`, which is the slowest check. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
+A pull request changing only `.md` files skips `🐧 Linux Unit Tests` and `🍎 macOS Unit Tests`, the slowest checks. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
 
 - The skip lives in the job's `if:` rather than a path filter, since a job skipped by its condition reports success and a skipped workflow never reports, which would strand a required check
 - `!cancelled()` keeps the job running when `🔍 Changes` is skipped on a push or fails, so only a detector that succeeded can skip the tests
 - The script splits renames and treats an empty or failed diff as code, so a `.ts` file renamed to `.md` still runs the tests
-- Every push to `main` runs the job, so a Markdown file a macOS test reads is caught at most one merge late, and `🛡️ Static Checks` runs the full suite on every pull request
+- Every push to `main` runs the job, so a Markdown file a unit test reads is caught at most one merge late
 
 ### `stack-verify.yml`
 
@@ -124,6 +124,6 @@ The CI programs, the install check, and a version pin sit beside the workflows.
 
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. With no merge queue, a sibling merge leaves it stale until a worker's standing wait or the poll reads it.
-- The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
-- `vitest.config.ts` keeps every `*.e2e.test.ts` out of `🛡️ Static Checks`. Only the `🎬 E2E Suites` groups run them, minus the probe tests under `src/driver/probes/` and `src/take/target.test.ts`.
+- The ruleset requires `🛡️ Static Checks` and `🐧 Linux Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
+- `vitest.config.ts` keeps every `*.e2e.test.ts` out of `🐧 Linux Unit Tests`. Only the `🎬 E2E Suites` groups run them, minus the probe tests under `src/driver/probes/` and `src/take/target.test.ts`.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization

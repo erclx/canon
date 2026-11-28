@@ -37,6 +37,7 @@
     "prepare": "husky",
     "check": "bun src/cli.ts gate run",
     "check:ci": "bun src/cli.ts gate run --all",
+    "check:static": "bun src/cli.ts gate run --all --skip tests",
     "update": "bun update --interactive && bun run check",
     "clean": "rm -rf node_modules && bun pm cache rm && bun install",
     "bootstrap": "bun scripts/core/bootstrap.ts",
