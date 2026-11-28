@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.131.0](https://github.com/erclx/canon/compare/v5.130.0...v5.131.0) (2026-11-28)
+
+
+### Features
+
+* **hooks:** print the frozen install after a merge changes a lockfile ([#3604](https://github.com/erclx/canon/issues/3604)) ([1c87617](https://github.com/erclx/canon/commit/1c87617f75ebac82c1a9c2982b149478b8e33227))
+* **orchestrator:** run the install a lockfile merge line names ([#3610](https://github.com/erclx/canon/issues/3610)) ([7890556](https://github.com/erclx/canon/commit/7890556302a970a14fd7cb234f4b33ee6d80ed16))
+* **records:** validate a plan's deferrals against the task board ([#3606](https://github.com/erclx/canon/issues/3606)) ([6d4f796](https://github.com/erclx/canon/commit/6d4f796a89381d978da0237d62cce0154d1dbce8))
+* **tasks:** keep a reviewer out of the In flight Session cell ([#3603](https://github.com/erclx/canon/issues/3603)) ([0d8abc9](https://github.com/erclx/canon/commit/0d8abc90481b79ba6059b7253880420fa2965b54))
+* **tooling:** delete the go and php stacks and name the way off them ([#3599](https://github.com/erclx/canon/issues/3599)) ([5a80a40](https://github.com/erclx/canon/commit/5a80a4045cdabaf3481983d2f221925ef5ddeb8f))
+
+
+### Bug Fixes
+
+* **pr:** stop the pass server by its /proc start ticks ([#3605](https://github.com/erclx/canon/issues/3605)) ([11cf7b1](https://github.com/erclx/canon/commit/11cf7b1d6c01b30ff6e359b13d959d00295d57c2))
+* **take:** time a recorded input's acknowledgement under the stall limit ([#3600](https://github.com/erclx/canon/issues/3600)) ([cf995ff](https://github.com/erclx/canon/commit/cf995fff577471f0d369284ca44591cfbcf1d6da))
+
 ## [5.130.0](https://github.com/erclx/canon/compare/v5.129.0...v5.130.0) (2026-11-27)
 
 
