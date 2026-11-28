@@ -5,6 +5,8 @@ description: Sources for claude/skills/design-taste/references/tells.md, one row
 
 # Machine tells ledger
 
+<!-- canon-length-exempt: a verbatim source record with one row per tells.md bullet, so it grows with the catalog it backs -->
+
 The field is what language models draw when nothing states a direction, which no design authority studies. Nearly every row is therefore a catalog observation from a community prompt skill, recording model output and never cited as an authority. The few authority rows quote MDN, Practical Typography, or Wikipedia.
 
 The main catalog is Taste-Skill's v2 experimental skill, which its author moved to the classics repository on 2026-10-19. Each count in the countable limits is a House choice even where a catalog states the same number, since the toolkit adopted it so the tell can be counted.
@@ -31,6 +33,7 @@ The main catalog is Taste-Skill's v2 experimental skill, which its author moved 
 | Boxes everywhere in one tone | [Notion home page](https://www.notion.com), read as a design: its feature tiles sit on a tinted ground and its three customer cards each take a color of their own, so no two boxed neighbors share a tone                                                             | 2026-11-19 |
 | A figure of identical parts  | [Wikipedia, Chartjunk](https://en.wikipedia.org/wiki/Chartjunk), quoting Tufte: "The interior decoration of graphics generates a lot of ink that does not tell the viewer anything new."                                                                               | 2026-11-08 |
 | The corner floater           | Catalog observation, [Taste-Skill v2 experimental](https://github.com/Leonxlnx/taste-skill-classics/blob/main/skills/taste-skill-v2-experimental/SKILL.md): "a small explainer paragraph floating with no clear alignment to anything else. That floater is the Tell." | 2026-10-24 |
+| The narrow centered column   | [Android canonical layouts](https://developer.android.com/develop/ui/views/layout/canonical-layouts): a wide window should "accommodate both the list and detail at the same time" rather than one column                                                              | 2026-11-28 |
 
 ## Content and labels
 
@@ -59,6 +62,7 @@ The main catalog is Taste-Skill's v2 experimental skill, which its author moved 
 | Saturation everywhere        | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "Oversaturated accent colors. Keep saturation below 80%."                                                                                                                                                              | 2026-10-24 |
 | The gradient as a substitute | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "Gradient-filled headline text" and a "Glowing or gradient" button are banned, reached past with "Solid ink" and a "Flat button"                                                                                     | 2026-10-24 |
 | Uniform radius and elevation | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "One medium border radius (12–16px) on everything" and a "Soft grey drop shadow under every card"                                                                                                                    | 2026-10-24 |
+| The blue-tinted dark         | [Material dark theme](https://github.com/material-components/material-components-android/blob/master/docs/theming/Dark.md): "The baseline Material `Dark` theme background and surface colors are dark grey"                                                                                                                                             | 2026-11-28 |
 
 ## Platform surfaces
 
