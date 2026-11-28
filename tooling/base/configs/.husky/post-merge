@@ -20,6 +20,25 @@
 root=$(git worktree list --porcelain 2>/dev/null | grep -m 1 '^worktree ' | cut -d' ' -f2-) || root=''
 [ -n "$root" ] || exit 0
 
+# A merge that changes a lockfile leaves the installed dependencies stale, so
+# the line names the frozen install and runs nothing. It sits ahead of the
+# board and `canon` checks so a checkout with neither still gets it. A missing
+# ORIG_HEAD gives nothing to compare and prints nothing.
+if git rev-parse --verify -q ORIG_HEAD >/dev/null 2>&1; then
+  for lock in bun.lock bun.lockb package-lock.json pnpm-lock.yaml yarn.lock uv.lock; do
+    case "$lock" in
+    bun.lock | bun.lockb) install='bun install --frozen-lockfile' ;;
+    package-lock.json) install='npm ci' ;;
+    pnpm-lock.yaml) install='pnpm install --frozen-lockfile' ;;
+    yarn.lock) install='yarn install --frozen-lockfile' ;;
+    uv.lock) install='uv sync --frozen' ;;
+    esac
+    if ! git diff --quiet ORIG_HEAD HEAD -- "$lock" 2>/dev/null; then
+      echo "$lock changed in this merge. Run $install."
+    fi
+  done
+fi
+
 # The board is shared scratch at the main worktree root, and `git worktree
 # list` puts that root first. A checkout with no board runs none of the steps.
 [ -d "$root/.canon/tasks" ] || exit 0

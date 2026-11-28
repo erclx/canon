@@ -67,6 +67,39 @@ function runHook(hook: string): number {
   return runHookWithStderr(hook).code
 }
 
+function git(...args: string[]): string {
+  return execaSync('git', ['-C', root, ...args], {
+    env: gitEnv(),
+    extendEnv: false,
+  }).stdout
+}
+
+/**
+ * Commits each file set in turn and points ORIG_HEAD at the first commit, so
+ * the hook reads the span a merge leaves behind.
+ */
+function mergeSpan(
+  before: Record<string, string>,
+  after: Record<string, string>,
+): void {
+  for (const files of [before, after]) {
+    for (const [name, content] of Object.entries(files)) {
+      writeFileSync(join(root, name), content)
+    }
+    git('add', '-A')
+    git('commit', '-m', 'step', '--allow-empty')
+    if (files === before) git('update-ref', 'ORIG_HEAD', 'HEAD')
+  }
+}
+
+function runHookStdout(hook: string): string {
+  return execaSync('sh', ['-e', hook], {
+    cwd: root,
+    env: { ...gitEnv(), PATH: `${bin}:/usr/bin:/bin` },
+    extendEnv: false,
+  }).stdout
+}
+
 beforeEach(() => {
   root = realpathSync(mkdtempSync(join(tmpdir(), 'canon-post-merge-hook-')))
   bin = join(root, '.bin')
@@ -118,6 +151,52 @@ describe.each(HOOKS)('post-merge hook ($name copy)', ({ path }) => {
     const code = runHook(path)
 
     expect({ code, canon: calls('canon') }).toEqual({ code: 0, canon: '' })
+  })
+
+  it('should name the frozen install when a merge changes bun.lock', () => {
+    mergeSpan({ 'bun.lock': 'a' }, { 'bun.lock': 'b' })
+
+    expect(runHookStdout(path)).toBe(
+      'bun.lock changed in this merge. Run bun install --frozen-lockfile.',
+    )
+  })
+
+  it('should print nothing when the merge leaves the lockfile alone', () => {
+    mergeSpan(
+      { 'bun.lock': 'a', 'package.json': '{}' },
+      { 'package.json': '{"a":1}' },
+    )
+
+    expect(runHookStdout(path)).toBe('')
+  })
+
+  it('should print one line per changed lockfile', () => {
+    mergeSpan(
+      { 'bun.lock': 'a', 'uv.lock': 'a' },
+      { 'bun.lock': 'b', 'uv.lock': 'b' },
+    )
+
+    expect(runHookStdout(path).split('\n')).toEqual([
+      'bun.lock changed in this merge. Run bun install --frozen-lockfile.',
+      'uv.lock changed in this merge. Run uv sync --frozen.',
+    ])
+  })
+
+  it('should still print the line with no board and no canon', () => {
+    mergeSpan({ 'bun.lock': 'a' }, { 'bun.lock': 'b' })
+    rmSync(join(root, '.canon'), { recursive: true })
+
+    expect(runHookStdout(path)).toBe(
+      'bun.lock changed in this merge. Run bun install --frozen-lockfile.',
+    )
+  })
+
+  it('should print nothing and exit zero with no ORIG_HEAD', () => {
+    writeFileSync(join(root, 'bun.lock'), 'a')
+    git('add', '-A')
+    git('commit', '-m', 'only')
+
+    expect(runHookStdout(path)).toBe('')
   })
 })
 
