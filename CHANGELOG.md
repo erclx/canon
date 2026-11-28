@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.134.0](https://github.com/erclx/canon/compare/v5.133.0...v5.134.0) (2026-11-28)
+
+
+### Features
+
+* **intake:** draw every visible drive finding before it is answered ([#3625](https://github.com/erclx/canon/issues/3625)) ([2c2cf19](https://github.com/erclx/canon/commit/2c2cf195a2f359733e17eb6855596b6b74518195))
+* **orchestrator:** add a release-merge runbook for the controller ([#3624](https://github.com/erclx/canon/issues/3624)) ([36e0b4a](https://github.com/erclx/canon/commit/36e0b4a1067925ec8cab460463af1a82ba3d8f70))
+* **roles:** add a design judge that sends the operator only close calls ([#3626](https://github.com/erclx/canon/issues/3626)) ([d8df35a](https://github.com/erclx/canon/commit/d8df35a2a8a179ee0d3a3d84efd0f99d8e1f9f32))
+* **skills:** walk the operator's hand steps from a file written first ([#3623](https://github.com/erclx/canon/issues/3623)) ([33b8240](https://github.com/erclx/canon/commit/33b8240638cfdcf0369983f3a2128d23449c689a))
+
 ## [5.133.0](https://github.com/erclx/canon/compare/v5.132.0...v5.133.0) (2026-11-28)
 
 
