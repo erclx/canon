@@ -30,6 +30,19 @@ A reference to a retired skill takes a hand edit.
 - Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
 - Delete a `canon:canvas-board` reference too. Frameboard, which `canon:design-pick` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
 
+## Keep or delete the Go and PHP stack files, your call
+
+The toolkit no longer ships the `go` or `php` stack, or their language and testing rules. Nothing deletes what a project already holds.
+
+- `.golangci.yml`, `phpstan.neon`, `phpunit.xml`, `.php-cs-fixer.dist.php`, the smoke test seed, and the stack's `package.json` scripts and gitignore entries all stay yours
+- `canon gov sync` removes the installed `lang/go.md` and `lib/testing-go.md`, or the PHP pair, and says so
+- `canon gov install base` moves the governance record off the retired stack
+
+Move tooling off it in two steps. A base write alone replaces `scripts/verify.json` with a list requiring only `check:format`, and `bun run check` then skips your typecheck, lint, and tests without a word.
+
+1. Run `canon tooling customize scripts/verify.json` to keep your list
+2. Run `canon tooling sync base --write` to record `base` as the chain
+
 ## Keep or delete the pick archives, your call
 
 A pick no longer copies its arms out of the board. Earlier picks left a folder of images per project under `.canon/`, such as `.canon/picks/` or `.canon/landing/`, and nothing deletes or moves one.

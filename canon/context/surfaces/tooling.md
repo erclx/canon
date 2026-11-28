@@ -18,7 +18,7 @@ Holds one stack: a `manifest.toml`, a `reference.md` with any `reference-<topic>
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
 - A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` and `[gitattributes]` add a group, and `[scaffold] prepare` runs on the starter.
 - `runtime` is reserved and read by nothing. `scaffold` is read by `canon tooling verify`, `canon tooling scaffold`, `canon tooling list`, and `sandbox/tooling/upstream.ts`.
-- `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their starters write no `package.json` and each stack's `scaffold/` overlay lands a minimal one
+- `python` extends `base` directly and runs on `uv`, so its starter writes no `package.json` and the stack's `scaffold/` overlay lands a minimal one
 - A script changes only through `[scripts.override]`, as `vite-react` forces `--max-warnings 0` onto the scaffold's oxlint, and the drift scan reads a stale override as `drifted`
 
 ### `tooling/astro/`

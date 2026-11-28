@@ -91,4 +91,4 @@ Check every new path the plan or the change names against each line, and fix the
 - What a module exposes across its boundary, being its exports, flags, output, and errors: `api-design`. This skill decides where the file holding it sits.
 - Where a new path gets written into a plan, and the plan's shape: `plan-change` and the plan standard
 - The pointer here that every session of a code stack loads: `routing`
-- Runner, suffix, and top-level test folder conventions per language: `testing-ts`, `testing-py`, `testing-go`, and `testing-php`
+- Runner, suffix, and top-level test folder conventions per language: `testing-ts` and `testing-py`
