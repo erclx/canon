@@ -1,6 +1,6 @@
 ---
 title: Orchestrator design launch
-description: The launch for a design session, being an app drive or a sketch round run under the planner role, always as a talk session, the name it takes, and how a pick reaches a worker
+description: The launch for a design session, being an app drive or a sketch round run under the planner role, always as a talk session, the name it takes, the judge launched beside it on the operator's ask, and how a pick reaches a worker
 ---
 
 # Dispatch a design session
@@ -22,6 +22,22 @@ A drive swaps the middle of the brief to `/canon:app-drive <target>` and asks fo
 - The name keeps the `planner-` prefix, since `orchestrator-handoff.md` and the skills that branch on a dispatched planner already read it, and the `design-` segment is what a reader tells it apart by
 - Never launch one cold. A drive asks the operator for missing config and closes only on their word, and both skills ask each pick through the question tool a cold launch denies.
 - Record no task, since the launch names none. The session's close hands back what its record produced.
+
+## Launch a judge beside it
+
+A judge picks each round the way the operator would and sends the operator only its close calls, per `${CLAUDE_SKILL_DIR}/../role-judge/SKILL.md`. Launch one only on the operator's ask, since a design session with no judge asks every round as it always has.
+
+Launch the judge first, since the design session's brief carries its id. The judge is not a talk session, as the operator talks only with the design session.
+
+```bash
+claude --bg --model <model> --effort <effort> -n "judge-<project>-<topic>" "Run /canon:role-judge. Judge the rounds a design session sends you, reading canon/DESIGN.md and <log> first, and write your verdict table to <table>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json at the moment you send, and never resolve an addressee by name prefix. Message it if you stop on a question."
+```
+
+- `<topic>` matches the design session's, so the pair reads together in the roster
+- `<log>` is the drive's `evidence/drive-log.md`, or `no drive log` for a standalone pick
+- `<table>` is `evidence/judge.md` in the drive's intake folder, or `.canon/tmp/<topic>/judge.md` for a pick keeping no `evidence/`
+
+Read the judge's sessionId from `canon sessions list --json`, then add one sentence to the design session's brief: `Your judge is the session whose sessionId is <judge-id>, so send it each round first and close on one batch review, as drawing.md's Asking section states.`
 
 ## Landing the pick
 

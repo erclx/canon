@@ -154,7 +154,7 @@ A launch naming no judge asks every round this way, so a pick or a drive launche
 
 ### With a judge named
 
-A launch naming a judge by sessionId sends each round to that judge before the operator sees it, per `${CLAUDE_SKILL_DIR}/../role-judge/SKILL.md`. Send the finding the round settles, its frames by name, and the options capture's path, through `canon:session-relay`.
+A launch naming a judge by sessionId sends each round to that judge before the operator sees it, per `${CLAUDE_SKILL_DIR}/../role-judge/SKILL.md`. Send the finding the round settles, its frames by name, the options capture's path, and this session's sessionId for the reply, through `canon:session-relay`.
 
 | Judge's reply | Route                                                                                         |
 | ------------- | --------------------------------------------------------------------------------------------- |

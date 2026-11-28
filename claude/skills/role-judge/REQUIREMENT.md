@@ -17,7 +17,7 @@ A judge with no stated bounds also writes the decision line or redraws the frame
 - Each round returns a pick, a one-line reason naming the rule or precedent that decided it, and `clear` or `close call`
 - A round with no deciding rule, a cut or below-the-fold difference, or two arms passing alike is a close call
 - A round where no arm passes returns a correction naming the arm and the change, so it is redrawn before anything reaches the operator
-- The verdict table under the design session's `evidence/` is the only file written
+- The verdict table at the path the launch names is the only file written
 
 ## Must not
 

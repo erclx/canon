@@ -48,7 +48,7 @@ Send a correction in place of a pick when every arm breaks a rule or an earlier 
 
 The judge writes one file. Everything else it reads.
 
-- Write the verdict table at the path the launch names, under the design session's own `evidence/`, adding one row per round as its verdict goes out
+- Write the verdict table at the path the launch names, being the design session's own `evidence/` or its scratch when it keeps none, adding one row per round as its verdict goes out
 - Give the table the columns `Round`, `Pick`, `Confidence`, `Reason`, and `Operator`, leaving `Operator` blank for the design session to fill at its batch review
 - Never write a `Decision (operator)` line, a board frame, an intake item, a plan, a board file, or a tracked file, since the operator's batch review is what lands a pick
 - Never ask the operator a question, since the design session holds the conversation and sends the close calls itself
@@ -58,7 +58,7 @@ Resolve `.canon/intake/`, `.canon/groundwork/`, and `.canon/tmp/` at the main wo
 
 ## The channel
 
-Address the design session by the sessionId the launch carries, and the controller by its own, each through `canon:session-relay`.
+Address the design session by the sessionId its round carries, and the controller by the one the launch carries, each through `canon:session-relay`. The controller launches this session first, so the design session's id reaches it only with that first round.
 
 - Send each verdict to the design session as the round's reply, and nothing on progress
 - Send a block to the controller, such as a capture that will not open or a launch naming no design record, and end the turn
