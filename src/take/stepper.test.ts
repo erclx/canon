@@ -3,6 +3,7 @@ import {
   StepperStalled,
   alignTicks,
   retryScale,
+  stepThen,
   withinCap,
 } from '@/take/stepper'
 
@@ -74,6 +75,69 @@ describe('withinCap', () => {
     await expect(
       withinCap(Promise.reject(new Error('navigation failed')), 15_000),
     ).rejects.toThrow('navigation failed')
+
+    expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+/**
+ * Covers the wait a recorded input makes on its acknowledgement after its
+ * frame. The page acknowledges an input only once its handler returns, so a
+ * handler that blocks after the frame holds the take unless the wait is timed.
+ */
+
+describe('stepThen', () => {
+  const frameDone = () => Promise.resolve()
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
+  })
+
+  it('should stall in recording at the frame count when the acknowledgement never comes', async () => {
+    const outcome = stepThen(new Promise(() => {}), frameDone, 2000, () => 3)
+      .then(() => undefined)
+      .catch((error: unknown) => error)
+
+    await vi.advanceTimersByTimeAsync(2000)
+
+    const stall = await outcome
+    expect(stall).toBeInstanceOf(StepperStalled)
+    expect(stall).toMatchObject({ frame: 3, phase: 'recording' })
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('should resolve and leave no timer behind when the acknowledgement comes inside the limit', async () => {
+    let acknowledge = () => {}
+    const sent = new Promise<void>((done) => {
+      acknowledge = done
+    })
+    const outcome = stepThen(sent, frameDone, 2000, () => 0)
+
+    await vi.advanceTimersByTimeAsync(1999)
+    acknowledge()
+
+    await expect(outcome).resolves.toBeUndefined()
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('should rethrow a frame stall and swallow the acknowledgement rejected after it', async () => {
+    let reject = (_: Error) => {}
+    const sent = new Promise<void>((_, fail) => {
+      reject = fail
+    })
+    const frameStalled = () =>
+      Promise.reject(new StepperStalled(5, 2000, 'recording'))
+
+    await expect(stepThen(sent, frameStalled, 2000, () => 5)).rejects.toThrow(
+      'frame 5 took over 2 s in recording',
+    )
+    reject(new Error('the shell closed its connection'))
+    await vi.advanceTimersByTimeAsync(0)
 
     expect(vi.getTimerCount()).toBe(0)
   })

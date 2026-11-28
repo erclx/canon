@@ -172,6 +172,9 @@ export async function filmStepped(
       frames += 1
     }
 
+    const afterFrame = (sent: Promise<unknown>) =>
+      stepThen(sent, frame, stallMs, () => frames)
+
     const recording: Stage = {
       viewport,
       now: () => frames * FRAME_MS,
@@ -179,13 +182,10 @@ export async function filmStepped(
         for (let i = 0; i < Math.round(ms / FRAME_MS); i += 1) await frame()
       },
       pointer: (input) =>
-        stepThen(
-          page.send('Input.dispatchMouseEvent', mouseEvent(input)),
-          frame,
-        ),
-      key: (text) => stepThen(page.send('Input.insertText', { text }), frame),
+        afterFrame(page.send('Input.dispatchMouseEvent', mouseEvent(input))),
+      key: (text) => afterFrame(page.send('Input.insertText', { text })),
       press: (input) =>
-        stepThen(page.send('Input.dispatchKeyEvent', keyEvent(input)), frame),
+        afterFrame(page.send('Input.dispatchKeyEvent', keyEvent(input))),
       evaluate: (expression) => page.evaluate(expression),
     }
 
@@ -464,12 +464,17 @@ function keyEvent(input: KeyInput): Record<string, unknown> {
 
 /**
  * Steps a frame, then awaits the input sent ahead of it, since awaiting first
- * deadlocks the page. When the step fails, the input is left settling against a
- * closing shell, so its rejection is handled here rather than left unhandled.
+ * deadlocks the page. The page acknowledges an input only once its handler
+ * returns, so the wait stalls in recording at `framesDone()` past `stallMs`
+ * rather than holding the take for as long as the handler blocks. When the
+ * step fails, the input is left settling against a closing shell, so its
+ * rejection is handled here rather than left unhandled.
  */
-async function stepThen(
+export async function stepThen(
   sent: Promise<unknown>,
   step: () => Promise<void>,
+  stallMs: number,
+  framesDone: () => number,
 ): Promise<void> {
   try {
     await step()
@@ -477,7 +482,7 @@ async function stepThen(
     sent.catch(() => {})
     throw error
   }
-  await sent
+  await withinStall(sent, framesDone(), stallMs, 'recording')
 }
 
 async function withinStall<T>(
