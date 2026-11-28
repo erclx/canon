@@ -42,15 +42,22 @@ const STILL_CAP_MS = 2000
  */
 export type StallPhase = 'settle' | 'setup' | 'recording'
 
+/** What a stall waited on: a frame's reply, or an input's acknowledgement. */
+export type StallWait = 'frame' | 'input'
+
 /** A frame that took longer than `STALL_MS`, so the beat is filmed another way. */
 export class StepperStalled extends Error {
   constructor(
     readonly frame: number,
     stallMs: number,
     readonly phase: StallPhase,
+    readonly wait: StallWait = 'frame',
   ) {
+    const limit = `${stallMs / 1000} s`
     super(
-      `frame ${frame} took over ${stallMs / 1000} s in ${phase} under frame stepping`,
+      wait === 'input'
+        ? `the input after frame ${frame} took over ${limit} to acknowledge in ${phase} under frame stepping`
+        : `frame ${frame} took over ${limit} in ${phase} under frame stepping`,
     )
   }
 }
@@ -172,6 +179,11 @@ export async function filmStepped(
       frames += 1
     }
 
+    // The frame the input's step began, numbered from 0 as a frame stall numbers it.
+    const lastFrame = () => frames - 1
+    const afterFrame = (sent: Promise<unknown>, limit = stallMs) =>
+      stepThen(sent, frame, { stallMs: limit, lastFrame })
+
     const recording: Stage = {
       viewport,
       now: () => frames * FRAME_MS,
@@ -179,13 +191,13 @@ export async function filmStepped(
         for (let i = 0; i < Math.round(ms / FRAME_MS); i += 1) await frame()
       },
       pointer: (input) =>
-        stepThen(
+        afterFrame(
           page.send('Input.dispatchMouseEvent', mouseEvent(input)),
-          frame,
+          ackLimit(input, stallMs),
         ),
-      key: (text) => stepThen(page.send('Input.insertText', { text }), frame),
+      key: (text) => afterFrame(page.send('Input.insertText', { text })),
       press: (input) =>
-        stepThen(page.send('Input.dispatchKeyEvent', keyEvent(input)), frame),
+        afterFrame(page.send('Input.dispatchKeyEvent', keyEvent(input))),
       evaluate: (expression) => page.evaluate(expression),
     }
 
@@ -462,14 +474,21 @@ function keyEvent(input: KeyInput): Record<string, unknown> {
     : { type: 'rawKeyDown', ...event }
 }
 
+/** The stall limit an input's acknowledgement waits under, and the frame it names. */
+export interface AckBound {
+  readonly stallMs: number
+  readonly lastFrame: () => number
+}
+
 /**
  * Steps a frame, then awaits the input sent ahead of it, since awaiting first
- * deadlocks the page. When the step fails, the input is left settling against a
- * closing shell, so its rejection is handled here rather than left unhandled.
+ * deadlocks the page. The page acknowledges only once its handler returns, so
+ * the wait stalls past `bound`, and a failed step leaves `sent` handled.
  */
-async function stepThen(
+export async function stepThen(
   sent: Promise<unknown>,
   step: () => Promise<void>,
+  bound: AckBound,
 ): Promise<void> {
   try {
     await step()
@@ -477,7 +496,24 @@ async function stepThen(
     sent.catch(() => {})
     throw error
   }
-  await sent
+  await withinStall(
+    sent,
+    bound.lastFrame(),
+    bound.stallMs,
+    'recording',
+    'input',
+  )
+}
+
+/**
+ * How long a move's acknowledgement may take. One that misses its frame waits
+ * on Chromium's next flush, in 2.5 s steps up to 5011 ms under measured load.
+ */
+const MOVE_ACK_MS = 30_000
+
+/** How long a pointer input's acknowledgement may take before the beat falls back. */
+export function ackLimit(input: PointerInput, stallMs: number): number {
+  return input.type === 'move' ? Math.max(stallMs, MOVE_ACK_MS) : stallMs
 }
 
 async function withinStall<T>(
@@ -485,11 +521,12 @@ async function withinStall<T>(
   frame: number,
   stallMs: number,
   phase: StallPhase,
+  wait: StallWait = 'frame',
 ): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
   const stalled = new Promise<never>((_, fail) => {
     timer = setTimeout(
-      () => fail(new StepperStalled(frame, stallMs, phase)),
+      () => fail(new StepperStalled(frame, stallMs, phase, wait)),
       stallMs,
     )
   })
