@@ -41,8 +41,8 @@ const DECISION_LABEL = 'Decision (operator)'
 const DRAWN_LABEL = 'Drawn'
 const BOARD_ROW = /^\|\s*Board\s*\|(.*?)\|?\s*$/
 const SEE = /^see\s+(\d+)/i
-/** The meta line of a passed goal, script, or Behavior row, which owes no drawing. */
-const PASS_META = /^`pass`/
+/** A passed entry's meta line, or a last drive's finding re-checked fixed, owing no drawing. */
+const EXEMPT_META = /^`pass`|^`[^`]+`\s*·\s*last-drive\s*·.*·\s*fixed\s*$/
 
 /**
  * The paths a `Drawn` value cites in code spans. A skip cites none, since its
@@ -56,7 +56,7 @@ export function citedDrawings(value: string): string[] {
 /**
  * Reads every logged finding, decided or not, for one with nothing drawn. A path
  * in a code span or `skipped, <reason>` passes, and so does a `see <nn>` decision,
- * drawn under the finding it names. A passed entry owes nothing.
+ * drawn under the finding it names. A pass or a fixed re-check owes nothing.
  */
 export function readDrawn(source: string): DrawnReading {
   const undrawn: string[] = []
@@ -99,7 +99,7 @@ export function readDrawn(source: string): DrawnReading {
     }
     const row = BOARD_ROW.exec(line.text)
     if (row && row[1].trim() !== '') board = true
-    if (finding !== undefined && PASS_META.test(line.text)) passed = true
+    if (finding !== undefined && EXEMPT_META.test(line.text)) passed = true
     const field = LOG_FIELD.exec(line.text)
     if (finding === undefined || !field) continue
     if (field[1] === DECISION_LABEL) decision = field[2].trim()

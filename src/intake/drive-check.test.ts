@@ -218,6 +218,32 @@ describe('readDrawn', () => {
     expect(readDrawn(log).undrawn).toEqual([])
   })
 
+  it('should pass a last-drive re-check marked fixed with no Drawn field', () => {
+    const log = [
+      '## 07. The export button sits below the fold',
+      '',
+      '`minor` · last-drive · developer · fixed',
+      '',
+      '- **Did:** re-drove finding 06 of the last drive',
+    ].join('\n')
+
+    expect(readDrawn(log).undrawn).toEqual([])
+  })
+
+  it('should list a last-drive re-check still open with no Drawn field', () => {
+    const log = [
+      '## 07. The export button sits below the fold',
+      '',
+      '`minor` · last-drive · developer · still open',
+      '',
+      '- **Did:** re-drove finding 06 of the last drive',
+    ].join('\n')
+
+    expect(readDrawn(log).undrawn).toEqual([
+      '07. The export button sits below the fold',
+    ])
+  })
+
   it('should list an undecided finding that carries no Drawn field', () => {
     const log = [
       '## 06. Export button sits below the fold',

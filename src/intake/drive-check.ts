@@ -97,9 +97,9 @@ export interface DriveFindings {
   readonly missingEvidence: readonly string[]
   /** The drive's worktree, when the record names one still on disk. */
   readonly worktreeLeft: readonly string[]
-  /** Logged findings the operator decided with no drawn outcome. */
+  /** Logged findings, decided or not, with no drawn outcome. */
   readonly undrawn: readonly string[]
-  /** `evidence/baseline/00-current` when a drive that drew a decided finding on a board holds no capture of the current page. */
+  /** `evidence/baseline/00-current` when a drive that drew a finding on a board holds no capture of the current page. */
   readonly uncaptured: readonly string[]
   /** Findings whose drawing was skipped while the item deciding them fixes a rendered surface. */
   readonly skippedVisible: readonly string[]
