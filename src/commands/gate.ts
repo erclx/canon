@@ -30,6 +30,7 @@ interface RunCommandOptions {
   readonly all?: boolean
   readonly nested?: boolean
   readonly json?: boolean
+  readonly skip?: readonly string[]
 }
 
 export function register(program: Command): void {
@@ -53,6 +54,10 @@ export function register(program: Command): void {
       'Suppress the outer frame when another script opened one',
     )
     .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--skip <stage...>',
+      'Leave the named stage ids out, each recorded as skipped',
+    )
     .addHelpText(
       'after',
       [
@@ -81,6 +86,7 @@ export function register(program: Command): void {
         '  canon gate run',
         '  canon gate run --all',
         '  canon gate run --json',
+        '  canon gate run --all --skip tests',
         '',
       ].join('\n'),
     )
@@ -97,6 +103,17 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   const emitJson = opts.json ?? false
   const nested = opts.nested ?? false
   const run = commandRunner(root)
+  const stages = stagesFor(root)
+
+  const unknown = (opts.skip ?? []).filter(
+    (id) => !stages.some((stage) => stage.id === id),
+  )
+  if (unknown.length > 0) {
+    logError(
+      `Unknown stage ${unknown.join(', ')}. Valid ids: ${stages.map((stage) => stage.id).join(', ')}`,
+    )
+    return 1
+  }
 
   if (!emitJson && !nested) intro('canon gate run')
 
@@ -114,6 +131,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
     ci: process.env.CI === 'true',
     run,
     cli: cliRunner(root),
+    skip: new Set(opts.skip),
     changed: changed.scoped ? changed.files : undefined,
     base: changed.scoped ? changed.base : undefined,
     onQueue: (label, holder) => {
@@ -125,7 +143,7 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   }
 
   const results = await runStages(
-    stagesFor(root),
+    stages,
     ctx,
     emitJson ? undefined : (result) => report(result),
   )

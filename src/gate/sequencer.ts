@@ -119,6 +119,8 @@ export interface GateContext extends MeasureContext {
    * scoping is off and every stage runs.
    */
   readonly changed?: readonly string[]
+  /** Stage ids the caller left out by flag, each recorded as skipped. */
+  readonly skip?: ReadonlySet<string>
   /** The merge base `changed` was read against, so a stage can read changed lines. */
   readonly base?: string
   /**
@@ -548,8 +550,9 @@ export async function runStages(
 
   for (const stage of stages) {
     const failed = results.find((entry) => entry.status === 'failed')
-    const result =
-      stage.id === HELD_STAGE_ID && failed !== undefined
+    const result = ctx.skip?.has(stage.id)
+      ? flaggedResult(stage)
+      : stage.id === HELD_STAGE_ID && failed !== undefined
         ? heldResult(stage, failed)
         : await runStage(stage, ctx)
     results.push(result)
@@ -557,6 +560,16 @@ export async function runStages(
   }
 
   return results
+}
+
+function flaggedResult(stage: Stage): StageResult {
+  return {
+    id: stage.id,
+    label: stage.label,
+    status: 'skipped',
+    emissions: [{ kind: 'info', text: 'Skipped by --skip' }],
+    ms: 0,
+  }
 }
 
 function heldResult(stage: Stage, failed: StageResult): StageResult {
