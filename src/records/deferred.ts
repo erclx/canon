@@ -65,6 +65,21 @@ function openingSpan(bullet: string): string | undefined {
   return /^-[ \t]*`([^`]+)`/.exec(bullet)?.[1].trim()
 }
 
+const NONE_IDENTIFIED = 'None identified.'
+
+/**
+ * Lines ahead of the first bullet, which `readBullets` drops. A deferral
+ * written there is the prose-only form the section exists to replace.
+ */
+function proseLines(section: readonly string[]): string[] {
+  const firstBullet = section.findIndex((line) => line.trim().startsWith('- '))
+  const lead = firstBullet === -1 ? section : section.slice(0, firstBullet)
+
+  return lead
+    .map((line) => line.trim())
+    .filter((line) => line !== '' && line !== NONE_IDENTIFIED)
+}
+
 function unfiled(bullet: string, reason: string): DeferralFinding {
   return {
     kind: 'deferral-unfiled',
@@ -81,7 +96,9 @@ export function checkDeferrals(
   section: readonly string[] | undefined,
   context: DeferralRoot,
 ): DeferralFinding[] {
-  const findings: DeferralFinding[] = []
+  const findings: DeferralFinding[] = proseLines(section ?? []).map((line) =>
+    unfiled(line, 'is prose under ## Deferred, which names no task stem.'),
+  )
 
   for (const bullet of readBullets(section ?? [])) {
     const stem = openingSpan(bullet)

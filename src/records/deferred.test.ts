@@ -50,6 +50,23 @@ describe('checkDeferrals', () => {
     expect(findings[0].message).toContain(reason)
   })
 
+  it.each([
+    ['a prose-only section', ['The resize grips wait for a later row.']],
+    [
+      'a paragraph ahead of a bullet',
+      ['The grips wait.', '', '- `v223.1-live-row`: resize grips'],
+    ],
+  ])('should report %s as unfiled', (_label, lines) => {
+    const findings = checkDeferrals(deferred(...lines), CONTEXT)
+
+    expect(findings.map((found) => found.kind)).toEqual(['deferral-unfiled'])
+    expect(findings[0].message).toContain('prose')
+  })
+
+  it('should read None identified. as a section deferring nothing', () => {
+    expect(checkDeferrals(deferred('None identified.'), CONTEXT)).toEqual([])
+  })
+
   it('should report nothing for a plan with no Deferred section', () => {
     expect(checkDeferrals(undefined, CONTEXT)).toEqual([])
   })
