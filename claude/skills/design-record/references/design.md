@@ -100,7 +100,7 @@ An optional `## Behavior` sits last, after `## Iconography`, so the order shared
 - It is a `Surface | Behavior` table, one row per interaction, since the prose budget skips table rows and a check reads it by row
 - The Surface cell names a `canon/design/` group, as `` `board` ``
 - The Behavior cell states one interaction with its range or persistence, such as `A frame resizes from its corner grips, 120px to 1600px`
-- `canon intake drive-check` fails a drive that tried no row, matching a row by both cells with a bold label and a trailing period dropped
+- `canon intake drive-check` fails a row with no drive entry, one not driven with no reason, and an entry naming no row, matching by both cells with a bold label and trailing period dropped
 
 The section belongs to an intent record. A values record adds it through the module it renders from, never by hand.
 
