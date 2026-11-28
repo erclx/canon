@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   StepperStalled,
   alignTicks,
+  boundsAcknowledgement,
   retryScale,
   stepThen,
   withinCap,
@@ -107,8 +108,13 @@ describe('stepThen', () => {
     vi.useRealTimers()
   })
 
+  const bound = (frames: number) => ({
+    stallMs: 2000,
+    framesDone: () => frames,
+  })
+
   it('should stall in recording at the frame count when the acknowledgement never comes', async () => {
-    const outcome = stepThen(new Promise(() => {}), frameDone, 2000, () => 3)
+    const outcome = stepThen(new Promise(() => {}), frameDone, bound(3))
       .then(() => undefined)
       .catch((error: unknown) => error)
 
@@ -125,9 +131,23 @@ describe('stepThen', () => {
     const sent = new Promise<void>((done) => {
       acknowledge = done
     })
-    const outcome = stepThen(sent, frameDone, 2000, () => 0)
+    const outcome = stepThen(sent, frameDone, bound(0))
 
     await vi.advanceTimersByTimeAsync(1999)
+    acknowledge()
+
+    await expect(outcome).resolves.toBeUndefined()
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('should wait an unbounded acknowledgement out past the limit without stalling', async () => {
+    let acknowledge = () => {}
+    const sent = new Promise<void>((done) => {
+      acknowledge = done
+    })
+    const outcome = stepThen(sent, frameDone, undefined)
+
+    await vi.advanceTimersByTimeAsync(5000)
     acknowledge()
 
     await expect(outcome).resolves.toBeUndefined()
@@ -142,13 +162,35 @@ describe('stepThen', () => {
     const frameStalled = () =>
       Promise.reject(new StepperStalled(5, 2000, 'recording'))
 
-    await expect(stepThen(sent, frameStalled, 2000, () => 5)).rejects.toThrow(
+    await expect(stepThen(sent, frameStalled, bound(5))).rejects.toThrow(
       'frame 5 took over 2 s in recording',
     )
     reject(new Error('the shell closed its connection'))
     await vi.advanceTimersByTimeAsync(0)
 
     expect(vi.getTimerCount()).toBe(0)
+  })
+})
+
+/**
+ * Covers which pointer inputs bound their acknowledgement. A move that misses
+ * its frame waits for Chromium's next flush, measured at 2.5 s steps under
+ * load, while a press, a release, and a wheel acknowledge within the frame.
+ */
+
+describe('boundsAcknowledgement', () => {
+  const at = { x: 10, y: 20 }
+
+  it('should leave a move unbounded', () => {
+    expect(boundsAcknowledgement({ type: 'move', ...at })).toBe(false)
+  })
+
+  it.each([
+    ['a press', { type: 'down', ...at, clickCount: 1 }],
+    ['a release', { type: 'up', ...at, clickCount: 1 }],
+    ['a wheel', { type: 'wheel', ...at, dy: 120 }],
+  ] as const)('should bound %s', (_, input) => {
+    expect(boundsAcknowledgement(input)).toBe(true)
   })
 })
 

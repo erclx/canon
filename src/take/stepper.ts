@@ -179,8 +179,9 @@ export async function filmStepped(
       frames += 1
     }
 
-    const afterFrame = (sent: Promise<unknown>) =>
-      stepThen(sent, frame, stallMs, () => frames)
+    const bound: AckBound = { stallMs, framesDone: () => frames }
+    const afterFrame = (sent: Promise<unknown>, bounded = true) =>
+      stepThen(sent, frame, bounded ? bound : undefined)
 
     const recording: Stage = {
       viewport,
@@ -189,7 +190,10 @@ export async function filmStepped(
         for (let i = 0; i < Math.round(ms / FRAME_MS); i += 1) await frame()
       },
       pointer: (input) =>
-        afterFrame(page.send('Input.dispatchMouseEvent', mouseEvent(input))),
+        afterFrame(
+          page.send('Input.dispatchMouseEvent', mouseEvent(input)),
+          boundsAcknowledgement(input),
+        ),
       key: (text) => afterFrame(page.send('Input.insertText', { text })),
       press: (input) =>
         afterFrame(page.send('Input.dispatchKeyEvent', keyEvent(input))),
@@ -469,16 +473,21 @@ function keyEvent(input: KeyInput): Record<string, unknown> {
     : { type: 'rawKeyDown', ...event }
 }
 
+/** The stall limit an input's acknowledgement waits under, and the frame it names. */
+export interface AckBound {
+  readonly stallMs: number
+  readonly framesDone: () => number
+}
+
 /**
  * Steps a frame, then awaits the input sent ahead of it, since awaiting first
  * deadlocks the page. The page acknowledges only once its handler returns, so
- * that wait stalls past `stallMs`, and a failed step leaves `sent` handled.
+ * a `bound` stalls that wait, and a failed step leaves `sent` handled.
  */
 export async function stepThen(
   sent: Promise<unknown>,
   step: () => Promise<void>,
-  stallMs: number,
-  framesDone: () => number,
+  bound: AckBound | undefined,
 ): Promise<void> {
   try {
     await step()
@@ -486,7 +495,25 @@ export async function stepThen(
     sent.catch(() => {})
     throw error
   }
-  await withinStall(sent, framesDone(), stallMs, 'recording', 'input')
+  if (!bound) {
+    await sent
+    return
+  }
+  await withinStall(
+    sent,
+    bound.framesDone(),
+    bound.stallMs,
+    'recording',
+    'input',
+  )
+}
+
+/**
+ * Whether a pointer input's acknowledgement waits under the stall limit. A move
+ * that misses its frame is acknowledged on Chromium's next flush, in 2.5 s steps.
+ */
+export function boundsAcknowledgement(input: PointerInput): boolean {
+  return input.type !== 'move'
 }
 
 async function withinStall<T>(
