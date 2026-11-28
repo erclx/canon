@@ -538,6 +538,24 @@ function widthSkipLines(
     .flatMap(([width, reason]) => skipLines(`**No reel at ${width}:**`, reason))
 }
 
+/**
+ * The per-width skips once a reel covers some owed widths but not all. Each owed width left unfilmed takes the all-widths
+ * reason as its own, and a reason already passed for a width stands.
+ */
+function splitWidthSkips(
+  owed: readonly number[],
+  covering: ReadonlySet<number>,
+  skips: EvidenceSkips,
+): ReadonlyMap<number, string> | undefined {
+  const reason = skips.reel?.trim() ?? ''
+  const byWidth = new Map(skips.reelByWidth)
+  if (reason === '') return skips.reelByWidth
+  for (const width of owed) {
+    if (!covering.has(width) && !byWidth.has(width)) byWidth.set(width, reason)
+  }
+  return byWidth
+}
+
 /** A skip line, or nothing for an empty reason. A reason is folded onto one line, since a line break would end the address region early. */
 function skipLines(prefix: string, reason: string | undefined): string[] {
   const text = reason?.replace(/\s+/g, ' ').trim() ?? ''
@@ -592,6 +610,10 @@ export function renderEvidenceBody(
       : owedReelWidths(readChecklistBoxes(checklist), classes)
   const covered =
     covering.size > 0 && owed.every((width) => covering.has(width))
+  const splitSkip = covering.size > 0 && !covered
+  const widthSkips = splitSkip
+    ? splitWidthSkips(owed, covering, skips)
+    : skips.reelByWidth
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
     ...(preview === undefined || previewBuilt === undefined
@@ -607,8 +629,8 @@ export function renderEvidenceBody(
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
     ...(local === undefined ? skipLines(LOCAL_SKIP_PREFIX, skips.local) : []),
     ...reels.flatMap(reelLines),
-    ...(covered ? [] : skipLines(REEL_SKIP_PREFIX, skips.reel)),
-    ...widthSkipLines(skips.reelByWidth, covering),
+    ...(covered || splitSkip ? [] : skipLines(REEL_SKIP_PREFIX, skips.reel)),
+    ...widthSkipLines(widthSkips, covering),
     ...uncapturedLines(uncaptured, covering.size > 0),
   ]
   const closing =

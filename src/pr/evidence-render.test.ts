@@ -1426,10 +1426,63 @@ describe('reels at several widths', () => {
     expect(body).not.toContain('**No reel:**')
   })
 
-  it('should keep the line naming every width while an owed width has no covering reel', () => {
-    const body = render('bbbb111', [WIDE], { reel: 'deferred: behind #1' })
+  it('should keep the line naming every width while no reel covers the head', () => {
+    const body = render('bbbb111', [], { reel: 'deferred: behind #1' })
 
     expect(body).toContain('**No reel:** deferred: behind #1')
+    expect(body).not.toContain('No reel at')
+  })
+
+  it('should split the line naming every width into one line per unfilmed width once a reel covers some', () => {
+    const body = render('bbbb111', [WIDE], { reel: 'deferred: behind #1' })
+
+    expect(body).toContain('**No reel at 390:** deferred: behind #1')
+    expect(body).not.toContain('**No reel:**')
+    expect(body).not.toContain('No reel at 1280')
+  })
+
+  it('should read the split lines back as per-width skips', () => {
+    const body = render('bbbb111', [WIDE], { reel: 'deferred: behind #1' })
+
+    expect(findEvidenceSkips([{ body }])).toEqual({
+      reelByWidth: new Map([[390, 'deferred: behind #1']]),
+    })
+  })
+
+  it('should keep the reason passed for a width over the split one', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] /board, 390: tap → opens\n- [ ] /board, 768: tap → opens\n- [ ] /board: click → opens',
+      undefined,
+      [WIDE],
+      {
+        reel: 'deferred: behind #1',
+        reelByWidth: new Map([[768, 'no-visible-change']]),
+      },
+    )
+
+    expect(body).toContain('**No reel at 390:** deferred: behind #1')
+    expect(body).toContain('**No reel at 768:** no-visible-change')
+  })
+
+  it('should write no skip line once a reel covers the head and no checklist owes a width', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      undefined,
+      undefined,
+      [WIDE],
+      { reel: 'deferred: behind #1' },
+    )
+
+    expect(body).not.toContain('No reel')
   })
 
   it('should drop the line naming every width once each owed width has a covering reel', () => {
