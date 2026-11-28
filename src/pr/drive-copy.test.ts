@@ -803,7 +803,8 @@ function statLine(pid: number, comm: string, ticks: string): string {
 }
 
 describe('the pass stop reading the leader start', () => {
-  let leader: number
+  /** Zero until a spawn yields a pid, since signalling group zero hits this runner's own group. */
+  let leader = 0
 
   function record(started: string): void {
     mkdirSync(dirname(copyRoot), { recursive: true })
@@ -820,15 +821,18 @@ describe('the pass stop reading the leader start', () => {
       { detached: true, stdio: 'ignore' },
     )
     child.unref()
-    leader = child.pid ?? -1
+    if (child.pid === undefined) throw new Error('The leader did not spawn.')
+    leader = child.pid
   })
 
   afterEach(() => {
+    if (leader === 0) return
     try {
       process.kill(-leader, 'SIGKILL')
     } catch {
       // The stop under test already ended the group.
     }
+    leader = 0
   })
 
   it('should stop a ticks record whose leader reads the same ticks even when ps prints another time', async () => {
