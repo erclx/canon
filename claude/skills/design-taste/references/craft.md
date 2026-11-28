@@ -13,6 +13,7 @@ The eye and the arithmetic disagree, and the eye is the one being served.
 
 - **Centering by the numbers is not centering.** A triangle in a circle, an icon beside a label, or a glyph in a round button sits left or low when centered by its box. Nudge it, usually a pixel or two.
 - **Equal vertical padding reads bottom-heavy.** A block with matching top and bottom padding looks like it is sinking. Give the bottom slightly more.
+- **A lone card or dialog centered in the viewport reads low.** For one tied to no control, a confirm included, set it slightly above the middle by a share of the viewport.
 - **Optical size beats declared size.** A circle and a square at the same declared size do not read as the same size. The circle needs to be larger.
 - **Type alignment follows the letterform, not the box.** A quotation mark, a bullet or an opening parenthesis at the start of a line should hang outside the text edge so the text itself lines up.
 
