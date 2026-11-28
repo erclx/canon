@@ -17,6 +17,7 @@ import {
   parseUpstream,
   readInstalledRules,
   readNewRules,
+  retiredStacksIn,
   selectNewRules,
   type ToolingReport,
   uncoveredDomains,
@@ -68,6 +69,7 @@ function unmeasuredTooling(): ToolingReport {
   return {
     measured: false,
     chain: [],
+    retired: [],
     counts: {
       configs: 0,
       customized: 0,
@@ -86,6 +88,21 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(TARGET, { recursive: true, force: true })
+})
+
+describe('retiredStacksIn', () => {
+  it('should name a retired stack the governance record still holds', () => {
+    const stamp: Stamp = {
+      covers: ['governance'],
+      domains: { governance: { syncedAt: 'then', files: {}, chain: ['php'] } },
+    }
+
+    expect(retiredStacksIn(stamp, 'governance')).toEqual(['php'])
+  })
+
+  it('should name nothing when no stamp exists', () => {
+    expect(retiredStacksIn(undefined, 'governance')).toEqual([])
+  })
 })
 
 describe('buildToolingReport', () => {
@@ -159,6 +176,34 @@ describe('buildToolingReport', () => {
     expect(buildToolingReport(TOOLKIT, TARGET, stamp).chain).toEqual([
       'retired-stack',
     ])
+  })
+
+  it('should name a retired stack in a chain that still measures', () => {
+    writeStack('base')
+
+    const report = buildToolingReport(
+      TOOLKIT,
+      TARGET,
+      stampChain(['go', 'base']),
+    )
+
+    expect(report.measured).toBe(true)
+    expect(report.retired).toEqual(['go'])
+  })
+
+  it('should name no retired stack in a chain the toolkit ships', () => {
+    writeStack('base')
+
+    expect(
+      buildToolingReport(TOOLKIT, TARGET, stampChain(['base'])).retired,
+    ).toEqual([])
+  })
+
+  it('should leave a chain name the table does not list out of retired', () => {
+    expect(
+      buildToolingReport(TOOLKIT, TARGET, stampChain(['retired-stack']))
+        .retired,
+    ).toEqual([])
   })
 
   it('should report measured with no changes when the target matches', () => {

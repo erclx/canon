@@ -37,7 +37,7 @@ Holds one `.toml` per stack with an optional `extends` and a `rules` list, where
 
 - `expandStackEntry` in `src/gov/stacks.ts` turns a folder name into every rule inside it, and dedupe runs on the expanded names
 - `base` names eleven rules one by one, so a rule authored later under `canon/` or `claude/` reaches no project until it is added there or proposed by detect
-- `node`, `python`, `go`, and `php` extend `base` and take `code` whole plus their language and testing rules, and there is no stack per framework
+- `node` and `python` extend `base` and take `code` whole plus their language and testing rules, and there is no stack per framework
 - Adding a stack means creating the `.toml`, setting `extends`, and listing rule names without `.md`, taking a folder whole only when it wants every rule there now and later
 - `--add` takes rule names alone, warns on an unknown name, and with no stack named skips `writeChainStamp`, so the target keeps its recorded chain
 

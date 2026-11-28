@@ -133,4 +133,12 @@ describe('gov install --yes', () => {
     expect(run.status).toBe(1)
     expect(run.stderr).toContain('Stack not found')
   })
+
+  it('should say a retired stack is no longer shipped and exit 1', () => {
+    const run = install(['go', '--yes', target])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain("Stack 'go' is no longer shipped")
+    expect(run.stderr).toContain('canon gov install base')
+  })
 })

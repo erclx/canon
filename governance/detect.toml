@@ -31,14 +31,6 @@ files = [".editorconfig", "**/Dockerfile*", "**/*.config.*", "**/.env.example"]
 deps = []
 files = ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.sh", "**/*.py"]
 
-["go"]
-deps = []
-files = ["**/go.mod"]
-
-["php"]
-deps = []
-files = ["**/composer.json"]
-
 ["react"]
 deps = ["react"]
 files = []
@@ -84,14 +76,6 @@ deps = [
   "@tanstack/query-core",
 ]
 files = []
-
-["testing-go"]
-deps = []
-files = ["**/go.mod"]
-
-["testing-php"]
-deps = ["phpunit/phpunit", "pestphp/pest"]
-files = ["**/phpunit.xml", "**/phpunit.xml.dist"]
 
 ["pydantic"]
 deps = ["pydantic"]

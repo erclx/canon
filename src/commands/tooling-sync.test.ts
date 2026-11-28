@@ -265,6 +265,44 @@ describe('tooling diff', () => {
     expect(record).toMatchObject({ ok: false, reason: 'unknown-stack' })
   })
 
+  it('should say a retired stack is no longer shipped and exit 1', () => {
+    const run = diffStack('go')
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain("Stack 'go' is no longer shipped")
+    expect(run.stderr).toContain('canon tooling sync base --write')
+  })
+
+  it('should leave a target whose chain holds only the retired stack as it is', () => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files: {}, chain: ['go'] } },
+      }),
+    )
+
+    const run = diffStack('go')
+
+    expect(run.stderr).toContain('leave the files as they are')
+    expect(run.stderr).not.toContain('canon tooling sync base --write')
+  })
+
+  it('should keep the unknown-stack reason for a retired stack under --json', () => {
+    const record = JSON.parse(diffStack('php', ['--json']).stdout ?? '') as {
+      reason: string
+    }
+
+    expect(record.reason).toBe('unknown-stack')
+  })
+
+  it('should say a retired stack passed to --skip is no longer shipped', () => {
+    const run = diffStack('base', ['--skip', 'go'])
+
+    expect(run.stderr).toContain("Stack 'go' is no longer shipped")
+  })
+
   it('should emit an excluded-stack reason under --json for the claude stack', () => {
     const record = JSON.parse(diffStack('claude', ['--json']).stdout ?? '') as {
       reason: string
@@ -637,5 +675,35 @@ describe('tooling sync --write hold', () => {
 
     expect(run.status).toBe(1)
     expect(run.stderr).toContain('nope.json')
+  })
+})
+
+describe('tooling scaffold and reference on a retired stack', () => {
+  const runTooling = (args: readonly string[]): Run => {
+    const run = spawnSync('bun', [CLI, 'tooling', ...args], {
+      cwd: target,
+      encoding: 'utf8',
+      env: buildEnv(),
+    })
+    return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+  }
+
+  it('should refuse a scaffold with the retired message and the no-manifest reason', () => {
+    const run = runTooling(['scaffold', 'go', 'app', '--json'])
+    const record = JSON.parse(run.stdout ?? '') as {
+      reason: string
+      message: string
+    }
+
+    expect(run.status).toBe(1)
+    expect(record.reason).toBe('no-manifest')
+    expect(record.message).toContain("Stack 'go' is no longer shipped")
+  })
+
+  it('should refuse a reference read with the retired message', () => {
+    const run = runTooling(['reference', 'php'])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain("Stack 'php' is no longer shipped")
   })
 })

@@ -2,7 +2,13 @@ import { join } from 'node:path'
 import { Command } from 'commander'
 import { execa } from 'execa'
 import { describe, expect, it } from 'vitest'
-import { findRetired, RETIRED_VERBS, retiredMessage } from '@/cli/retired'
+import {
+  findRetired,
+  findRetiredStack,
+  RETIRED_VERBS,
+  retiredMessage,
+  retiredStackMessage,
+} from '@/cli/retired'
 
 type Registration = { register?: (program: Command) => void }
 
@@ -63,6 +69,54 @@ describe('retiredMessage', () => {
     expect(message).toContain('canon canvas')
     expect(message).toContain(`v${verb.release}`)
     expect(message).toContain(verb.movedTo)
+  })
+})
+
+describe('findRetiredStack', () => {
+  it.each(['go', 'php'])('should find the retired %s stack', (name) => {
+    expect(findRetiredStack(name)?.name).toBe(name)
+  })
+
+  it.each(['base', 'python', './go'])(
+    'should leave %s to the caller',
+    (name) => {
+      expect(findRetiredStack(name)).toBeUndefined()
+    },
+  )
+})
+
+describe('retiredStackMessage', () => {
+  it('should say the stack is no longer shipped and its files stay', () => {
+    const message = retiredStackMessage('go', 'tooling')
+
+    expect(message).toContain("Stack 'go' is no longer shipped by the toolkit")
+    expect(message).toContain('Its files stay yours')
+  })
+
+  it('should keep the verify list before a tooling move to base', () => {
+    const message = retiredStackMessage('php', 'tooling')
+
+    expect(message).toContain('canon tooling customize scripts/verify.json')
+    expect(message).toContain('canon tooling sync base --write')
+  })
+
+  it('should leave a chain holding only retired stacks as it is', () => {
+    const message = retiredStackMessage('go', 'tooling', ['go'])
+
+    expect(message).toContain('leave the files as they are')
+    expect(message).not.toContain('canon tooling sync base --write')
+  })
+
+  it('should keep the base move for a chain that still holds base', () => {
+    expect(retiredStackMessage('go', 'tooling', ['go', 'base'])).toContain(
+      'canon tooling sync base --write',
+    )
+  })
+
+  it('should move governance to base', () => {
+    expect(retiredStackMessage('go', 'governance')).toContain(
+      'canon gov install base',
+    )
   })
 })
 

@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
+import { findRetiredStack, retiredStackMessage } from '@/cli/retired'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
   injectConfigs,
@@ -469,12 +470,19 @@ async function runScaffold(
   const json = opts.json === true
   if (!json) intro(`canon tooling scaffold ${stack}`)
 
-  const result = await scaffoldStack({
-    root: PROJECT_ROOT,
-    stack,
-    target,
-    ...(opts.appRoot === undefined ? {} : { appRoot: opts.appRoot }),
-  })
+  const result: Awaited<ReturnType<typeof scaffoldStack>> =
+    !stackExists(PROJECT_ROOT, stack) && findRetiredStack(stack) !== undefined
+      ? {
+          ok: false,
+          reason: 'no-manifest',
+          message: retiredStackMessage(stack, 'tooling'),
+        }
+      : await scaffoldStack({
+          root: PROJECT_ROOT,
+          stack,
+          target,
+          ...(opts.appRoot === undefined ? {} : { appRoot: opts.appRoot }),
+        })
 
   if (!result.ok) {
     logError(result.message)
@@ -542,6 +550,12 @@ function printReference(stack: string): number {
   const root = process.cwd()
   const resolved = resolveReference(root, stack)
 
+  if (!resolved && findRetiredStack(stack) !== undefined) {
+    logError(retiredStackMessage(stack, 'tooling'))
+    outro()
+    return 1
+  }
+
   if (!resolved) {
     logWarn(`Unknown stack: ${stack}`)
     logStep('Available stacks')
@@ -559,6 +573,16 @@ function printReference(stack: string): number {
   return 0
 }
 
+function missingStackError(
+  stack: string,
+  target: string,
+  fallback: string,
+): string {
+  if (findRetiredStack(stack) === undefined) return fallback
+  const chain = stampedChain(readStamp(resolve(target)), 'tooling')
+  return retiredStackMessage(stack, 'tooling', chain)
+}
+
 /**
  * Resolves the chain and rejects the same inputs the bash rejected, so a bad
  * stack name fails before anything touches the target. The excluded-stack guard
@@ -572,7 +596,7 @@ function prepare(stack: string, target: string, skip?: string): Prepared {
     return {
       ok: false,
       reason: 'unknown-stack',
-      error: `Stack not found: ${stack}`,
+      error: missingStackError(stack, target, `Stack not found: ${stack}`),
     }
   }
 
@@ -588,7 +612,11 @@ function prepare(stack: string, target: string, skip?: string): Prepared {
       return {
         ok: false,
         reason: 'unknown-skip',
-        error: `Stack to skip not found: ${skip}`,
+        error: missingStackError(
+          skip,
+          target,
+          `Stack to skip not found: ${skip}`,
+        ),
       }
     }
   }
