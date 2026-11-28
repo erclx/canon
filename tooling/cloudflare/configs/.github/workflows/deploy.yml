@@ -44,7 +44,9 @@ jobs:
       - name: Read the Wrangler config
         id: shape
         run: |
-          shape=$(bash scripts/wrangler-shape.sh | sed -n 's/^shape=//p')
+          # Read apart from the sed, since a run step has no pipefail and a pipe drops a failed read.
+          reading=$(bash scripts/wrangler-shape.sh)
+          shape=$(sed -n 's/^shape=//p' <<< "$reading")
           case "$shape" in
           worker)
             echo "::notice::The Wrangler config declares a Worker entry, so the Worker workflow deploys this project and this one skips."
