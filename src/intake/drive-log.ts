@@ -111,6 +111,35 @@ export function readDrawn(source: string): DrawnReading {
 }
 
 /**
+ * Maps each logged finding's number to the paths its `Drawn` field cites. A
+ * `see <nn>` decision takes that finding's paths, one hop only.
+ */
+export function readDrawings(source: string): Map<number, string[]> {
+  const raw = new Map<number, string[]>()
+  const pointers = new Map<number, number>()
+  let finding: number | undefined
+
+  for (const line of bodyLines(source)) {
+    if (line.fenced) continue
+    if (/^#{1,2}\s/.test(line.text)) {
+      const heading = FINDING_HEADING.exec(line.text)?.[1]
+      finding = heading === undefined ? undefined : Number.parseInt(heading, 10)
+      continue
+    }
+    const field = LOG_FIELD.exec(line.text)
+    if (finding === undefined || !field) continue
+    if (field[1] === DRAWN_LABEL) raw.set(finding, citedDrawings(field[2]))
+    const hop = field[1] === DECISION_LABEL && SEE.exec(field[2].trim())
+    if (hop) pointers.set(finding, Number(hop[1]))
+  }
+
+  for (const [from, to] of pointers) {
+    if (!raw.has(from)) raw.set(from, raw.get(to) ?? [])
+  }
+  return raw
+}
+
+/**
  * Maps each logged finding's number to the operator's decision. A decision reading
  * `see <nn>` takes that finding's decision, one hop only, and drops out when it
  * is missing or itself points on.

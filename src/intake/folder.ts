@@ -1,7 +1,13 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, join, normalize, relative } from 'node:path'
-import { citedDrawings, DRIVE_LOG, readDecisions } from '@/intake/drive-log'
+import {
+  citedDrawings,
+  DRIVE_LOG,
+  isEvidencePath,
+  readDecisions,
+  readDrawings,
+} from '@/intake/drive-log'
 import {
   INDEX_FILE,
   type IntakeItem,
@@ -108,15 +114,30 @@ export function namesRenderedSurface(item: IntakeItem): boolean {
   )
 }
 
+/** What the folder's drive log records, read once per folder. */
+interface FolderLog {
+  readonly decisions: ReadonlyMap<number, string>
+  readonly drawings: ReadonlyMap<number, readonly string[]>
+}
+
 /**
- * A visible item citing no drawing, which nobody can answer from its text. A
- * pending pick owes nothing, since its round is where the drawing happens.
+ * A visible item with no drawing on disk, which nobody can answer from its text.
+ * A path counts from the item's own `Drawn:` or the finding its pointer reaches,
+ * and a pending pick owes nothing, since its round is where the drawing happens.
  */
-function owesDrawing(item: IntakeItem): boolean {
-  return (
-    namesRenderedSurface(item) &&
-    citedDrawings(item.drawn ?? '').length === 0 &&
-    !isPendingPick(item)
+function owesDrawing(
+  item: IntakeItem,
+  folder: string,
+  log: FolderLog,
+): boolean {
+  if (!namesRenderedSurface(item) || isPendingPick(item)) return false
+  const pointer = logPointer(item)
+  const cited = [
+    ...citedDrawings(item.drawn ?? ''),
+    ...(pointer === undefined ? [] : (log.drawings.get(pointer) ?? [])),
+  ]
+  return !cited.some(
+    (path) => isEvidencePath(path) && existsSync(join(folder, path)),
   )
 }
 
@@ -238,10 +259,21 @@ export async function listFolders(root: string): Promise<ListOutcome> {
  * The folder's own drive log, read once per folder. A folder with no log
  * resolves every pointer to nothing, which the answer route refuses.
  */
-async function folderDecisions(folder: string): Promise<Map<number, string>> {
+async function folderLog(folder: string): Promise<FolderLog> {
   const path = join(folder, DRIVE_LOG)
-  if (!existsSync(path)) return new Map()
-  return readDecisions(await readFile(path, 'utf8'))
+  if (!existsSync(path)) return { decisions: new Map(), drawings: new Map() }
+  const source = await readFile(path, 'utf8')
+  return { decisions: readDecisions(source), drawings: readDrawings(source) }
+}
+
+/** The finding a `Decided:` pointer names in this folder's log, and no other path. */
+function logPointer(item: IntakeItem): number | undefined {
+  const pointer =
+    item.decided === undefined ? undefined : parseDecided(item.decided)
+  if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG) {
+    return undefined
+  }
+  return pointer.finding
 }
 
 /**
@@ -252,18 +284,14 @@ function resolveDecision(
   item: IntakeItem,
   decisions: ReadonlyMap<number, string>,
 ): string | undefined {
-  const pointer =
-    item.decided === undefined ? undefined : parseDecided(item.decided)
-  if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG) {
-    return undefined
-  }
-  return decisions.get(pointer.finding)
+  const finding = logPointer(item)
+  return finding === undefined ? undefined : decisions.get(finding)
 }
 
 async function readClusters(folder: string): Promise<ClusterItems[]> {
-  const [names, decisions] = await Promise.all([
+  const [names, log] = await Promise.all([
     listClusters(folder),
-    folderDecisions(folder),
+    folderLog(folder),
   ])
 
   return Promise.all(
@@ -272,9 +300,9 @@ async function readClusters(folder: string): Promise<ClusterItems[]> {
       items: readItems(await readFile(join(folder, cluster), 'utf8')).map(
         (item) => ({
           ...item,
-          decision: resolveDecision(item, decisions),
+          decision: resolveDecision(item, log.decisions),
           pendingPick: isPendingPick(item),
-          undrawn: owesDrawing(item),
+          undrawn: owesDrawing(item, folder, log),
         }),
       ),
     })),
@@ -372,6 +400,7 @@ export async function answerItems(
     )
   }
 
+  const log = await folderLog(opened)
   // An answer opening a pick asks for the drawing rather than deciding without one.
   const picking = new Set(
     selections
@@ -383,7 +412,7 @@ export async function answerItems(
     return (
       item !== undefined &&
       !picking.has(label.toLowerCase()) &&
-      owesDrawing(item)
+      owesDrawing(item, opened, log)
     )
   })
 
@@ -395,7 +424,7 @@ export async function answerItems(
     )
   }
 
-  const accepted = await acceptDecided(opened, decided, find)
+  const accepted = acceptDecided(log.decisions, decided, find)
   if (!Array.isArray(accepted)) return accepted
 
   const landed = [...selections, ...accepted]
@@ -421,14 +450,13 @@ export async function answerItems(
  * The answer each decided label lands, keeping `ok` first for every reader
  * keying on it and the finding beside it so the slot names its source.
  */
-async function acceptDecided(
-  folder: string,
+function acceptDecided(
+  decisions: ReadonlyMap<number, string>,
   labels: readonly string[],
   find: (label: string) => IntakeItem | undefined,
-): Promise<Selection[] | IntakeRefused> {
+): Selection[] | IntakeRefused {
   if (labels.length === 0) return []
 
-  const decisions = await folderDecisions(folder)
   const accepted: Selection[] = []
   const undecided: IntakeItem[] = []
 
