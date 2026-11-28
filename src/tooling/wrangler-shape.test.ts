@@ -218,6 +218,31 @@ database_name = "app-db-preview"
     })
   })
 
+  describe('a JSON config the parser must read', () => {
+    it('reads a config saved with a byte order mark', () => {
+      put(
+        'wrangler.jsonc',
+        '﻿{ "main": "src/index.ts", "d1_databases": [{ "database_name": "app" }], "env": { "staging": { "d1_databases": [{ "database_name": "app-s" }] } } }\n',
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=app\nstaging=true\nd1_staging=app-s\n',
+      )
+    })
+
+    it('fails the read rather than guessing the databases of a config that does not parse', () => {
+      put(
+        'wrangler.jsonc',
+        '{ "main": "src/index.ts", "d1_databases": [{ "database_name": "app" ]\n',
+      )
+
+      const { status, stdout } = run()
+
+      expect(status).toBe(1)
+      expect(stdout).toBe('')
+    })
+  })
+
   it('exits zero whatever the shape, so a caller branches on the output', () => {
     put('wrangler.json', '{ "main": "a", "pages_build_output_dir": "b" }\n')
 

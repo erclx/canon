@@ -26,7 +26,6 @@ else
   body=$(perl -0777 -pe 's{("(?:\\.|[^"\\])*")|/\*.*?\*/|//[^\n]*}{defined $1 ? $1 : ""}gse' "$config")
   entry='"main"[[:space:]]*:'
   output='"pages_build_output_dir"[[:space:]]*:'
-  database='"database_name"[[:space:]]*:[[:space:]]*"[^"]*"'
 fi
 
 has_entry=false
@@ -53,11 +52,12 @@ if [ "$config" = wrangler.toml ]; then
   ' <<<"$body")
 else
   # Parsed rather than matched, so a `staging` key under `vars` is no environment.
-  # A config that does not parse keeps every database it names and no staging.
-  databases=$(grep -Eo "$database" <<<"$body" | sed -E 's/.*"([^"]*)"$/\1/' | paste -sd ' ' - || true)
-  environments=$(DATABASES=$databases perl -MJSON::PP -e '
-    my $config = eval { JSON::PP->new->relaxed->decode(do { local $/; <STDIN> }) };
-    if (ref $config ne "HASH") { printf "d1=%s\nstaging=false\nd1_staging=\n", $ENV{DATABASES}; exit }
+  # A config that does not parse fails the read, since a guess migrates the wrong databases.
+  environments=$(CONFIG=$config perl -MJSON::PP -e '
+    my $text = do { local $/; <STDIN> };
+    $text =~ s/^\xEF\xBB\xBF//;
+    my $config = eval { JSON::PP->new->relaxed->decode($text) };
+    if (ref $config ne "HASH") { print STDERR "::error::wrangler-shape.sh could not parse $ENV{CONFIG}, so it cannot tell which databases each environment binds.\n"; exit 1 }
     my $names = sub { join " ", map { ref $_ eq "HASH" ? $_->{database_name} // () : () } @{ ref $_[0] eq "ARRAY" ? $_[0] : [] } };
     my $staging = ref $config->{env} eq "HASH" && ref $config->{env}{staging} eq "HASH" ? $config->{env}{staging} : undef;
     printf "d1=%s\nstaging=%s\nd1_staging=%s\n", $names->($config->{d1_databases}), $staging ? "true" : "false", $staging ? $names->($staging->{d1_databases}) : "";
