@@ -70,6 +70,7 @@ import {
 } from '@/gate/sequencer'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { detectRules } from '@/gov/detect'
+import { findRetiredStack, retiredStackMessage } from '@/cli/retired'
 import { writeChainStamp } from '@/sync/stamp'
 import { resolveTarget } from '@/targets/validate'
 import {
@@ -1412,7 +1413,7 @@ async function runDetect(target: string, opts: DetectOptions): Promise<number> {
 
   const result = await detectRules(PROJECT_ROOT, resolved, opts.stack)
   if (!result.ok) {
-    logError(`Stack not found: ${result.missingStack}`)
+    logError(govMissingStack(result.missingStack))
     return 1
   }
 
@@ -1507,6 +1508,12 @@ async function chooseStack(root: string): Promise<string | number> {
   })
 }
 
+function govMissingStack(stack: string): string {
+  return findRetiredStack(stack) === undefined
+    ? `Stack not found: ${stack}`
+    : retiredStackMessage(stack, 'governance')
+}
+
 async function runInstall(
   stack: string | undefined,
   target: string,
@@ -1531,14 +1538,14 @@ async function runInstall(
   }
 
   if (!govStackExists(PROJECT_ROOT, selected)) {
-    logError(`Stack not found: ${selected}`)
+    logError(govMissingStack(selected))
     outro()
     return 1
   }
 
   const resolution = resolveRules(PROJECT_ROOT, selected)
   if (!resolution.ok) {
-    logError(`Stack not found: ${resolution.missingStack}`)
+    logError(govMissingStack(resolution.missingStack))
     outro()
     return 1
   }
