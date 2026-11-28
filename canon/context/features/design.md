@@ -15,7 +15,7 @@ The same stage drift-checks the landing page's token preview, and that drift is 
 
 ### `src/design/`
 
-Owns the token module, the component layer, the renderers, the markdown parser, and the contrast reading.
+Owns the token module, the component layer, the renderers, the markdown parser, and the contrast reading. `behavior.ts` reads the record's `## Behavior` rows for both `canon intake drive-check` and `canon records validate plans`, so the two match a row one way.
 
 - `tokens.ts` holds the values and `REVIEWED`, which the record's frontmatter renders. Its values come from the sheets in `canon/design/foundations/`, and its accent is the mark's pip pair.
 - `components.ts` holds the component layer, since the record keeps CSS class names out. `template.ts` reads its rules, the preview, and the favicon from `templates/`.
