@@ -28,9 +28,12 @@ const run = async (...args: string[]): Promise<number> => {
   }
 }
 
-const serve = async (status: number): Promise<string> => {
+const serve = async (
+  status: number,
+  headers: Record<string, string> = {},
+): Promise<string> => {
   server = createServer((_, response) => {
-    response.writeHead(status).end()
+    response.writeHead(status, headers).end()
   })
   await new Promise<void>((resolve) => server?.listen(0, '127.0.0.1', resolve))
   const { port } = server.address() as AddressInfo
@@ -52,7 +55,19 @@ describe('smoke-check.sh', () => {
   it('fails on a server error', async () => {
     const url = await serve(500)
 
-    expect(await run(url)).not.toBe(0)
+    expect(await run(url)).toBe(1)
+  })
+
+  it('reports a challenged answer as blocked rather than failed', async () => {
+    const url = await serve(403, { 'cf-mitigated': 'challenge' })
+
+    expect(await run(url)).toBe(3)
+  })
+
+  it('fails a plain 403 that carries no challenge header', async () => {
+    const url = await serve(403)
+
+    expect(await run(url)).toBe(1)
   })
 
   it('fails when nothing answers', async () => {
