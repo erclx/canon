@@ -89,6 +89,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
 | `## Verbatim`          | settled wording that lands unchanged in a file, one H3 per block            | When wording is settled                           |
+| `## Deferred`          | each piece of scope left for a later row, under its filed task's stem       | When the plan leaves scope for a later row        |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
 | `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                     |
 | `## Verification`      | the test or command that proves each outcome                                | Always                                            |
@@ -227,6 +228,17 @@ A `## Verbatim` section carries wording someone settled, landing in a file exact
 A Create block makes a new file, so its lead names a path that does not exist yet and no anchor. Its grep bullet takes the first distinctive line, such as the `title:` line or the H1, since a markdown file opens on `---` and that line matches any file with frontmatter.
 
 Keep a Create block to 80 lines. A longer new file goes in `## Files to touch` for the executing session to write, since a plan carrying a whole skill body costs every session that reads it.
+
+### Deferred
+
+A deferral written in prose alone reaches the worker that reads the plan once, and never the planner of the row it names. Scope the plan leaves for a later row goes under `## Deferred` instead.
+
+- Write each bullet as `` `<task stem>`: <what is deferred> ``, with the stem bare and carrying no folder or `.md` suffix
+- Name a task on the board, live or archived. A declined row fails, since nobody will build it.
+- File a row not yet on the board before the plan validates, through whoever files rows, so the board carries it first
+- Leave the section out when the plan defers nothing
+
+`canon records validate plans` reports `deferral-unfiled` for a bullet naming no filed task, and skips the check in a project with no tasks folder.
 
 ### Design references
 
@@ -442,6 +454,10 @@ Add as <where> in `<path/to/file>`, after <anchor>.
 ```text
 <the wording, as the formatter leaves it>
 ```
+
+## Deferred
+
+- `<task stem>`: <what this plan leaves for that row>
 
 ## Design references
 
