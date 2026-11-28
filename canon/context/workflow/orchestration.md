@@ -55,7 +55,7 @@ Owns the `canon tasks` verbs that validate, archive, derive from, and write the 
 Reads and answers the intake folders under `.canon/intake/`, behind `canon intake list`, `canon intake answer`, and `canon intake drive-check`. The check reads the `[drive]` table through `src/config/app.ts` by the target fallback `app-drive` states, so a change to that fallback lands in both.
 
 - `items.ts` parses an item's heading and its bolded field bullets, and skips `00-overview.md`, which points at items and carries no answer slot
-- `folder.ts` resolves a slug to a folder and refuses with a named reason, such as `ambiguous-slug` or `answered`, before it writes a selection into an answer slot
+- `folder.ts` refuses a selection by a named reason before it writes a slot, and its `undrawn` reason reads the rendered-surface pattern `src/records/` owns, so widening it widens the gate
 - `drive-check.ts` matches a goal, and a Behavior row through `src/design/behavior.ts`, with the bold label and trailing period stripped, so either reworded after a drive reads as unmapped and unknown
 - The log axes read the drive log by exact label, being `Drawn`, `Decision (operator)`, and the `Board` row, and `Decided:` joins an item to a skip. A rename in `drive-record.md` turns one off silently.
 - `readDecisions` resolves an item's `Decided:` pointer by those same labels, so that rename also refuses every `--decided` accept as `undecided`
