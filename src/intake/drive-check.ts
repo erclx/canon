@@ -27,6 +27,8 @@ import {
   readAppTable,
 } from '@/config/app'
 import { requirementsRel } from '@/context/requirements'
+import { parseSectionTables } from '@/design/parse'
+import { DESIGN_DOCUMENT } from '@/design/regen'
 import { bodyLines } from '@/markdown/scan'
 
 /** The record a drive leaves in its intake folder, which this check reads. */
@@ -95,6 +97,12 @@ export interface DriveFindings {
   readonly uncaptured: readonly string[]
   /** Findings whose drawing was skipped while the item deciding them fixes a rendered surface. */
   readonly skippedVisible: readonly string[]
+  /**
+   * Design record Behavior rows and `behaviors` entries that failed, each as
+   * `unmapped: <surface>: <behavior>`, `unreasoned: ...`, or `unknown: ...`,
+   * the same three ways a goal fails.
+   */
+  readonly behavior: readonly string[]
 }
 
 export interface DriveChecked {
@@ -102,6 +110,8 @@ export interface DriveChecked {
   readonly slug: string
   readonly reason: 'clean' | 'failed'
   readonly goals: number
+  /** The Behavior rows the design record holds, zero with no record or section. */
+  readonly behaviors: number
   readonly findings: DriveFindings
 }
 
@@ -116,6 +126,19 @@ interface DriveGoal {
   readonly reason?: string
 }
 
+interface DriveBehavior {
+  readonly surface: string
+  readonly behavior: string
+  readonly status: GoalStatus
+  readonly reason?: string
+}
+
+/** One row of the design record's `## Behavior` table. */
+export interface BehaviorRow {
+  readonly surface: string
+  readonly behavior: string
+}
+
 interface DriveScript {
   readonly script: string
   readonly persona: string
@@ -125,6 +148,8 @@ interface DriveScript {
 
 interface DriveRecord {
   readonly goals: readonly DriveGoal[]
+  /** Empty for a record written before the design record held behavior. */
+  readonly behaviors: readonly DriveBehavior[]
   /** Absent for the flat default target. */
   readonly target?: string
   readonly scripts: readonly DriveScript[]
@@ -212,10 +237,8 @@ function parseRecord(raw: string): DriveRecord | string {
     return `${DRIVE_RECORD} is not an object.`
   }
 
-  const { goals, evidence, worktree, target, scripts } = parsed as Record<
-    string,
-    unknown
-  >
+  const { goals, behaviors, evidence, worktree, target, scripts } =
+    parsed as Record<string, unknown>
   if (!Array.isArray(goals)) {
     return `${DRIVE_RECORD} carries no "goals" list.`
   }
@@ -264,13 +287,48 @@ function parseRecord(raw: string): DriveRecord | string {
   const runs = parseScripts(scripts)
   if (typeof runs === 'string') return runs
 
+  const tried = parseBehaviors(behaviors)
+  if (typeof tried === 'string') return tried
+
   return {
     goals: entries,
+    behaviors: tried,
     ...(typeof target === 'string' && { target }),
     scripts: runs,
     evidence: evidence ?? [],
     ...(typeof worktree === 'string' && { worktree }),
   }
+}
+
+function parseBehaviors(behaviors: unknown): DriveBehavior[] | string {
+  if (behaviors === undefined) return []
+  if (!Array.isArray(behaviors)) {
+    return `${DRIVE_RECORD} carries a "behaviors" field that is not a list.`
+  }
+
+  const entries: DriveBehavior[] = []
+  for (const [index, entry] of behaviors.entries()) {
+    const { surface, behavior, status, reason } = (entry ?? {}) as Record<
+      string,
+      unknown
+    >
+    if (typeof surface !== 'string' || surface.trim() === '') {
+      return `${DRIVE_RECORD} behaviors[${index}] carries no "surface".`
+    }
+    if (typeof behavior !== 'string' || behavior.trim() === '') {
+      return `${DRIVE_RECORD} behaviors[${index}] carries no "behavior" text.`
+    }
+    if (status !== 'driven' && status !== 'not-driven') {
+      return `${DRIVE_RECORD} behaviors[${index}] has a "status" other than "driven" or "not-driven".`
+    }
+    entries.push({
+      surface,
+      behavior,
+      status,
+      ...(typeof reason === 'string' && { reason }),
+    })
+  }
+  return entries
 }
 
 function parseScripts(scripts: unknown): DriveScript[] | string {
@@ -302,6 +360,59 @@ function parseScripts(scripts: unknown): DriveScript[] | string {
     })
   }
   return runs
+}
+
+function normalizeSurface(text: string): string {
+  return text.replace(/`/g, '').trim()
+}
+
+/**
+ * Every row of every table under the design record's `## Behavior`, with the
+ * Surface cell's code span dropped and the Behavior cell normalized the way a
+ * goal is. A project with no record, or a record with no section, has no rows.
+ */
+export function readBehaviorRows(root: string): BehaviorRow[] {
+  const path = join(root, DESIGN_DOCUMENT)
+  if (!existsSync(path)) return []
+  return parseSectionTables(path, 'Behavior')
+    .flat()
+    .map((row) => ({
+      surface: normalizeSurface(row.Surface?.value ?? ''),
+      behavior: normalizeGoal(row.Behavior?.value ?? ''),
+    }))
+    .filter((row) => row.surface !== '' && row.behavior !== '')
+}
+
+function behaviorKey(surface: string, behavior: string): string {
+  return `${normalizeSurface(surface)}: ${normalizeGoal(behavior)}`
+}
+
+/** Each Behavior row or entry that fails, read the three ways a goal fails. */
+function behaviorFindings(
+  rows: readonly BehaviorRow[],
+  entries: readonly DriveBehavior[],
+): string[] {
+  const byKey = new Map(
+    entries.map((entry) => [behaviorKey(entry.surface, entry.behavior), entry]),
+  )
+  const known = new Set(
+    rows.map((row) => behaviorKey(row.surface, row.behavior)),
+  )
+
+  const unmapped: string[] = []
+  const unreasoned: string[] = []
+  for (const key of known) {
+    const entry = byKey.get(key)
+    if (entry === undefined) unmapped.push(`unmapped: ${key}`)
+    else if (entry.status === 'not-driven' && !entry.reason?.trim()) {
+      unreasoned.push(`unreasoned: ${key}`)
+    }
+  }
+  const unknown = [...byKey.keys()]
+    .filter((key) => !known.has(key))
+    .map((key) => `unknown: ${key}`)
+
+  return [...unmapped, ...unreasoned, ...unknown]
 }
 
 interface ScriptPlan {
@@ -545,6 +656,7 @@ export async function checkDrive(
     )
   }
   const goals = readGoals(await readFile(requirements, 'utf8'))
+  const rows = readBehaviorRows(root)
 
   const plan = readScriptPlan(readAppTable(root, 'drive'), record.target)
   if ('ok' in plan) return plan
@@ -600,6 +712,7 @@ export async function checkDrive(
         ? [join(BASELINE_DIR, CURRENT_PAGE)]
         : [],
     skippedVisible: await skippedOnVisible(folder, drawn.skipped),
+    behavior: behaviorFindings(rows, record.behaviors),
   }
   const failed = Object.values(findings).some((list) => list.length > 0)
 
@@ -608,6 +721,7 @@ export async function checkDrive(
     slug: basename(folder),
     reason: failed ? 'failed' : 'clean',
     goals: goals.length,
+    behaviors: rows.length,
     findings,
   }
 }
