@@ -81,7 +81,7 @@ export default scenario({
       )
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  the preview lists one tooling row per language root (web, api, svc) with its path and command, the root row resolving to 'base' with no command of its own. The svc row resolves to 'base' as a fallback, since no stack ships for Go. Governance resolves once at the root to 'base' with the React and Python rules passed through --add. One canon init runs at the root, and each subfolder takes its own tooling sync with --skip base, so no subfolder carries .husky or .github.",
+        "Expect:  the preview lists one tooling row per language root (web, api, svc) with its path, the root row resolving to 'base' with no command of its own. The svc row resolves to 'base' as a fallback, since no stack ships for Go, and carries no command either. Governance resolves once at the root to 'base' with the React and Python rules passed through --add. One canon init runs at the root, and web and api each take their own tooling sync with --skip base, so no subfolder carries .husky or .github.",
       )
     },
     'vite-react': (ctx) => {

@@ -19,6 +19,6 @@ absent = [
 ]
 
 manual = [
-  "The preview prints one tooling row per language root, each with its path, stack, and command. Unwired: the envelope carries the final reply rather than the preview, and a substring naming each folder cannot separate a row from a passing mention",
+  "The preview prints one tooling row per language root, each with its path and stack, and a command on the web and api rows alone, since svc resolves to 'base' and takes no subfolder sync. Unwired: the envelope carries the final reply rather than the preview, and a substring naming each folder cannot separate a row from a passing mention",
   "The root row resolves to 'base' and adds no command of its own. Semantic: `canon init` lands the same layer, so no tree assertion separates a redundant sync from a skipped one",
 ]
