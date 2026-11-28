@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Prints the deploy shape of the Wrangler config in the working directory, the
-# D1 databases it binds, and whether it declares `env.staging`, as `key=value`
-# lines for `$GITHUB_OUTPUT`. Both deploy workflows read it, so one reading
-# decides which of them deploys. Add a key as a new line, never by changing one.
+# Prints the Wrangler config's deploy shape, D1 databases, and staging environment
+# as `key=value` lines for `$GITHUB_OUTPUT`. Both deploy workflows read it to decide
+# which one deploys, so add a key as a new line and never change an existing one.
 set -euo pipefail
 
 config=""
