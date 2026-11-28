@@ -14,11 +14,20 @@ describe('StepperStalled', () => {
       const stall = new StepperStalled(0, 2000, phase)
 
       expect(stall.phase).toBe(phase)
+      expect(stall.wait).toBe('frame')
       expect(stall.message).toBe(
         `frame 0 took over 2 s in ${phase} under frame stepping`,
       )
     },
   )
+
+  it('should name the input rather than the frame when an acknowledgement stalled', () => {
+    const stall = new StepperStalled(107, 8000, 'recording', 'input')
+
+    expect(stall.message).toBe(
+      'the input after frame 107 took over 8 s to acknowledge in recording under frame stepping',
+    )
+  })
 })
 
 describe('retryScale', () => {
@@ -107,7 +116,7 @@ describe('stepThen', () => {
 
     const stall = await outcome
     expect(stall).toBeInstanceOf(StepperStalled)
-    expect(stall).toMatchObject({ frame: 3, phase: 'recording' })
+    expect(stall).toMatchObject({ frame: 3, phase: 'recording', wait: 'input' })
     expect(vi.getTimerCount()).toBe(0)
   })
 

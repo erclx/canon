@@ -42,15 +42,22 @@ const STILL_CAP_MS = 2000
  */
 export type StallPhase = 'settle' | 'setup' | 'recording'
 
+/** What a stall waited on: a frame's reply, or an input's acknowledgement. */
+export type StallWait = 'frame' | 'input'
+
 /** A frame that took longer than `STALL_MS`, so the beat is filmed another way. */
 export class StepperStalled extends Error {
   constructor(
     readonly frame: number,
     stallMs: number,
     readonly phase: StallPhase,
+    readonly wait: StallWait = 'frame',
   ) {
+    const limit = `${stallMs / 1000} s`
     super(
-      `frame ${frame} took over ${stallMs / 1000} s in ${phase} under frame stepping`,
+      wait === 'input'
+        ? `the input after frame ${frame} took over ${limit} to acknowledge in ${phase} under frame stepping`
+        : `frame ${frame} took over ${limit} in ${phase} under frame stepping`,
     )
   }
 }
@@ -479,7 +486,7 @@ export async function stepThen(
     sent.catch(() => {})
     throw error
   }
-  await withinStall(sent, framesDone(), stallMs, 'recording')
+  await withinStall(sent, framesDone(), stallMs, 'recording', 'input')
 }
 
 async function withinStall<T>(
@@ -487,11 +494,12 @@ async function withinStall<T>(
   frame: number,
   stallMs: number,
   phase: StallPhase,
+  wait: StallWait = 'frame',
 ): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
   const stalled = new Promise<never>((_, fail) => {
     timer = setTimeout(
-      () => fail(new StepperStalled(frame, stallMs, phase)),
+      () => fail(new StepperStalled(frame, stallMs, phase, wait)),
       stallMs,
     )
   })
