@@ -1,6 +1,6 @@
 ---
 title: Measured runs
-description: Where a worker runs a measurement, which is never the shared machine, and what it does when the plan names a place it cannot reach
+description: Where a worker runs a measurement, which is never the shared machine, what it does when the plan names a place it cannot reach, and why it never loads the machine to reproduce a failing test
 ---
 
 # Measured runs
