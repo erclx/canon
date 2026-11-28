@@ -9,7 +9,7 @@
 
 - Open a modal only for a task that needs the person's full attention or an answer before they continue, and use inline content for anything they can ignore.
 - Never open a modal from inside a modal, and close the first before showing the second. A confirm or alert may sit over one, one at a time.
-- Open a surface one control revealed beside it on a wide screen, as a popover pointing at it and leaving it uncovered. A phone keeps a sheet, and a confirm or alert stays centered.
+- Open a surface one control revealed beside it on wide screens, as a popover aimed at it and covering it as little as it can. A phone takes a sheet, and a confirm or alert takes the viewport placement.
 
 ## Navigation
 
