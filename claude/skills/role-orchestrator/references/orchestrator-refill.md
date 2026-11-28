@@ -27,6 +27,7 @@ A merge trigger runs four things in order, whoever ran the merge, since the refi
 
 1. Read the `pull` field of each merge record since the last sweep before reading any history, since a main behind its remote reads every later step off a stale tree.
    - `pulled` means the main worktree is current and the `post-merge` hook ran
+   - A `<lockfile> changed in this merge. Run <install>.` line, from the merge or a hand pull, means nothing was installed. Run the printed `<install>` in the main worktree before step 2.
    - `skipped` or `refused` means neither happened, so run `git pull --ff-only` in the main worktree once its `reason` is cleared, such as a dirty tree committed or a branch checked back to the trunk
    - A merge whose record nobody read, such as one the operator ran by hand, takes the same hand pull
 2. Run `gh pr list --state open` and `git log --oneline -8`. Report any pull request whose review has not been posted and stop for that one first.
