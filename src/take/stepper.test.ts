@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   StepperStalled,
+  ackLimit,
   alignTicks,
-  boundsAcknowledgement,
   retryScale,
   stepThen,
   withinCap,
@@ -110,7 +110,7 @@ describe('stepThen', () => {
 
   const bound = (frames: number) => ({
     stallMs: 2000,
-    framesDone: () => frames,
+    lastFrame: () => frames,
   })
 
   it('should stall in recording at the frame count when the acknowledgement never comes', async () => {
@@ -140,20 +140,6 @@ describe('stepThen', () => {
     expect(vi.getTimerCount()).toBe(0)
   })
 
-  it('should wait an unbounded acknowledgement out past the limit without stalling', async () => {
-    let acknowledge = () => {}
-    const sent = new Promise<void>((done) => {
-      acknowledge = done
-    })
-    const outcome = stepThen(sent, frameDone, undefined)
-
-    await vi.advanceTimersByTimeAsync(5000)
-    acknowledge()
-
-    await expect(outcome).resolves.toBeUndefined()
-    expect(vi.getTimerCount()).toBe(0)
-  })
-
   it('should rethrow a frame stall and swallow the acknowledgement rejected after it', async () => {
     let reject: (error: Error) => void = () => {}
     const sent = new Promise<void>((_, fail) => {
@@ -173,24 +159,30 @@ describe('stepThen', () => {
 })
 
 /**
- * Covers which pointer inputs bound their acknowledgement. A move that misses
- * its frame waits for Chromium's next flush, measured at 2.5 s steps under
- * load, while a press, a release, and a wheel acknowledge within the frame.
+ * Covers how long each pointer input's acknowledgement may take. A move that
+ * misses its frame waits for Chromium's next flush, measured at 2.5 s steps up
+ * to 5011 ms under load, while a press, a release, and a wheel came within 31 ms.
  */
 
-describe('boundsAcknowledgement', () => {
+describe('ackLimit', () => {
   const at = { x: 10, y: 20 }
 
-  it('should leave a move unbounded', () => {
-    expect(boundsAcknowledgement({ type: 'move', ...at })).toBe(false)
+  it('should give a move room for two flushes past the slowest one measured', () => {
+    expect(ackLimit({ type: 'move', ...at }, 2000)).toBeGreaterThanOrEqual(
+      5011 + 2 * 2500,
+    )
+  })
+
+  it('should never give a move less than the stall limit', () => {
+    expect(ackLimit({ type: 'move', ...at }, 60_000)).toBe(60_000)
   })
 
   it.each([
     ['a press', { type: 'down', ...at, clickCount: 1 }],
     ['a release', { type: 'up', ...at, clickCount: 1 }],
     ['a wheel', { type: 'wheel', ...at, dy: 120 }],
-  ] as const)('should bound %s', (_, input) => {
-    expect(boundsAcknowledgement(input)).toBe(true)
+  ] as const)('should hold %s to the stall limit', (_, input) => {
+    expect(ackLimit(input, 2000)).toBe(2000)
   })
 })
 

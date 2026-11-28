@@ -179,9 +179,10 @@ export async function filmStepped(
       frames += 1
     }
 
-    const bound: AckBound = { stallMs, framesDone: () => frames }
-    const afterFrame = (sent: Promise<unknown>, bounded = true) =>
-      stepThen(sent, frame, bounded ? bound : undefined)
+    // The frame the input's step began, numbered from 0 as a frame stall numbers it.
+    const lastFrame = () => frames - 1
+    const afterFrame = (sent: Promise<unknown>, limit = stallMs) =>
+      stepThen(sent, frame, { stallMs: limit, lastFrame })
 
     const recording: Stage = {
       viewport,
@@ -192,7 +193,7 @@ export async function filmStepped(
       pointer: (input) =>
         afterFrame(
           page.send('Input.dispatchMouseEvent', mouseEvent(input)),
-          boundsAcknowledgement(input),
+          ackLimit(input, stallMs),
         ),
       key: (text) => afterFrame(page.send('Input.insertText', { text })),
       press: (input) =>
@@ -476,18 +477,18 @@ function keyEvent(input: KeyInput): Record<string, unknown> {
 /** The stall limit an input's acknowledgement waits under, and the frame it names. */
 export interface AckBound {
   readonly stallMs: number
-  readonly framesDone: () => number
+  readonly lastFrame: () => number
 }
 
 /**
  * Steps a frame, then awaits the input sent ahead of it, since awaiting first
  * deadlocks the page. The page acknowledges only once its handler returns, so
- * a `bound` stalls that wait, and a failed step leaves `sent` handled.
+ * the wait stalls past `bound`, and a failed step leaves `sent` handled.
  */
 export async function stepThen(
   sent: Promise<unknown>,
   step: () => Promise<void>,
-  bound: AckBound | undefined,
+  bound: AckBound,
 ): Promise<void> {
   try {
     await step()
@@ -495,13 +496,9 @@ export async function stepThen(
     sent.catch(() => {})
     throw error
   }
-  if (!bound) {
-    await sent
-    return
-  }
   await withinStall(
     sent,
-    bound.framesDone(),
+    bound.lastFrame(),
     bound.stallMs,
     'recording',
     'input',
@@ -509,11 +506,14 @@ export async function stepThen(
 }
 
 /**
- * Whether a pointer input's acknowledgement waits under the stall limit. A move
- * that misses its frame is acknowledged on Chromium's next flush, in 2.5 s steps.
+ * How long a move's acknowledgement may take. One that misses its frame waits
+ * on Chromium's next flush, in 2.5 s steps up to 5011 ms under measured load.
  */
-export function boundsAcknowledgement(input: PointerInput): boolean {
-  return input.type !== 'move'
+const MOVE_ACK_MS = 30_000
+
+/** How long a pointer input's acknowledgement may take before the beat falls back. */
+export function ackLimit(input: PointerInput, stallMs: number): number {
+  return input.type === 'move' ? Math.max(stallMs, MOVE_ACK_MS) : stallMs
 }
 
 async function withinStall<T>(
