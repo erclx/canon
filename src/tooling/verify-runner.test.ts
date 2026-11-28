@@ -342,8 +342,7 @@ describe('tools and preconditions', () => {
     expect(result.stdout).toContain('uv is not installed')
   })
 
-  // A project keeps its own list once its stack is retired, so the runner
-  // still honors a tool hint and a precondition no shipped list declares.
+  // A retired stack's project keeps its own list, which may carry these.
   it('should name a tool hint when the tool is absent', () => {
     writeOwnList({
       require: ['lint'],
