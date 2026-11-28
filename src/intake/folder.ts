@@ -12,6 +12,7 @@ import {
   readItems,
   writeAnswerLine,
 } from '@/intake/items'
+import { RENDERED_SURFACE } from '@/records/validate'
 import { recordDir } from '@/roots/record'
 
 export const INTAKE_REFUSALS = [
@@ -90,6 +91,17 @@ function refuse(
   detail: readonly string[] = [],
 ): IntakeRefused {
   return { ok: false, reason, message, detail }
+}
+
+/**
+ * Whether the item's `Fix:` or `Worth it:` line names a rendered-surface file in
+ * a code span, which is a change a person sees.
+ */
+export function namesRenderedSurface(item: IntakeItem): boolean {
+  const text = `${item.fix ?? ''} ${item.worth ?? ''}`
+  return [...text.matchAll(/`([^`]+)`/g)].some((span) =>
+    RENDERED_SURFACE.test(span[1]),
+  )
 }
 
 export function intakeDir(root: string): string {

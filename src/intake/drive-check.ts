@@ -16,10 +16,10 @@ import {
   extractOrdinal,
   type IntakeRefused,
   listClusters,
+  namesRenderedSurface,
   openFolder,
 } from '@/intake/folder'
 import { parseDecided, readItems } from '@/intake/items'
-import { RENDERED_SURFACE } from '@/records/validate'
 import {
   APP_CONFIG_REL,
   type AppTableRead,
@@ -575,11 +575,7 @@ async function skippedOnVisible(
         item.decided === undefined ? undefined : parseDecided(item.decided)
       if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG)
         continue
-      const text = `${item.fix ?? ''} ${item.worth ?? ''}`
-      const names = [...text.matchAll(/`([^`]+)`/g)].some((span) =>
-        RENDERED_SURFACE.test(span[1]),
-      )
-      if (names) visible.add(pointer.finding)
+      if (namesRenderedSurface(item)) visible.add(pointer.finding)
     }
   }
   return skipped
