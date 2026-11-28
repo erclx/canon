@@ -100,6 +100,19 @@ describe('retiredStackMessage', () => {
     expect(message).toContain('canon tooling sync base --write')
   })
 
+  it('should leave a chain holding only retired stacks as it is', () => {
+    const message = retiredStackMessage('go', 'tooling', ['go'])
+
+    expect(message).toContain('leave the files as they are')
+    expect(message).not.toContain('canon tooling sync base --write')
+  })
+
+  it('should keep the base move for a chain that still holds base', () => {
+    expect(retiredStackMessage('go', 'tooling', ['go', 'base'])).toContain(
+      'canon tooling sync base --write',
+    )
+  })
+
   it('should move governance to base', () => {
     expect(retiredStackMessage('go', 'governance')).toContain(
       'canon gov install base',

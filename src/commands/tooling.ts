@@ -573,10 +573,14 @@ function printReference(stack: string): number {
   return 0
 }
 
-function missingStackError(stack: string, fallback: string): string {
-  return findRetiredStack(stack) === undefined
-    ? fallback
-    : retiredStackMessage(stack, 'tooling')
+function missingStackError(
+  stack: string,
+  target: string,
+  fallback: string,
+): string {
+  if (findRetiredStack(stack) === undefined) return fallback
+  const chain = stampedChain(readStamp(resolve(target)), 'tooling')
+  return retiredStackMessage(stack, 'tooling', chain)
 }
 
 /**
@@ -592,7 +596,7 @@ function prepare(stack: string, target: string, skip?: string): Prepared {
     return {
       ok: false,
       reason: 'unknown-stack',
-      error: missingStackError(stack, `Stack not found: ${stack}`),
+      error: missingStackError(stack, target, `Stack not found: ${stack}`),
     }
   }
 
@@ -608,7 +612,11 @@ function prepare(stack: string, target: string, skip?: string): Prepared {
       return {
         ok: false,
         reason: 'unknown-skip',
-        error: missingStackError(skip, `Stack to skip not found: ${skip}`),
+        error: missingStackError(
+          skip,
+          target,
+          `Stack to skip not found: ${skip}`,
+        ),
       }
     }
   }

@@ -102,9 +102,26 @@ const WAY_OFF: Record<StackCatalog, string> = {
     'Run `canon gov install base` to move to base, which keeps every rule base ships.',
 }
 
+/**
+ * A chain naming no shipped stack is a subfolder synced with `--skip base`,
+ * where a base write lands `.husky/` and `.github/` the root already owns.
+ */
+const ALONE_WAY_OFF =
+  'Nothing the toolkit ships remains in this chain, as after a sync with `--skip base`, so leave the files as they are rather than writing base here.'
+
+/**
+ * Names the way off a retired stack. A tooling caller passes the recorded
+ * chain when it has one, since the way off differs for a chain left with no
+ * shipped stack, and a caller with none gets the base move.
+ */
 export function retiredStackMessage(
   name: string,
   catalog: StackCatalog,
+  chain: readonly string[] = [],
 ): string {
-  return `Stack '${name}' is no longer shipped by the toolkit. Its files stay yours. ${WAY_OFF[catalog]}`
+  const alone =
+    catalog === 'tooling' &&
+    chain.length > 0 &&
+    chain.every((each) => findRetiredStack(each) !== undefined)
+  return `Stack '${name}' is no longer shipped by the toolkit. Its files stay yours. ${alone ? ALONE_WAY_OFF : WAY_OFF[catalog]}`
 }

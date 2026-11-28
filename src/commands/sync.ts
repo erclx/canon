@@ -258,7 +258,7 @@ function renderTooling(report: CheckReport): void {
   logStep('tooling')
 
   for (const name of tooling.retired) {
-    logWarn(retiredStackMessage(name, 'tooling'))
+    logWarn(retiredStackMessage(name, 'tooling', tooling.chain))
   }
 
   if (!tooling.measured) {

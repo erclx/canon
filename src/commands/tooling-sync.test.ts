@@ -273,6 +273,22 @@ describe('tooling diff', () => {
     expect(run.stderr).toContain('canon tooling sync base --write')
   })
 
+  it('should leave a target whose chain holds only the retired stack as it is', () => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files: {}, chain: ['go'] } },
+      }),
+    )
+
+    const run = diffStack('go')
+
+    expect(run.stderr).toContain('leave the files as they are')
+    expect(run.stderr).not.toContain('canon tooling sync base --write')
+  })
+
   it('should keep the unknown-stack reason for a retired stack under --json', () => {
     const record = JSON.parse(diffStack('php', ['--json']).stdout ?? '') as {
       reason: string

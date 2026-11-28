@@ -43,6 +43,8 @@ Move tooling off it in two steps. A base write alone replaces `scripts/verify.js
 1. Run `canon tooling customize scripts/verify.json` to keep your list
 2. Run `canon tooling sync base --write` to record `base` as the chain
 
+Skip both steps in a subfolder synced with `--skip base`, whose chain records `go` or `php` alone. Leave its files as they are, since a base write there lands `.husky/` and `.github/` where the repository root already owns them.
+
 ## Keep or delete the pick archives, your call
 
 A pick no longer copies its arms out of the board. Earlier picks left a folder of images per project under `.canon/`, such as `.canon/picks/` or `.canon/landing/`, and nothing deletes or moves one.
