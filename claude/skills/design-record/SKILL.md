@@ -73,11 +73,13 @@ Retire a reference in the change that removes its surface from the app.
 
 ## Step 6: carry a pick into the design document
 
-A pick that settles color, type, spacing, or radius changes the design document as well as the folder. Skip this step when the pick changed layout or structure alone, since the reference carries that.
+A pick that settles color, type, spacing, radius, or an interaction changes the design document as well as the folder. Skip this step when the pick changed layout or structure alone, since the reference carries that.
 
 - Carry each value into the stylesheet the document's lead names, and its intent into the document's sections under `design.md`
 - A project with no stylesheet yet writes one of its own for the values, and the lead names its path
 - A values record names in its lead the module it renders from and the command that renders it. Edit that module and run that command, never the document.
+- A pick settling an interaction, such as a drag range or what a tap opens, writes one row to `## Behavior` under `design.md`, naming the surface's group
+- A pick taken on the live prototype writes its row too, since no frame carries the interaction
 
 Never cite a board frame path from the document or the index. The board folder is gitignored, so the citation resolves on one machine alone.
 
@@ -88,7 +90,7 @@ Never cite a board frame path from the document or the index. The board folder i
 Group:  <group>, <name>
 Files:  <each file the sync wrote or removed>
 Index:  <the group file created, changed, or removed, or unchanged>
-Design: <the stylesheet and design document the values went to, or unchanged>
+Design: <the stylesheet and design document the values went to, each Behavior row written, or unchanged>
 ```
 
 Emit every path from the project root. Omit the files line when nothing was written.

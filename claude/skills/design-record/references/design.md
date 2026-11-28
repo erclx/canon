@@ -93,6 +93,17 @@ Add either optional section, and the one line Layout may carry, when the project
 - `Draw widths:`, a line inside `## Layout` naming the phone, tablet, and desktop widths a board draws at, which `design-pick` reads
 - `## Mark`: the logo's construction rules and the files that carry it
 
+### Behavior
+
+An optional `## Behavior` sits last, after `## Iconography`, so the order shared with Google's DESIGN.md stays untouched. It holds the interactions a design session settled that no frame can show, such as a drag range or what a tap opens.
+
+- It is a `Surface | Behavior` table, one row per interaction, since the prose budget skips table rows and a check reads it by row
+- The Surface cell names a `canon/design/` group, as `` `board` ``
+- The Behavior cell states one interaction with its range or persistence, such as `A frame resizes from its corner grips, 120px to 1600px`
+- `canon intake drive-check` fails a drive that tried no row, matching a row by both cells with a bold label and a trailing period dropped
+
+The section belongs to an intent record. A values record adds it through the module it renders from, never by hand.
+
 ## Device classes
 
 The classes a project supports live under `[device-classes]` in `canon/config/app.toml`, or in `canon/config/device-classes.toml` before it, not in the record. A project with no table supports all three of phone, tablet, and desktop.
@@ -200,4 +211,10 @@ Values live in `<path to the stylesheet>`. This record holds the intent behind t
 ## Iconography
 
 - <style, source library, and whether custom icons are allowed>
+
+## Behavior
+
+| Surface   | Behavior                                         |
+| --------- | ------------------------------------------------ |
+| `<group>` | <one interaction, with its range or persistence> |
 ```
