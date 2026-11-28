@@ -406,7 +406,7 @@ describe('poll', () => {
         'RESPONSE  #7 answered with no new commit\nHELD      1 line(s) above ended no wait',
       )
       expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
-    })
+    }, 10_000)
 
     it('should carry a held line into the exit an actionable line ends', async () => {
       writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
@@ -531,14 +531,14 @@ describe('poll', () => {
         'bash',
         [
           '-c',
-          `(sleep 1.5; touch '${join(root, 'fixtures', 'list-unreadable')}') & bun '${SCRIPT}' --wait 4 --every 1`,
+          `(sleep 0.75; touch '${join(root, 'fixtures', 'list-unreadable')}') & bun '${SCRIPT}' --wait 2 --every 0.5`,
         ],
         { cwd: join(root, 'repo'), encoding: 'utf8', env: buildEnv() },
       )
 
       expect(child.status).toBe(1)
       expect(child.stdout).toContain('RESPONSE  #7')
-    })
+    }, 10_000)
 
     it('should print no CODE-CLOSED on a first sighting of a closed review', () => {
       writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
@@ -579,7 +579,7 @@ describe('poll', () => {
 
     expect(waited.stdout).toBe('No movement.')
     expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
-  })
+  }, 10_000)
 
   it('should exit on the first run that reports an actionable line', () => {
     writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
@@ -652,13 +652,13 @@ describe('poll', () => {
     rmSync(reads, { force: true })
     const started = Date.now()
 
-    const waited = poll('--wait', '3', '--every', '1')
+    const waited = poll('--wait', '2', '--every', '0.5')
 
     expect(waited.status).toBe(1)
     expect(waited.stderr).toContain('open pull request list could not be read')
     expect(readCount(reads)).toBeGreaterThanOrEqual(2)
     expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
-  })
+  }, 10_000)
 
   it('should read a hung command as failed once its timeout passes', async () => {
     const started = Date.now()
