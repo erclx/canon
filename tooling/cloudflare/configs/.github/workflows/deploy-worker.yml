@@ -11,6 +11,12 @@ on:
       - 'src/**'
       - 'migrations/**'
       - 'wrangler.*'
+  # A pull request compiles the Worker and deploys nothing, so it reads no secret.
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'migrations/**'
+      - 'wrangler.*'
   workflow_dispatch:
     inputs:
       drill_rollback:
@@ -18,25 +24,86 @@ on:
         type: boolean
         default: false
 
-# A Worker deploys from the default branch alone, so one group serializes every
-# run. The running job is left to finish, since a cancel between the migration
-# and the deploy leaves a migrated database under the old code.
-concurrency:
-  group: deploy-worker
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
 jobs:
+  dry-run:
+    name: 🧪 Dry run
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # A group per pull request, so a dry run never queues behind a deploy.
+    concurrency:
+      group: deploy-worker-dry-run-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read the Wrangler config
+        id: shape
+        run: bash scripts/wrangler-shape.sh >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether to compile
+        id: gate
+        env:
+          SHAPE: ${{ steps.shape.outputs.shape }}
+        run: |
+          if [ "$SHAPE" = worker ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::The Wrangler config declares no Worker alone, so there is no Worker to compile."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Bun
+        if: steps.gate.outputs.skip == 'false'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        if: steps.gate.outputs.skip == 'false'
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          if jq -e '.scripts.build' package.json > /dev/null; then
+            bun run build
+          else
+            echo "package.json declares no build script, so wrangler deploy bundles the Worker."
+          fi
+
+      - name: Compile without deploying
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          STAGING: ${{ steps.shape.outputs.staging }}
+        run: |
+          bunx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/dry-run"
+          if [ "$STAGING" = true ]; then
+            bunx wrangler deploy --dry-run --env staging --outdir "$RUNNER_TEMP/dry-run-staging"
+          fi
+
   deploy:
     name: 🚀 Deploy Worker
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    # A Worker deploys from the default branch alone, so one group serializes every
+    # run. The running job is left to finish, since a cancel between the migration
+    # and the deploy leaves a migrated database under the old code.
+    concurrency:
+      group: deploy-worker
+      cancel-in-progress: false
     env:
       # Fill in the full URL of a route the deployed Worker answers with a 2xx
       # only when it is healthy, such as https://example.com/health.
       HEALTH_URL: REPLACE_WITH_HEALTH_URL
+      # Fill in staging's health route the same way when the Wrangler config
+      # declares env.staging. A config without it never reads this.
+      STAGING_HEALTH_URL: REPLACE_WITH_STAGING_HEALTH_URL
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -77,14 +144,22 @@ jobs:
       # after the deploy would roll back a healthy version.
       - name: Check the health route
         if: steps.gate.outputs.skip == 'false'
+        env:
+          STAGING: ${{ steps.shape.outputs.staging }}
         run: |
-          case "$HEALTH_URL" in
-          http://* | https://*) ;;
-          *)
-            echo "::error::Fill in HEALTH_URL in .github/workflows/deploy-worker.yml before the first deploy."
-            exit 1
-            ;;
-          esac
+          check() {
+            case "$2" in
+            http://* | https://*) ;;
+            *)
+              echo "::error::Fill in $1 in .github/workflows/deploy-worker.yml before the first deploy."
+              exit 1
+              ;;
+            esac
+          }
+          check HEALTH_URL "$HEALTH_URL"
+          if [ "$STAGING" = true ]; then
+            check STAGING_HEALTH_URL "$STAGING_HEALTH_URL"
+          fi
 
       - name: Setup Bun
         if: steps.gate.outputs.skip == 'false'
@@ -114,26 +189,117 @@ jobs:
             echo "package.json declares no build script, so wrangler deploy bundles the Worker."
           fi
 
-      # The serving version is the rollback target, read before the deploy lands.
-      # A Worker never deployed answers code 10007, and an empty history `has no deployments`.
+      # Each environment's serving version is its rollback target, read before any
+      # deploy lands. A Worker never deployed answers code 10007, and an empty
+      # history `has no deployments`.
       - name: Record the serving version
         id: serving
         if: steps.gate.outputs.skip == 'false'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          STAGING: ${{ steps.shape.outputs.staging }}
         run: |
-          if status=$(bunx wrangler deployments status --json 2> "$RUNNER_TEMP/wrangler-error.log"); then
-            version=$(jq -r '.versions | max_by(.percentage) | .version_id' <<< "$status")
-            echo "Serving version $version, the rollback target."
-          elif printf '%s\n' "$status" | cat - "$RUNNER_TEMP/wrangler-error.log" | grep -qE 'has no deployments|code: 10007'; then
-            version=""
-            echo "::notice::No version serves yet, so a failed smoke check has nothing to roll back to."
-          else
-            cat "$RUNNER_TEMP/wrangler-error.log"
+          record() {
+            local key=$1
+            shift
+            if status=$(bunx wrangler deployments status --json "$@" 2> "$RUNNER_TEMP/wrangler-error.log"); then
+              version=$(jq -r '.versions | max_by(.percentage) | .version_id' <<< "$status")
+              echo "Serving version $version, the rollback target for $key."
+            elif printf '%s\n' "$status" | cat - "$RUNNER_TEMP/wrangler-error.log" | grep -qE 'has no deployments|code: 10007'; then
+              version=""
+              echo "::notice::No version serves yet for $key, so a failed smoke check there has nothing to roll back to."
+            else
+              cat "$RUNNER_TEMP/wrangler-error.log"
+              exit 1
+            fi
+            echo "$key=$version" >> "$GITHUB_OUTPUT"
+          }
+          record version
+          if [ "$STAGING" = true ]; then
+            record staging_version --env staging
+          fi
+
+      # Staging runs the same bookmark, migration, deploy, and smoke check ahead
+      # of production, so a failure there stops the run before production changes.
+      - name: Record the staging D1 bookmark
+        id: bookmark_staging
+        if: steps.gate.outputs.skip == 'false' && steps.shape.outputs.staging == 'true' && steps.shape.outputs.d1_staging != ''
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DATABASES: ${{ steps.shape.outputs.d1_staging }}
+        run: |
+          bookmarks=""
+          for database in $DATABASES; do
+            bookmark=$(bunx wrangler d1 time-travel info "$database" --json --env staging | jq -re '.bookmark')
+            echo "Bookmark $bookmark is the restore point for $database on staging."
+            bookmarks="$bookmarks $database:$bookmark"
+          done
+          echo "bookmarks=${bookmarks# }" >> "$GITHUB_OUTPUT"
+
+      - name: Migrate staging D1
+        if: steps.gate.outputs.skip == 'false' && steps.shape.outputs.staging == 'true' && steps.shape.outputs.d1_staging != ''
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DATABASES: ${{ steps.shape.outputs.d1_staging }}
+        run: |
+          for database in $DATABASES; do
+            bunx wrangler d1 migrations apply "$database" --remote --env staging
+          done
+
+      - name: Deploy staging
+        if: steps.gate.outputs.skip == 'false' && steps.shape.outputs.staging == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SHA: ${{ github.sha }}
+        run: bunx wrangler deploy --env staging --message "Deploy $SHA"
+
+      # Exit 3 is Cloudflare challenging the runner rather than a failed Worker,
+      # so the run ends red as blocked and rolls nothing back.
+      - name: Smoke check staging
+        id: smoke_staging
+        if: steps.gate.outputs.skip == 'false' && steps.shape.outputs.staging == 'true'
+        run: |
+          code=0
+          bash scripts/smoke-check.sh "$STAGING_HEALTH_URL" || code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit "$code"
+
+      - name: Roll back staging
+        if: failure() && steps.smoke_staging.outcome == 'failure' && steps.smoke_staging.outputs.code != '3'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERSION: ${{ steps.serving.outputs.staging_version }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$VERSION" ]; then
+            echo "::error::The staging smoke check failed and no earlier staging version was recorded, so the new version still serves there. Production was not deployed."
             exit 1
           fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          bunx wrangler rollback "$VERSION" --env staging --message "Staging smoke check failed on $SHA"
+          echo "::error::The staging smoke check failed, so version $VERSION serves staging again and production was not deployed."
+
+      # The bookmark is the point a hand restore returns to. The run never restores
+      # by itself, since a restore discards every write since the bookmark.
+      - name: Record the D1 bookmark
+        id: bookmark
+        if: steps.gate.outputs.skip == 'false' && steps.shape.outputs.d1 != ''
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DATABASES: ${{ steps.shape.outputs.d1 }}
+        run: |
+          bookmarks=""
+          for database in $DATABASES; do
+            bookmark=$(bunx wrangler d1 time-travel info "$database" --json | jq -re '.bookmark')
+            echo "Bookmark $bookmark is the restore point for $database."
+            bookmarks="$bookmarks $database:$bookmark"
+          done
+          echo "bookmarks=${bookmarks# }" >> "$GITHUB_OUTPUT"
 
       # Migrations run before the deploy, so a failed one stops the run with the
       # old code still serving. They must stay readable by that old code, since
@@ -165,12 +331,16 @@ jobs:
         run: |
           if [ "$DRILL" = true ]; then
             echo "::warning::Rollback drill, failing the smoke check on purpose."
+            echo "code=1" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          bash scripts/smoke-check.sh "$HEALTH_URL"
+          code=0
+          bash scripts/smoke-check.sh "$HEALTH_URL" || code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit "$code"
 
       - name: Roll back
-        if: failure() && steps.smoke.outcome == 'failure'
+        if: failure() && steps.smoke.outcome == 'failure' && steps.smoke.outputs.code != '3'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -183,3 +353,17 @@ jobs:
           fi
           bunx wrangler rollback "$VERSION" --message "Smoke check failed on $SHA"
           echo "::error::The smoke check failed, so version $VERSION serves again. Any migration this run applied stays in the database."
+
+      - name: Print the restore command
+        if: failure() && (steps.bookmark.outputs.bookmarks != '' || steps.bookmark_staging.outputs.bookmarks != '')
+        env:
+          BOOKMARKS: ${{ steps.bookmark.outputs.bookmarks }}
+          STAGING_BOOKMARKS: ${{ steps.bookmark_staging.outputs.bookmarks }}
+        run: |
+          echo "::warning::The run failed after recording a D1 restore point, and nothing restored the database. A restore discards every write since its bookmark, users' own included, so run one by hand only if a migration this run applied must be undone."
+          for pair in $STAGING_BOOKMARKS; do
+            echo "bunx wrangler d1 time-travel restore ${pair%%:*} --bookmark=${pair#*:} --env staging"
+          done
+          for pair in $BOOKMARKS; do
+            echo "bunx wrangler d1 time-travel restore ${pair%%:*} --bookmark=${pair#*:}"
+          done
