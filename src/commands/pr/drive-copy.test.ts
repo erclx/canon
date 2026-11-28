@@ -395,6 +395,16 @@ describe('canon pr drive-copy', () => {
       expect(outcome.record).not.toHaveProperty('url')
     })
 
+    it('should keep the worker copy under --serve when the project declares no serve', async () => {
+      writeRepoFile('canon/config/preview.json', '{"writes":["board"]}')
+
+      const outcome = await runDriveCopy(['7', '--baseline', '--serve'])
+
+      expect(String(outcome.record.copyRoot)).toMatch(
+        /\.canon\/tmp\/pr\/review-ui\/x\/board$/,
+      )
+    })
+
     it('should stop the last pass server before starting the next one', async () => {
       writeServe()
       const first = await runDriveCopy(['7', '--serve'])
