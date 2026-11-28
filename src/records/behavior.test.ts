@@ -1,5 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { checkBehaviorRows } from '@/records/behavior'
+import { recordsDir, validateRecords } from '@/records/validate'
 
 const ROWS = [
   { surface: 'shell', behavior: 'The sidebar collapses below 768px' },
@@ -117,5 +122,116 @@ describe('checkBehaviorRows', () => {
     expect(findings.map((found) => found.subject)).toEqual([
       'board: A frame resizes from its corner grips',
     ])
+  })
+})
+
+describe('validateRecords over a design record', () => {
+  let root: string
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-behavior-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  async function seedDesignRecord(): Promise<void> {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    await writeFile(
+      join(root, 'canon', 'DESIGN.md'),
+      [
+        '# Design',
+        '',
+        '## Behavior',
+        '',
+        '| Surface | Behavior                       |',
+        '| ------- | ------------------------------ |',
+        '| `shell` | Escape closes the command menu |',
+        '',
+      ].join('\n'),
+    )
+  }
+
+  function plan(extra: string): string {
+    return [
+      '# Feature: The shell closes its menu',
+      '',
+      '## Summary',
+      '',
+      '- The goal',
+      '',
+      '## Files to touch',
+      '',
+      '- `src/shell.ts`: the menu',
+      '',
+      extra,
+      '## Verification',
+      '',
+      '- The menu closes: `bun test src/shell`',
+      '',
+      '## Risks',
+      '',
+      'None identified.',
+      '',
+      '## Review focus',
+      '',
+      'None identified.',
+      '',
+      '## Questions',
+      '',
+      'None identified.',
+      '',
+    ].join('\n')
+  }
+
+  const CITING =
+    '## Design references\n\n- `canon/design/shell/`: built against, the shell\n\n'
+
+  async function seedPlan(body: string): Promise<void> {
+    const dir = recordsDir(root, 'plans')
+    mkdirSync(dir, { recursive: true })
+    await writeFile(join(dir, 'feature-a-b.md'), body)
+  }
+
+  it('should report a cited row the plan does not name', async () => {
+    await seedDesignRecord()
+    await seedPlan(plan(CITING))
+
+    const outcome = await validateRecords(root, 'plans')
+
+    expect(outcome.ok && outcome.findings.map((found) => found.kind)).toEqual([
+      'behavior-unstated',
+    ])
+  })
+
+  it('should pass a cited row the section rules out with a reason', async () => {
+    await seedDesignRecord()
+    await seedPlan(
+      plan(
+        `${CITING}## Behavior rows\n\n- Escape closes the command menu: out, the menu ships later\n\n`,
+      ),
+    )
+
+    const outcome = await validateRecords(root, 'plans')
+
+    expect(outcome.ok && outcome.findings).toEqual([])
+  })
+
+  it('should skip the check where no design record exists', async () => {
+    await seedPlan(plan(CITING))
+
+    const outcome = await validateRecords(root, 'plans')
+
+    expect(outcome.ok && outcome.findings).toEqual([])
+  })
+
+  it('should owe nothing for a plan citing no group', async () => {
+    await seedDesignRecord()
+    await seedPlan(plan(''))
+
+    const outcome = await validateRecords(root, 'plans')
+
+    expect(outcome.ok && outcome.findings).toEqual([])
   })
 })
