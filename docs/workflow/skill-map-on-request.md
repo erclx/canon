@@ -27,5 +27,6 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 | `canon:canon-cli`           | To pick a `canon` verb, or learn which can lose edits |
 | `canon:youtube-transcripts` | A video transcript wanted as context                  |
 | `canon:teach-craft`         | To teach a subject so it sticks                       |
+| `canon:operator-walk`       | To walk the operator through steps done by hand       |
 | `canon:markdown-craft`      | Before a substantial markdown edit                    |
 | `canon:write-human`         | Before drafting or revising prose                     |
