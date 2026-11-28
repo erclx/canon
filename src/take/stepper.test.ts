@@ -126,7 +126,7 @@ describe('stepThen', () => {
   })
 
   it('should rethrow a frame stall and swallow the acknowledgement rejected after it', async () => {
-    let reject = (_: Error) => {}
+    let reject: (error: Error) => void = () => {}
     const sent = new Promise<void>((_, fail) => {
       reject = fail
     })

@@ -464,11 +464,8 @@ function keyEvent(input: KeyInput): Record<string, unknown> {
 
 /**
  * Steps a frame, then awaits the input sent ahead of it, since awaiting first
- * deadlocks the page. The page acknowledges an input only once its handler
- * returns, so the wait stalls in recording at `framesDone()` past `stallMs`
- * rather than holding the take for as long as the handler blocks. When the
- * step fails, the input is left settling against a closing shell, so its
- * rejection is handled here rather than left unhandled.
+ * deadlocks the page. The page acknowledges only once its handler returns, so
+ * that wait stalls past `stallMs`, and a failed step leaves `sent` handled.
  */
 export async function stepThen(
   sent: Promise<unknown>,
