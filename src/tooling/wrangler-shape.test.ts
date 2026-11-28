@@ -52,13 +52,15 @@ afterEach(() => {
 describe('wrangler-shape.sh', () => {
   describe('the shape', () => {
     it('reads a project with no Wrangler config as none', () => {
-      expect(run().stdout).toBe('shape=none\nd1=\n')
+      expect(run().stdout).toBe('shape=none\nd1=\nstaging=false\nd1_staging=\n')
     })
 
     it('reads the commented starter as a Worker with no D1 binding', () => {
       put('wrangler.jsonc', HELLO_WORLD)
 
-      expect(run().stdout).toBe('shape=worker\nd1=\n')
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=\nstaging=false\nd1_staging=\n',
+      )
     })
 
     it('reads a TOML config naming a build output as Pages', () => {
@@ -67,7 +69,9 @@ describe('wrangler-shape.sh', () => {
         'name = "site"\npages_build_output_dir = "./dist" # main = "x"\n',
       )
 
-      expect(run().stdout).toBe('shape=pages\nd1=\n')
+      expect(run().stdout).toBe(
+        'shape=pages\nd1=\nstaging=false\nd1_staging=\n',
+      )
     })
 
     it('reads a config declaring both an entry and a build output as both', () => {
@@ -76,7 +80,7 @@ describe('wrangler-shape.sh', () => {
         '{ "main": "src/index.ts", "pages_build_output_dir": "dist" }\n',
       )
 
-      expect(run().stdout).toBe('shape=both\nd1=\n')
+      expect(run().stdout).toBe('shape=both\nd1=\nstaging=false\nd1_staging=\n')
     })
   })
 
@@ -95,7 +99,9 @@ describe('wrangler-shape.sh', () => {
 `,
       )
 
-      expect(run().stdout).toBe('shape=worker\nd1=app-db logs-db\n')
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=app-db logs-db\nstaging=false\nd1_staging=\n',
+      )
     })
 
     it('lists a database a TOML config binds', () => {
@@ -104,7 +110,136 @@ describe('wrangler-shape.sh', () => {
         'main = "src/index.ts"\n\n[[d1_databases]]\nbinding = "DB"\ndatabase_name = "app-db"\n',
       )
 
-      expect(run().stdout).toBe('shape=worker\nd1=app-db\n')
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=app-db\nstaging=false\nd1_staging=\n',
+      )
+    })
+  })
+
+  describe('the staging environment', () => {
+    it('reports staging when a JSONC config declares env.staging', () => {
+      put(
+        'wrangler.jsonc',
+        `{
+  "main": "src/index.ts",
+  "env": {
+    // the copy that deploys first
+    "staging": { "name": "app-staging" },
+  },
+}
+`,
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=\nstaging=true\nd1_staging=\n',
+      )
+    })
+
+    it('reports staging when a TOML config opens an env.staging table', () => {
+      put(
+        'wrangler.toml',
+        'main = "src/index.ts"\n\n[env.staging]\nname = "app-staging"\n',
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=\nstaging=true\nd1_staging=\n',
+      )
+    })
+
+    it('reports no staging for a key named staging outside env', () => {
+      put(
+        'wrangler.jsonc',
+        '{ "main": "src/index.ts", "vars": { "staging": "no" } }\n',
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=\nstaging=false\nd1_staging=\n',
+      )
+    })
+
+    it('reports no staging for a TOML table commented out', () => {
+      put('wrangler.toml', 'main = "src/index.ts"\n# [env.staging]\n')
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=\nstaging=false\nd1_staging=\n',
+      )
+    })
+  })
+
+  describe('the databases per environment', () => {
+    it('splits a JSONC config into production and staging databases', () => {
+      put(
+        'wrangler.jsonc',
+        `{
+  "main": "src/index.ts",
+  "d1_databases": [{ "binding": "DB", "database_name": "app-db" }],
+  "env": {
+    "staging": {
+      "d1_databases": [{ "binding": "DB", "database_name": "app-db-staging" }],
+    },
+    "preview": {
+      "d1_databases": [{ "binding": "DB", "database_name": "app-db-preview" }],
+    },
+  },
+}
+`,
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=app-db\nstaging=true\nd1_staging=app-db-staging\n',
+      )
+    })
+
+    it('splits a TOML config into production and staging databases', () => {
+      put(
+        'wrangler.toml',
+        `main = "src/index.ts"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "app-db"
+
+[env.staging]
+name = "app-staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "app-db-staging"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "app-db-preview"
+`,
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=app-db\nstaging=true\nd1_staging=app-db-staging\n',
+      )
+    })
+  })
+
+  describe('a JSON config the parser must read', () => {
+    it('reads a config saved with a byte order mark', () => {
+      put(
+        'wrangler.jsonc',
+        '﻿{ "main": "src/index.ts", "d1_databases": [{ "database_name": "app" }], "env": { "staging": { "d1_databases": [{ "database_name": "app-s" }] } } }\n',
+      )
+
+      expect(run().stdout).toBe(
+        'shape=worker\nd1=app\nstaging=true\nd1_staging=app-s\n',
+      )
+    })
+
+    it('fails the read rather than guessing the databases of a config that does not parse', () => {
+      put(
+        'wrangler.jsonc',
+        '{ "main": "src/index.ts", "d1_databases": [{ "database_name": "app" ]\n',
+      )
+
+      const { status, stdout } = run()
+
+      expect(status).toBe(1)
+      expect(stdout).toBe('')
     })
   })
 

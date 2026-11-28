@@ -56,7 +56,7 @@ A `pull_request` trigger on `closed` runs only the `cleanup-preview` job, which 
 
 ## Worker deploy
 
-`deploy-worker.yml` runs one job on a merge to `main` or a dispatch from it, in an order that keeps the old code serving until the new version proves healthy.
+`deploy-worker.yml` runs a deploy job on a merge to `main` or a dispatch from it, in an order that keeps the old code serving until the new version proves healthy. A pull request runs a dry-run job instead.
 
 ### Order
 
@@ -64,10 +64,32 @@ Each step runs only when the one before it passed, so a failure anywhere ahead o
 
 1. Install, then run the `test` and `build` scripts where `package.json` declares each, since a Worker with no build has `wrangler deploy` bundle it.
 2. Record the version serving now through `wrangler deployments status --json`, the rollback target, taking the one with the largest traffic share.
-3. Apply remote D1 migrations for every `database_name` the config binds, and skip the step when it binds none.
-4. Deploy with `wrangler deploy`, its message naming the commit.
-5. Run `scripts/smoke-check.sh` against the health route, which retries five times three seconds apart and fails on any status outside 2xx.
-6. Roll back to the recorded version through `wrangler rollback` when the smoke check fails, and leave the run red.
+3. Record each bound database's current bookmark through `wrangler d1 time-travel info --json`, the restore point, and stop before migrating when one cannot be read.
+4. Apply remote D1 migrations for every `database_name` the config binds at its top level, and skip both D1 steps when it binds none.
+5. Deploy with `wrangler deploy`, its message naming the commit.
+6. Run `scripts/smoke-check.sh` against the health route, which retries five times three seconds apart and fails on any status outside 2xx.
+7. Roll back to the recorded version through `wrangler rollback` when the smoke check fails, and leave the run red.
+
+### Staging
+
+A Wrangler config declaring `env.staging` deploys staging first in the same run. `scripts/wrangler-shape.sh` reports `staging=true` and lists staging's own databases as `d1_staging`, since an environment inherits no D1 binding.
+
+- Staging runs steps 2 through 7 with `--env staging` against `STAGING_HEALTH_URL`, and production runs them only after staging's smoke check passes.
+- A failed staging smoke check rolls staging back to its own recorded version and leaves production undeployed.
+- A config without `env.staging` runs no staging step and never reads `STAGING_HEALTH_URL`.
+- A JSON config the script cannot parse fails the read with an error in both workflows, since a guess would migrate a database against the wrong environment.
+
+### Dry run
+
+A pull request touching the deploy paths runs `wrangler deploy --dry-run`, which compiles the Worker and uploads nothing. The job reads no secret, since Actions logs on a public repository are public, and it adds a second dry run under `--env staging` when the config declares one.
+
+The job takes a concurrency group per pull request and cancels a superseded run, so it never queues behind a deploy.
+
+### Blocked smoke check
+
+`scripts/smoke-check.sh` exits 3 when the health route answers with `cf-mitigated: challenge`, meaning Cloudflare challenged the runner rather than the Worker failing. The run ends red with `blocked` in the log and rolls nothing back, since the check gave no verdict on the new version.
+
+Let the runner through to the health route, such as with a WAF skip rule on its path, so the next run can read it.
 
 ### Gating
 
@@ -88,6 +110,10 @@ A rollback creates a new deployment of the recorded version and touches no datab
 - A first deploy records no version, so a failed smoke check on it fails the run with the new version still serving.
 - The record step reads API code 10007 as a Worker never deployed and `has no deployments` as one with an empty history, and fails on any other error.
 
+### The restore is a hand step
+
+A failure after a bookmark was recorded prints `wrangler d1 time-travel restore <database> --bookmark=<bookmark>` for each database, with `--env staging` on staging's. The run never restores by itself, because a restore discards every write since the bookmark, users' own included. Whether to run it is the operator's call.
+
 ### Rollback drill
 
 Dispatch the workflow from `main` with `drill_rollback` ticked to deploy and then fail the smoke check once on purpose. The run ends red after the rollback, which proves the path before a real failure needs it.
@@ -107,12 +133,13 @@ A Pages project fills three values in `deploy.yml`.
 
 ### Worker
 
-A Worker project fills two values in `deploy-worker.yml` and sets its token's scope.
+A Worker project fills its values in `deploy-worker.yml` and sets its token's scope.
 
 - Grant `CLOUDFLARE_API_TOKEN` Workers Scripts edit and D1 edit, since a Pages-edit token runs neither `wrangler deploy` nor `d1 migrations apply`.
 
 - Set `HEALTH_URL` to the full URL of a route answering 2xx only when the Worker is healthy.
-- Widen the `paths:` filter the same way as the Pages one, keeping `migrations/**` and `wrangler.*`.
+- Set `STAGING_HEALTH_URL` the same way for staging when the config declares `env.staging`, and leave the placeholder otherwise.
+- Widen both `paths:` filters, under `push` and `pull_request`, the same way as the Pages one, keeping `migrations/**` and `wrangler.*` in each.
 
 ## Re-sync
 
