@@ -20,6 +20,7 @@ import {
   splitPlanSections,
   validateRecords,
 } from '@/records/validate'
+import { tasksDir } from '@/tasks/archive'
 
 let ROOT: string
 
@@ -1207,6 +1208,53 @@ describe('validateRecords', () => {
     const outcome = await validateRecords(ROOT, 'plans')
 
     expect(outcome).toMatchObject({ ok: true, records: 1, findings: [] })
+  })
+
+  describe('Deferred', () => {
+    function deferringPlan(stem: string): string {
+      return conformingPlan().replace(
+        '**Verification:**',
+        `## Deferred\n\n- \`${stem}\`: the resize grips\n\n**Verification:**`,
+      )
+    }
+
+    it('should report a deferral no task on the board carries', async () => {
+      mkdirSync(tasksDir(ROOT), { recursive: true })
+      await seedPlan('feature-a-b.md', deferringPlan('v9.9-unfiled-row'))
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && kinds(outcome.findings)).toEqual([
+        'deferral-unfiled',
+      ])
+    })
+
+    it('should pass a deferral to a filed task', async () => {
+      mkdirSync(tasksDir(ROOT), { recursive: true })
+      await writeFile(join(tasksDir(ROOT), 'v9.9-filed-row.md'), '# Task\n')
+      await seedPlan('feature-a-b.md', deferringPlan('v9.9-filed-row'))
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && outcome.findings).toEqual([])
+    })
+
+    it('should read no finding off a plan with no Deferred section', async () => {
+      mkdirSync(tasksDir(ROOT), { recursive: true })
+      await seedPlan('feature-a-b.md', conformingPlan())
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && outcome.findings).toEqual([])
+    })
+
+    it('should skip the check where no tasks folder exists', async () => {
+      await seedPlan('feature-a-b.md', deferringPlan('v9.9-unfiled-row'))
+
+      const outcome = await validateRecords(ROOT, 'plans')
+
+      expect(outcome.ok && outcome.findings).toEqual([])
+    })
   })
 
   it('should resolve a cited path against the root it validates', async () => {

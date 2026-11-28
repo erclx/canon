@@ -48,6 +48,8 @@ What this skill adds on top of the standard:
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change holds.
 - Name `proposal-critique` for a one-way change or an unverified cause
 
+Put scope the plan leaves for a later row under `## Deferred`, keyed by the filed task's stem, and never in prose alone.
+
 A file at 280 rendered lines or more, or 180 under `docs/`, gets its new content placed in its entry, as a second markdown path for the reference it lands in or the split that comes first. Weigh what the plan adds too, since a file at 250 can take a 60-line section.
 
 ### Suggestions and sections

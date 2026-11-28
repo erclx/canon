@@ -21,6 +21,11 @@ import {
   readCounterpartRoot,
 } from '@/records/counterpart'
 import {
+  checkDeferrals,
+  type DeferralRoot,
+  readDeferralRoot,
+} from '@/records/deferred'
+import {
   isSessionMap,
   measureSessionMap,
   type SessionMapLength,
@@ -83,6 +88,7 @@ export const FINDING_KINDS = [
   'counterpart-malformed',
   'callers-unstated',
   'callers-malformed',
+  'deferral-unfiled',
   'ceiling-unstated',
   'bundle-unshared',
   'evidence-missing',
@@ -263,6 +269,7 @@ const PLAN_SECTIONS = [
   'Files to touch',
   'Counterparts',
   'Callers',
+  'Deferred',
   'Design references',
   'Reference images',
   'Verification',
@@ -649,9 +656,9 @@ function checkDesignReferences(
 }
 
 /**
- * `counterpart` and `callers` are the roots each section's check reads. Left
- * out, as in a project with no stack or no shipped skills, the plan owes that
- * section nothing.
+ * `counterpart`, `callers`, and `deferrals` are the roots each section's check
+ * reads. Left out, as in a project with no stack, no shipped skills, or no
+ * board, the plan owes that section nothing.
  */
 export function checkPlan(
   name: string,
@@ -659,6 +666,7 @@ export function checkPlan(
   counterpart?: CounterpartRoot,
   readDocument?: ReadDocument,
   callers?: CallersRoot,
+  deferrals?: DeferralRoot,
 ): Finding[] {
   const findings: Finding[] = []
 
@@ -744,6 +752,14 @@ export function checkPlan(
         sections.get('Callers'),
         callers,
       ).map((found) => finding(found.kind, name, found.subject, found.message)),
+    )
+  }
+
+  if (deferrals) {
+    findings.push(
+      ...checkDeferrals(sections.get('Deferred'), deferrals).map((found) =>
+        finding(found.kind, name, found.subject, found.message),
+      ),
     )
   }
 
@@ -1227,12 +1243,20 @@ export async function validateRecords(
   if (kind === 'plans') {
     const counterpart = await readCounterpartRoot(root)
     const callers = readCallersRoot(root)
+    const deferrals = await readDeferralRoot(root)
     return validateFiles(
       dir,
       kind,
       names,
       (name, text) =>
-        checkPlan(name, text, counterpart, documentReader(root), callers),
+        checkPlan(
+          name,
+          text,
+          counterpart,
+          documentReader(root),
+          callers,
+          deferrals,
+        ),
       planStructure,
       (name, text) =>
         checkPlanEvidence(name, text, (rel) => existsSync(join(root, rel))),
