@@ -21,7 +21,7 @@ jobs:
       matrix:
         # Only the stacks that scaffold. A stack with no scaffold is refused by the verb.
         # Keep in step with the stack list in the report job's loop
-        stack: [astro, nextjs, vite-react, go, php, python, cloudflare]
+        stack: [astro, nextjs, vite-react, python, cloudflare]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -39,30 +39,11 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Setup Go
-        if: matrix.stack == 'go'
-        uses: actions/setup-go@v7
-        with:
-          go-version: 'stable'
-
-      - name: Check Go
-        if: matrix.stack == 'go'
-        run: |
-          go version
-          # The stack's prepare installs golangci-lint here, off the runner's PATH
-          echo "$HOME/go/bin" >> "$GITHUB_PATH"
-
       # Latest, since the scaffold's Sync adds an unpinned @playwright/test.
       # Chromium alone, since the scaffolds declare no other engine and the hosted image ships its system libraries
       - name: Install Playwright Chromium
         if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
         run: bunx playwright@latest install chromium
-
-      - name: Check PHP and Composer
-        if: matrix.stack == 'php'
-        run: |
-          php --version
-          composer --version
 
       - name: Install uv
         if: matrix.stack == 'python'
@@ -113,4 +94,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         # Keep in step with the matrix above. A stack missing here gets no issue.
-        run: scripts/ci/stack-issues.sh astro nextjs vite-react go php python cloudflare
+        run: scripts/ci/stack-issues.sh astro nextjs vite-react python cloudflare

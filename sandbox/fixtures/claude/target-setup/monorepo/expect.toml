@@ -1,17 +1,17 @@
-purpose = "/canon:target-setup on a tree with a React web root, a Python api root, and a Go svc root below an empty root package.json finds all three and syncs each. A run reading markers at the root alone resolves everything to base."
+purpose = "/canon:target-setup on a tree with a React web root, a Python api root, and a Go svc root below an empty root package.json finds all three, syncs web and api, and resolves svc to base since no stack ships for Go. A run reading markers at the root alone resolves everything to base."
 
 # The fresh arm cost 20 turns and this arm adds two subfolder syncs on top of the same chain, so the ceiling holds at the default until a first run gives a measurement.
 max_turns = 30
 
 paths = [
   { path = ".claude/rules/canon/lang/python.md", why = "Governance installs once at the root, so each subfolder's language reaches the rule set through --add. One rule per root proves the walk reached it." },
-  { path = ".claude/rules/canon/lang/go.md", why = "The Go root language rule arrived through --add." },
   { path = ".claude/rules/canon/framework/react.md", why = "The web root framework rule arrived through --add." },
-  { path = "web/.oxlintrc.json", why = "Proves the web subfolder took its own tooling sync. The svc root carries no tooling assertion, since a driven session calls the published canon and a Go tooling config fails against any release predating that stack while the detection under test ran correctly." },
+  { path = "web/.oxlintrc.json", why = "Proves the web subfolder took its own tooling sync. The svc root carries no tooling assertion, since no stack ships for Go and its base fallback lands nothing a subfolder sync would not." },
   { path = "api/ruff.toml", why = "Proves the api subfolder took its own tooling sync." },
 ]
 
 absent = [
+  { path = ".claude/rules/canon/lang/go.md", why = "No Go rule ships, so the svc root adds none through --add." },
   { path = "web/.github/workflows/verify.yml", why = "A subtree sync also withholds .github/, which GitHub reads only at the repository root." },
   { path = "api/.github", why = "A subtree sync withholds .github for the python root too." },
   { path = "web/.husky", why = "A subfolder sync that ran without --skip base re-drops husky, and git honors one core.hooksPath, so the extra hook folder breaks silently." },

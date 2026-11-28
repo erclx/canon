@@ -19,8 +19,6 @@ const RUNNER = join(TOOLING, 'base/configs/scripts/verify.ts')
 
 const STACK_SCRIPTS = {
   base: ['check:format'],
-  go: ['typecheck', 'lint', 'test:run'],
-  php: ['typecheck', 'lint', 'test:run'],
   python: ['typecheck', 'lint', 'test:run'],
   web: ['typecheck', 'lint', 'test:run', 'build'],
 } as const
@@ -44,19 +42,9 @@ beforeEach(() => {
   bin = join(fixture, 'bin')
   mkdirSync(bin)
   // Toolchains are probed for presence only, so a passing stub stands in.
-  for (const tool of [
-    'uv',
-    'go',
-    'golangci-lint',
-    'php',
-    'composer',
-    'shfmt',
-    'shellcheck',
-  ]) {
+  for (const tool of ['uv', 'lint-tool', 'shfmt', 'shellcheck']) {
     writeStub(tool, 0)
   }
-  mkdirSync(join(fixture, 'vendor/bin'), { recursive: true })
-  writeFileSync(join(fixture, 'vendor/bin/phpunit'), '', { mode: 0o755 })
 })
 
 afterEach(() => {
@@ -77,6 +65,11 @@ const writeList = (stack: Stack): void => {
     join(TOOLING, stack, 'configs/scripts/verify.json'),
     join(fixture, 'scripts/verify.json'),
   )
+}
+
+const writeOwnList = (list: Readonly<Record<string, unknown>>): void => {
+  mkdirSync(join(fixture, 'scripts'), { recursive: true })
+  writeFileSync(join(fixture, 'scripts/verify.json'), JSON.stringify(list))
 }
 
 const writePackage = (scripts: Readonly<Record<string, string>>): void => {
@@ -128,40 +121,37 @@ const initRepoWithMarkdown = (): void => {
   writeFileSync(join(fixture, 'note.md'), '# Note\n')
 }
 
-describe.each(['base', 'go', 'php', 'python', 'web'] as const)(
-  '%s verify.json',
-  (stack) => {
-    it('should pass when every required script is declared', () => {
-      setUp(stack, STACK_SCRIPTS[stack])
+describe.each(['base', 'python', 'web'] as const)('%s verify.json', (stack) => {
+  it('should pass when every required script is declared', () => {
+    setUp(stack, STACK_SCRIPTS[stack])
 
-      expect(runVerify().status).toBe(0)
-    })
+    expect(runVerify().status).toBe(0)
+  })
 
-    it('should exit 1 when one required script is undeclared', () => {
-      setUp(stack, STACK_SCRIPTS[stack].slice(1))
+  it('should exit 1 when one required script is undeclared', () => {
+    setUp(stack, STACK_SCRIPTS[stack].slice(1))
 
-      expect(runVerify().status).toBe(1)
-    })
+    expect(runVerify().status).toBe(1)
+  })
 
-    it('should name the undeclared required script', () => {
-      setUp(stack, STACK_SCRIPTS[stack].slice(1))
+  it('should name the undeclared required script', () => {
+    setUp(stack, STACK_SCRIPTS[stack].slice(1))
 
-      expect(runVerify().stdout).toContain(STACK_SCRIPTS[stack][0])
-    })
+    expect(runVerify().stdout).toContain(STACK_SCRIPTS[stack][0])
+  })
 
-    it('should exit 1 when no package.json exists', () => {
-      writeList(stack)
+  it('should exit 1 when no package.json exists', () => {
+    writeList(stack)
 
-      expect(runVerify().status).toBe(1)
-    })
+    expect(runVerify().status).toBe(1)
+  })
 
-    it('should tell the reader to sync when no package.json exists', () => {
-      writeList(stack)
+  it('should tell the reader to sync when no package.json exists', () => {
+    writeList(stack)
 
-      expect(runVerify().stdout).toContain('Sync the stack to write one')
-    })
-  },
-)
+    expect(runVerify().stdout).toContain('Sync the stack to write one')
+  })
+})
 
 describe('an undeclared base phase', () => {
   it('should be skipped under a derived list', () => {
@@ -272,10 +262,10 @@ describe('check:shell', () => {
   })
 })
 
-describe('the go list', () => {
+describe('a list not requiring build', () => {
   it('should never run a declared build', () => {
-    writeList('go')
-    writePackage({ ...declare(STACK_SCRIPTS.go), build: 'exit 1' })
+    writeList('python')
+    writePackage({ ...declare(STACK_SCRIPTS.python), build: 'exit 1' })
 
     const result = runVerify()
 
@@ -352,23 +342,34 @@ describe('tools and preconditions', () => {
     expect(result.stdout).toContain('uv is not installed')
   })
 
-  it('should name the go install hint when golangci-lint is absent', () => {
-    setUp('go', STACK_SCRIPTS.go)
-    rmSync(join(bin, 'golangci-lint'))
+  // A project keeps its own list once its stack is retired, so the runner
+  // still honors a tool hint and a precondition no shipped list declares.
+  it('should name a tool hint when the tool is absent', () => {
+    writeOwnList({
+      require: ['lint'],
+      tools: [{ name: 'lint-tool', hint: "Run 'install lint-tool'" }],
+    })
+    writePackage(declare(['check:format', 'lint']))
+    rmSync(join(bin, 'lint-tool'))
 
     const result = run([process.execPath, RUNNER], { PATH: bin })
 
-    expect(result.stdout).toContain('go install')
+    expect(result.stdout).toContain("Run 'install lint-tool'")
   })
 
-  it('should name composer install when vendor/bin/phpunit is missing', () => {
-    setUp('php', STACK_SCRIPTS.php)
-    rmSync(join(fixture, 'vendor'), { force: true, recursive: true })
+  it('should name a precondition hint when its path is missing', () => {
+    writeOwnList({
+      require: ['test:run'],
+      preconditions: [
+        { path: 'vendor/bin/runner', hint: "Run 'vendor install'" },
+      ],
+    })
+    writePackage(declare(['check:format', 'test:run']))
 
     const result = runVerify()
 
     expect(result.status).toBe(1)
-    expect(result.stdout).toContain("Run 'composer install'")
+    expect(result.stdout).toContain("Run 'vendor install'")
   })
 })
 

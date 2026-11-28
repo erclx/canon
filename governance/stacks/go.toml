@@ -1,2 +1,0 @@
-extends = "base"
-rules = ["code", "go", "testing-go"]

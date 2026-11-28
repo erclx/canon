@@ -1,2 +1,0 @@
-extends = "base"
-rules = ["code", "php", "testing-php"]

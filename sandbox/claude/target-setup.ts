@@ -54,19 +54,15 @@ export default scenario({
       ctx.fixtures('claude', 'target-setup', 'no-stack', '01-initial')
 
       ctx.git('add', '.')
-      ctx.commit(
-        'chore(sandbox): go project the toolkit ships no governance stack for',
-      )
+      ctx.commit('chore(sandbox): go project the toolkit ships no stack for')
 
-      ctx.log.step(
-        'Scenario ready: setup skill on a language with no governance stack',
-      )
+      ctx.log.step('Scenario ready: setup skill on a language with no stack')
       ctx.log.info(
         'Context: go.mod and main.go, no package.json and no JavaScript evidence',
       )
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  the governance stack resolves to 'base' and the preview marks it a fallback, with the Go language rule passed through --add. The tooling stack resolves to 'go' on a canon whose catalog carries it, and the preview names it with no fallback mark. The chain runs rather than stopping, the indexes phase runs and finds no candidate folder, and the report names git-commit as outside the chain.",
+        "Expect:  the governance and tooling stacks both resolve to 'base' and the preview marks each a fallback, with no Go language rule passed through --add. The chain runs rather than stopping, the indexes phase runs and finds no candidate folder, and the report names git-commit as outside the chain.",
       )
     },
     monorepo: (ctx) => {
@@ -85,7 +81,7 @@ export default scenario({
       )
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  the preview lists one tooling row per language root (web, api, svc) with its path and command, the root row resolving to 'base' with no command of its own. Governance resolves once at the root to 'base' with the React, Python, and Go rules passed through --add. One canon init runs at the root, and each subfolder takes its own tooling sync with --skip base, so no subfolder carries .husky or .github.",
+        "Expect:  the preview lists one tooling row per language root (web, api, svc) with its path and command, the root row resolving to 'base' with no command of its own. The svc row resolves to 'base' as a fallback, since no stack ships for Go. Governance resolves once at the root to 'base' with the React and Python rules passed through --add. One canon init runs at the root, and each subfolder takes its own tooling sync with --skip base, so no subfolder carries .husky or .github.",
       )
     },
     'vite-react': (ctx) => {
