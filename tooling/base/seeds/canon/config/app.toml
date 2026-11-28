@@ -19,7 +19,7 @@
 # Scenario files a drive runs first.
 # scripts = ["canon/drive/basics.md"]
 
-# Where a drive puts the mock of a decided finding its copy cannot host.
+# Where a drive puts the mock of a finding its copy cannot host.
 # proposals = ".canon/proposals"
 
 # The board project and home folder a drive draws in.

@@ -12,6 +12,7 @@ Three reports agree that an advisory is easy to miss, and they split on why.
 - **Problem:** at 390 pixels wide the banner renders 712 pixels down, under the week chart, in `src/alerts/banner.tsx`
 - **Fix:** render the banner above the chart in `src/alerts/banner.tsx` whenever an advisory is active
 - **Worth it:** yes, five of fourteen reports name a missed advisory and every one was on a phone
+- **Drawn:** `evidence/alerts/01-options.png`
 - **You:**
 
 ### 2. A lifted advisory keeps its banner until a reload
@@ -19,6 +20,7 @@ Three reports agree that an advisory is easy to miss, and they split on why.
 - **Problem:** the banner in `src/alerts/banner.tsx` reads the advisory once at mount, so a lift at 14:05 still showed at 14:40 in a held session
 - **Fix:** subscribe the banner in `src/alerts/banner.tsx` to the advisory feed it already polls
 - **Worth it:** yes, a stale advisory teaches people to ignore the next one
+- **Drawn:** `evidence/alerts/02-options.png`
 - **You:**
 
 ### 3. Advisories reach nobody with the app closed

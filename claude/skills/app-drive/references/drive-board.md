@@ -1,11 +1,11 @@
 ---
 title: Drive board
-description: How app-drive draws on its own board project, from the start at the first decided finding through the page order, the frame lift, the capture, and the refusals that end the board
+description: How app-drive draws on its own board project, from the start at the first visible finding through the whole page, the page order, the caption on each row, the frame lift with every earlier pick applied, the capture, the served copy, and the refusals that end the board
 ---
 
 # Drive board
 
-Read when `app-drive` reaches the first finding the operator decides, before any frame on the board. The drive's project stays apart from standalone picks, so this file covers the drive's own pages alone. The `drawing.md` and `board.md` it names sit in `${CLAUDE_SKILL_DIR}/../design-pick/references/`.
+Read when `app-drive` reaches the first finding with something visible, decided or not, before any frame on the board. The drive's project stays apart from standalone picks, so this file covers the drive's own pages alone. The `drawing.md` and `board.md` it names sit in `${CLAUDE_SKILL_DIR}/../design-pick/references/`.
 
 ## Starting the board
 
@@ -26,20 +26,52 @@ Do these once, while the copy still runs, since a copy the close removed has no 
 
 1. Write the board's address and project as the drive log's `Board` row.
 2. Hand the operator the board's address.
-3. Draw the shipped page whole on `00-current`, as `drawing.md` states.
+3. Draw the shipped page whole on `00-current`, as `## The whole page` below states.
 
 On a finding raised after the close, with the copy gone, add that finding's section alone to `00-current`, as `from-finding.md` beside `drawing.md` states.
+
+## The whole page
+
+A drive draws the shipped surface whole on `00-current` before the first finding it draws, so every fix is judged against the page it changes. It draws `00-next` beside it once the operator's picks settle, with every pick applied. Both pages' frames take no device and are fitted, so each section shows at its full length.
+
+- Draw one frame per section at each width, never the whole page in one frame. A page frame 12,000px tall is one nobody reads.
+- Give each section one row in page order, desktop first, then tablet, then phone
+- Put the site header in the first section's frames and the footer in the last's
+- Leave `00-current` as the shipped page for the whole drive, and apply each pick to `00-next` alone
+- Log the page's measured height at 1280 on both pages under the finding that asked for a shorter page, when one did
+
+Copy both pages' captures into the drive's `evidence/baseline/` as its whole-page comparison.
 
 ## Drawing on the board
 
 The drive's project holds `00-current`, a page per topic, and `00-next`, as `drawing.md` states. A topic's section is the drive's `<surface>`, the name `evidence/<surface>/` takes. Read `frameboard list --root <board> --json` with no `--project`, which refuses before the project exists, and run `project add` when it lacks it.
 
-- Add each page and frame by the name, place, and height `drawing.md` gives, and take theming and font from `design-pick`'s Step 2
+- Add each page and frame by the name, place, and height `drawing.md` gives, each row's caption first, and take theming and font from `design-pick`'s Step 2
 - Lift the copy's rendered markup per `${CLAUDE_SKILL_DIR}/../design-pick/references/live-arms.md`, since the board cannot reach a stylesheet inside the copy
 - Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<surface>/<nn>-options.png`
   - Capture each continuation page the same way into `evidence/<surface>/<nn>-options-<k>.png`, where `<k>` is the page's own suffix, so `<page>-2` takes `<nn>-options-2.png`
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
 - Draw `00-next` once the operator's picks settle, and copy both whole-page captures into `evidence/baseline/` as `00-current` and `00-next`, where a `-` or `.` suffix such as `-1440.light` is read
+
+### Each pick reaches the copy before the next lift
+
+A frame lifted after a pick lands shows the page the operator is building toward. Lifted from the shipped build instead, a later topic's frames would undo every pick made before them.
+
+- Apply each landed pick to the copy's markup or stylesheet, and rebuild it with the `Launch` row's command, before lifting the next finding's frames
+- Lift a later topic's current set from that copy, so it shows every earlier pick
+- Leave every frame already drawn as it stands, an earlier topic's current set and `00-current` included, since each was drawn against the page the operator saw then
+- Say in a later finding's `Saw` when it was met on a part an earlier pick changed, since the shipped build does not carry that part
+- Apply nothing for an undecided finding, since no option has been picked
+
+### The served copy as a prototype
+
+A finding about behavior across sections, such as scroll, a sticky or pinned element, a fixed header, or a theme switch, is decided on the drive's served copy rather than on a board frame, per `## The live prototype` in `drawing.md`.
+
+- Apply each decision to the copy as it lands, and hand the operator its address beside the board's
+- Copy its source into `evidence/mocks/<section>/` like any mock, since the copy is gone once the drive closes
+- Keep composition on the board, where the options sit side by side
+
+### Addresses and refusals
 
 Give the operator each page's address in the turn the page is added, read off `frameboard show` as `drawing.md` states. The operator then opens a page while it holds only what was just drawn, rather than asking for the link.
 

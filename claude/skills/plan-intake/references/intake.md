@@ -141,10 +141,11 @@ An item whose claim is a defect may carry one run of its repro, and the run is w
 - **Suggested:** the pick in one sentence, then the reason and the main tradeoff in one or two
 - **Overlaps:** the live board task that already owns this item
 - **Decided:** evidence/drive-log.md, finding <nn>, only where the operator's decision in this folder's drive log is the Fix
+- **Drawn:** `evidence/<surface>/<nn>-options.png`, only where the Fix or Worth it line names a rendered-surface file
 - **You:**
 ```
 
-- `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item, each on one line since the reader takes nothing after it. The other three are conditional.
+- `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item, each on one line since the reader takes nothing after it. The other four are conditional.
 - Number items per cluster file, giving a finding split later a letter suffix such as `3a` beside `3`, since renumbering moves every cited label
 - `Open:` reads on its own, with no bare "it" or "this" for the Fix, and `Suggested:` is required beside it, since `ok` against two options carries no information
 - Where the answer is the operator's preference rather than a technical call, say so in that form rather than inventing a default
@@ -196,6 +197,16 @@ An item carrying `Decided:` restates a decision the operator made during a drive
 - The verb writes `ok, as decided in drive-log finding <nn>`, so the slot still carries `ok` and names its source
 - A pointer that reaches no decision in the folder's log refuses the whole call as `undecided`, with no slot written
 - The operator still answers the cluster question, so an empty slot stays unread until then
+
+### A drawing owed
+
+An item whose `Fix:` or `Worth it:` line names a rendered-surface file in a code span, such as a `.tsx` or `.css` path, changes what a person sees. Nobody answers it from text, so it carries `Drawn:` citing the frames it is answered from, each a path under `evidence/`.
+
+- `canon intake list --json` reports such an item as `undrawn` while no path it cites holds a file under `evidence/`, a `skipped` value included
+- A `Decided:` item also counts the paths its finding's `Drawn` cites in the drive log, so a drive item needs no copy to be answered
+- `canon intake answer` refuses an answer on it as `undrawn`, with no slot written
+- An answer opening a pending pick lands anyway, and so does one filling a pending pick, since the pick is where its drawing happens
+- An intake pass draws the item per `intake-board.md` beside this file, and on a project with no board the item takes `sketch` alone
 
 ## Retrieval
 

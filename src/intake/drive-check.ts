@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
-import { basename, isAbsolute, join, normalize } from 'node:path'
+import { basename, join, normalize } from 'node:path'
 import {
   changedSince,
   readWorktreeStatus,
@@ -10,16 +10,17 @@ import {
   DRIVE_LOG,
   type DrawnReading,
   EVIDENCE_DIR,
+  isEvidencePath,
   readDrawn,
 } from '@/intake/drive-log'
 import {
   extractOrdinal,
   type IntakeRefused,
   listClusters,
+  namesRenderedSurface,
   openFolder,
 } from '@/intake/folder'
 import { parseDecided, readItems } from '@/intake/items'
-import { RENDERED_SURFACE } from '@/records/validate'
 import {
   APP_CONFIG_REL,
   type AppTableRead,
@@ -96,9 +97,9 @@ export interface DriveFindings {
   readonly missingEvidence: readonly string[]
   /** The drive's worktree, when the record names one still on disk. */
   readonly worktreeLeft: readonly string[]
-  /** Logged findings the operator decided with no drawn outcome. */
+  /** Logged findings, decided or not, with no drawn outcome. */
   readonly undrawn: readonly string[]
-  /** `evidence/baseline/00-current` when a drive that drew a decided finding on a board holds no capture of the current page. */
+  /** `evidence/baseline/00-current` when a drive that drew a finding on a board holds no capture of the current page. */
   readonly uncaptured: readonly string[]
   /** Findings whose drawing was skipped while the item deciding them fixes a rendered surface. */
   readonly skippedVisible: readonly string[]
@@ -484,16 +485,6 @@ function unscriptedPairs(
   )
 }
 
-function isEvidencePath(path: string): boolean {
-  if (isAbsolute(path)) return false
-  const segments = normalize(path).split(/[\\/]/)
-  return (
-    segments[0] === EVIDENCE_DIR &&
-    segments.length > 1 &&
-    !segments.includes('..')
-  )
-}
-
 /**
  * The scratch key for a topic, with any ordinal dropped, so a baseline taken
  * before the intake folder is numbered and a check naming the numbered folder
@@ -575,11 +566,7 @@ async function skippedOnVisible(
         item.decided === undefined ? undefined : parseDecided(item.decided)
       if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG)
         continue
-      const text = `${item.fix ?? ''} ${item.worth ?? ''}`
-      const names = [...text.matchAll(/`([^`]+)`/g)].some((span) =>
-        RENDERED_SURFACE.test(span[1]),
-      )
-      if (names) visible.add(pointer.finding)
+      if (namesRenderedSurface(item)) visible.add(pointer.finding)
     }
   }
   return skipped

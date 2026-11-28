@@ -1,17 +1,25 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, join, normalize, relative } from 'node:path'
-import { DRIVE_LOG, readDecisions } from '@/intake/drive-log'
+import {
+  citedDrawings,
+  DRIVE_LOG,
+  isEvidencePath,
+  readDecisions,
+  readDrawings,
+} from '@/intake/drive-log'
 import {
   INDEX_FILE,
   type IntakeItem,
   isMalformed,
   isPendingPick,
   isUnread,
+  opensPick,
   parseDecided,
   readItems,
   writeAnswerLine,
 } from '@/intake/items'
+import { RENDERED_SURFACE } from '@/records/validate'
 import { recordDir } from '@/roots/record'
 
 export const INTAKE_REFUSALS = [
@@ -23,6 +31,7 @@ export const INTAKE_REFUSALS = [
   'answered',
   'bad-input',
   'undecided',
+  'undrawn',
 ] as const
 
 export type IntakeRefusal = (typeof INTAKE_REFUSALS)[number]
@@ -49,6 +58,8 @@ export interface ResolvedItem extends IntakeItem {
   readonly decision: string | undefined
   /** Whether the answer only opens a pick, which the answer route may replace. */
   readonly pendingPick: boolean
+  /** Whether the item names a rendered surface and cites no drawing, which the answer route refuses. */
+  readonly undrawn: boolean
 }
 
 export interface ClusterItems {
@@ -90,6 +101,44 @@ function refuse(
   detail: readonly string[] = [],
 ): IntakeRefused {
   return { ok: false, reason, message, detail }
+}
+
+/**
+ * Whether the item's `Fix:` or `Worth it:` line names a rendered-surface file in
+ * a code span, which is a change a person sees.
+ */
+export function namesRenderedSurface(item: IntakeItem): boolean {
+  const text = `${item.fix ?? ''} ${item.worth ?? ''}`
+  return [...text.matchAll(/`([^`]+)`/g)].some((span) =>
+    RENDERED_SURFACE.test(span[1]),
+  )
+}
+
+/** What the folder's drive log records, read once per folder. */
+interface FolderLog {
+  readonly decisions: ReadonlyMap<number, string>
+  readonly drawings: ReadonlyMap<number, readonly string[]>
+}
+
+/**
+ * A visible item with no drawing on disk, which nobody can answer from its text.
+ * A path counts from the item's own `Drawn:` or the finding its pointer reaches,
+ * and a pending pick owes nothing, since its round is where the drawing happens.
+ */
+function owesDrawing(
+  item: IntakeItem,
+  folder: string,
+  log: FolderLog,
+): boolean {
+  if (!namesRenderedSurface(item) || isPendingPick(item)) return false
+  const pointer = logPointer(item)
+  const cited = [
+    ...citedDrawings(item.drawn ?? ''),
+    ...(pointer === undefined ? [] : (log.drawings.get(pointer) ?? [])),
+  ]
+  return !cited.some(
+    (path) => isEvidencePath(path) && existsSync(join(folder, path)),
+  )
 }
 
 export function intakeDir(root: string): string {
@@ -210,10 +259,21 @@ export async function listFolders(root: string): Promise<ListOutcome> {
  * The folder's own drive log, read once per folder. A folder with no log
  * resolves every pointer to nothing, which the answer route refuses.
  */
-async function folderDecisions(folder: string): Promise<Map<number, string>> {
+async function folderLog(folder: string): Promise<FolderLog> {
   const path = join(folder, DRIVE_LOG)
-  if (!existsSync(path)) return new Map()
-  return readDecisions(await readFile(path, 'utf8'))
+  if (!existsSync(path)) return { decisions: new Map(), drawings: new Map() }
+  const source = await readFile(path, 'utf8')
+  return { decisions: readDecisions(source), drawings: readDrawings(source) }
+}
+
+/** The finding a `Decided:` pointer names in this folder's log, and no other path. */
+function logPointer(item: IntakeItem): number | undefined {
+  const pointer =
+    item.decided === undefined ? undefined : parseDecided(item.decided)
+  if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG) {
+    return undefined
+  }
+  return pointer.finding
 }
 
 /**
@@ -224,18 +284,14 @@ function resolveDecision(
   item: IntakeItem,
   decisions: ReadonlyMap<number, string>,
 ): string | undefined {
-  const pointer =
-    item.decided === undefined ? undefined : parseDecided(item.decided)
-  if (pointer === undefined || normalize(pointer.path) !== DRIVE_LOG) {
-    return undefined
-  }
-  return decisions.get(pointer.finding)
+  const finding = logPointer(item)
+  return finding === undefined ? undefined : decisions.get(finding)
 }
 
 async function readClusters(folder: string): Promise<ClusterItems[]> {
-  const [names, decisions] = await Promise.all([
+  const [names, log] = await Promise.all([
     listClusters(folder),
-    folderDecisions(folder),
+    folderLog(folder),
   ])
 
   return Promise.all(
@@ -244,8 +300,9 @@ async function readClusters(folder: string): Promise<ClusterItems[]> {
       items: readItems(await readFile(join(folder, cluster), 'utf8')).map(
         (item) => ({
           ...item,
-          decision: resolveDecision(item, decisions),
+          decision: resolveDecision(item, log.decisions),
           pendingPick: isPendingPick(item),
+          undrawn: owesDrawing(item, folder, log),
         }),
       ),
     })),
@@ -268,9 +325,9 @@ export async function readFolder(
 }
 
 /**
- * Lands a batch in one cluster file in one read-modify-write, since a call per
- * selection races on the read. A `decided` label reaching no decision refuses the
- * whole call, as does a filled slot, a pending pick aside.
+ * Lands a batch in one read-modify-write, since a call per selection races on
+ * the read. A decided label reaching no decision, a filled slot bar a pending
+ * pick, and a visible item citing no drawing each refuse the whole call.
  */
 export async function answerItems(
   root: string,
@@ -343,7 +400,31 @@ export async function answerItems(
     )
   }
 
-  const accepted = await acceptDecided(opened, decided, find)
+  const log = await folderLog(opened)
+  // An answer opening a pick asks for the drawing rather than deciding without one.
+  const picking = new Set(
+    selections
+      .filter((selection) => opensPick(selection.answer))
+      .map((selection) => selection.label.toLowerCase()),
+  )
+  const undrawn = named.filter((label) => {
+    const item = find(label)
+    return (
+      item !== undefined &&
+      !picking.has(label.toLowerCase()) &&
+      owesDrawing(item, opened, log)
+    )
+  })
+
+  if (undrawn.length > 0) {
+    return refuse(
+      'undrawn',
+      `${name} item ${undrawn.join(', ')} names a rendered surface and cites no drawing, so nothing was written. Draw it and record Drawn: first.`,
+      undrawn.map((label) => `${label}. ${find(label)?.title ?? ''}`),
+    )
+  }
+
+  const accepted = acceptDecided(log.decisions, decided, find)
   if (!Array.isArray(accepted)) return accepted
 
   const landed = [...selections, ...accepted]
@@ -369,14 +450,13 @@ export async function answerItems(
  * The answer each decided label lands, keeping `ok` first for every reader
  * keying on it and the finding beside it so the slot names its source.
  */
-async function acceptDecided(
-  folder: string,
+function acceptDecided(
+  decisions: ReadonlyMap<number, string>,
   labels: readonly string[],
   find: (label: string) => IntakeItem | undefined,
-): Promise<Selection[] | IntakeRefused> {
+): Selection[] | IntakeRefused {
   if (labels.length === 0) return []
 
-  const decisions = await folderDecisions(folder)
   const accepted: Selection[] = []
   const undecided: IntakeItem[] = []
 

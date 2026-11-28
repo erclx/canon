@@ -13,6 +13,7 @@ Both findings sit in one component, so they ship together.
 - **Fix:** clamp the marker inside the chart's own box in `src/tides/week-chart.tsx`
 - **Worth it:** yes, the marker is the one number the page exists to show
 - **Decided:** evidence/drive-log.md, finding 02
+- **Drawn:** `evidence/week/02-options.png`, `evidence/mocks/week/`
 - **You:**
 
 ### 2. The chart scrolls sideways at the reflow floor
@@ -21,4 +22,5 @@ Both findings sit in one component, so they ship together.
 - **Fix:** let the day list scroll and hold the chart at its 20rem floor in `src/tides/week-chart.tsx`
 - **Worth it:** yes, the design record already says the day list scrolls and never the chart
 - **Decided:** evidence/drive-log.md, finding 03
+- **Drawn:** `evidence/week/02-options.png`, `evidence/mocks/week/`
 - **You:**

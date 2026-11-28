@@ -103,6 +103,10 @@ export function register(program: Command): void {
         'An answer opening on the word "sketch" is a pending pick, reported as',
         '`pendingPick` on each item. It is answered and decides nothing.',
         '',
+        'An item whose Fix or Worth it line names a rendered-surface file and',
+        'whose Drawn line cites no path is reported as `undrawn`, which the',
+        'answer verb refuses until the drawing is recorded.',
+        '',
         'Examples:',
         '  canon intake list',
         '  canon intake list toolkit-overview --unread --json',
@@ -149,6 +153,9 @@ export function register(program: Command): void {
         '  undecided       a --decided item carries no Decided: field, or its',
         "                  pointer reaches no decision in this folder's",
         '                  evidence/drive-log.md',
+        '  undrawn         the item names a rendered-surface file in its Fix or',
+        '                  Worth it line and its Drawn line cites no path, and',
+        '                  the answer neither opens nor fills a pending pick',
         '  bad-input       a malformed command line, such as no selection, an empty',
         '                  answer, or two answers for one item, an item under',
         '                  both --set and --decided among them',
@@ -213,10 +220,11 @@ export function register(program: Command): void {
         '  missingEvidence  an evidence path that holds no file',
         '  worktreeLeft     the drive worktree the record names, still on disk,',
         '                   where null records a drive of the live app',
-        '  undrawn          a decision in evidence/drive-log.md with no Drawn',
-        '                   path and no skipped reason',
-        '  uncaptured       a drive whose log names a Board and draws a decided',
-        '                   finding, with no evidence/baseline/00-current image',
+        '  undrawn          a finding in evidence/drive-log.md, decided or not,',
+        '                   with no Drawn path and no skipped reason, a passed',
+        '                   entry aside',
+        '  uncaptured       a drive whose log names a Board and draws a finding,',
+        '                   with no evidence/baseline/00-current image',
         '  skippedVisible   a Drawn skip on a finding whose intake item names a',
         '                   rendered-surface file in its Fix or Worth it line',
         '  behavior         a ## Behavior row in canon/DESIGN.md with no',
@@ -515,7 +523,8 @@ function reportFolder(
     for (const item of cluster.items) {
       const state = isUnread(item) ? 'unread' : (item.answer ?? 'no slot')
       const pending = item.pendingPick ? 'pending pick: ' : ''
-      logInfo(`${item.label}. ${item.title} (${pending}${state})`)
+      const undrawn = item.undrawn ? ', undrawn' : ''
+      logInfo(`${item.label}. ${item.title} (${pending}${state}${undrawn})`)
     }
   }
 
@@ -607,7 +616,7 @@ const FINDING_LABELS: Record<keyof DriveFindings, string> = {
   strayEvidence: 'Evidence outside evidence/',
   missingEvidence: 'Evidence holding no file',
   worktreeLeft: 'Drive worktree still on disk',
-  undrawn: 'Decisions with nothing drawn',
+  undrawn: 'Findings with nothing drawn',
   uncaptured: 'Board drive with no current-page capture',
   skippedVisible: 'Drawing skipped on a visible change',
   behavior: 'Behavior rows not driven',
@@ -644,7 +653,7 @@ function reportDriveCheck(
   if (outcome.reason === 'clean') {
     logStep('Clean')
     logInfo(
-      `${outcome.goals} goal(s) and ${outcome.behaviors} behavior row(s) mapped, the checkout untouched, the evidence in place, every decision drawn.`,
+      `${outcome.goals} goal(s) and ${outcome.behaviors} behavior row(s) mapped, the checkout untouched, the evidence in place, every finding drawn.`,
     )
     outro()
     return code

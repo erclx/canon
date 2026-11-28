@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   answerItems,
@@ -634,5 +634,197 @@ describe('pending pick', () => {
     expect(outcome.reason).toBe('answered')
     expect(outcome.detail).toEqual(['2. already decided'])
     expect(await readFile(join(folder, '01-domain.md'), 'utf8')).toBe(before)
+  })
+})
+
+function visibleItem(label: string, drawn?: string, answer?: string): string {
+  const text = item({ label, answer }).replace(
+    '- **Fix:** the one change proposed',
+    '- **Fix:** pin the panel edge in `src/panel.tsx`',
+  )
+  if (drawn === undefined) return text
+  return text.replace('- **You:**', `- **Drawn:** ${drawn}\n- **You:**`)
+}
+
+async function seedDrawing(folder: string, path: string): Promise<void> {
+  mkdirSync(join(folder, dirname(path)), { recursive: true })
+  await writeFile(join(folder, path), 'png')
+}
+
+describe('undrawn gate', () => {
+  it('should refuse undrawn for a visible item with no Drawn and write no slot', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(visibleItem('1'), item({ label: '2' })),
+    })
+    const before = await readFile(join(folder, '01-domain.md'), 'utf8')
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'ok' },
+      { label: '2', answer: 'ok' },
+    ])
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('undrawn')
+    expect(outcome.detail).toEqual(['1. Item 1'])
+    expect(await readFile(join(folder, '01-domain.md'), 'utf8')).toBe(before)
+  })
+
+  it('should refuse undrawn for a visible item whose drawing was skipped', async () => {
+    await seedFolder('a-dump', {
+      '01-domain.md': cluster(
+        visibleItem('1', 'skipped, the change reads as `src/panel.tsx` only'),
+      ),
+    })
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'ok' },
+    ])
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('undrawn')
+  })
+
+  it('should land an answer on a visible item whose Drawn cites a path', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(
+        visibleItem('1', '`evidence/panel/02-options.png`'),
+      ),
+    })
+    await seedDrawing(folder, 'evidence/panel/02-options.png')
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'option b' },
+    ])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-domain.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe('option b')
+  })
+
+  it.each([
+    ['a code span outside evidence/', '`src/alerts/banner.tsx`'],
+    ['an evidence path holding no file', '`evidence/panel/09-options.png`'],
+  ])(
+    'should refuse undrawn for a visible item whose Drawn cites %s',
+    async (_, drawn) => {
+      const folder = await seedFolder('a-dump', {
+        '01-domain.md': cluster(visibleItem('1', drawn)),
+      })
+      await seedDrawing(folder, 'evidence/panel/02-options.png')
+
+      const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+        { label: '1', answer: 'ok' },
+      ])
+
+      expect(outcome.ok).toBe(false)
+      if (!outcome.ok) expect(outcome.reason).toBe('undrawn')
+    },
+  )
+
+  it('should land an answer on an item naming no rendered-surface file', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(
+        item({ label: '1' }).replace(
+          '- **Fix:** the one change proposed',
+          '- **Fix:** print the record from `src/commands/export.ts`',
+        ),
+      ),
+    })
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'ok' },
+    ])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-domain.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe('ok')
+  })
+
+  it('should fill a pending pick on a visible item with no Drawn', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(visibleItem('1', undefined, 'sketch')),
+    })
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'pill row' },
+    ])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-domain.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe('pill row')
+  })
+
+  it('should land a sketch answer on a visible item with no Drawn', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(visibleItem('1')),
+    })
+
+    const outcome = await answerItems(ROOT, 'a-dump', '01-domain.md', [
+      { label: '1', answer: 'sketch, with the inspector' },
+    ])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-domain.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe('sketch, with the inspector')
+  })
+
+  it('should refuse undrawn for a decided label on a visible item with no Drawn', async () => {
+    await seedDrive(
+      visibleItem('1').replace(
+        '- **You:**',
+        '- **Decided:** evidence/drive-log.md, finding 2\n- **You:**',
+      ),
+    )
+
+    const outcome = await answerItems(ROOT, 'drive', '01-layers.md', [], ['1'])
+
+    expect(outcome.ok).toBe(false)
+    if (!outcome.ok) expect(outcome.reason).toBe('undrawn')
+  })
+
+  it('should accept a decided label whose finding the log drew', async () => {
+    const folder = await seedDrive(
+      visibleItem('1').replace(
+        '- **You:**',
+        '- **Decided:** evidence/drive-log.md, finding 4\n- **You:**',
+      ),
+    )
+    await writeFile(
+      join(folder, 'evidence', 'drive-log.md'),
+      DRIVE_LOG.replace(
+        '- **Decision (operator):** close the frame on click',
+        '- **Drawn:** `evidence/layers/02-options.png`\n- **Decision (operator):** close the frame on click',
+      ),
+    )
+    await seedDrawing(folder, 'evidence/layers/02-options.png')
+
+    const outcome = await answerItems(ROOT, 'drive', '01-layers.md', [], ['1'])
+
+    expect(outcome.ok).toBe(true)
+    const text = await readFile(join(folder, '01-layers.md'), 'utf8')
+    expect(readItems(text)[0].answer).toBe(
+      'ok, as decided in drive-log finding 04',
+    )
+  })
+
+  it('should list each item as owing a drawing or not', async () => {
+    const folder = await seedFolder('a-dump', {
+      '01-domain.md': cluster(
+        visibleItem('1'),
+        visibleItem('2', '`evidence/panel/02-options.png`'),
+        item({ label: '3' }),
+      ),
+    })
+    await seedDrawing(folder, 'evidence/panel/02-options.png')
+
+    const outcome = await readFolder(ROOT, 'a-dump')
+
+    if (!outcome.ok) throw new Error(outcome.message)
+    expect(outcome.clusters[0].items.map((entry) => entry.undrawn)).toEqual([
+      true,
+      false,
+      false,
+    ])
   })
 })

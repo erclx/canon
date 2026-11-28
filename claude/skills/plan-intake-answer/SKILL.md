@@ -34,7 +34,8 @@ Never guess from the topic of the conversation. A session resuming against the w
 Run `canon intake list <slug> --unread --json`. It returns the unread items grouped by the cluster file holding them, each carrying its label, title, `problem`, `fix`, open question, and suggestion. The `problem` and `fix` fields are absent on an item that lacks the line, so write the lead-in from whichever are present.
 
 - An item carrying `Decided:` also carries `decision`, which the CLI resolved from the folder's drive log
-- Read it off the record and never open the log, since the CLI owns that parse
+- An item carrying `Drawn:` also carries `drawn`, and one naming a rendered surface with nothing drawn carries `undrawn: true`
+- Read both off the record and never open the log, since the CLI owns that parse
 
 Work one cluster at a time, in the order the folder numbers them. A dump of six clusters holding five items each is thirty questions, and a surface putting all of them at once is unusable. The cluster boundary is also where an operator who runs out of attention stops cleanly, leaving whole clusters unread rather than one file half answered.
 
@@ -61,6 +62,8 @@ Give every option what it means and what it costs. An option with no stated cost
 Send the whole batch in one turn. When the session runs on a surface carrying a structured question tool, such as `AskUserQuestion` in Claude Code, send it through one call with one entry per item. Otherwise write it as a numbered list in one message with the suggestion marked.
 
 ### An item settled by looking
+
+An item carrying `drawn` names its frames by path in the lead-in, so the operator opens the drawing before picking. Put an item reading `undrawn: true` with `sketch` as its one option, since the verb refuses every other answer until a drawing lands, and leave it unread when the operator declines.
 
 Offer `sketch` as one more option on an item settled by looking, meaning it waits on a `design-pick` pass. It lands as a pending pick, which the answer contract states, so nothing promotes the item until the pick fills its slot.
 
@@ -95,7 +98,10 @@ canon intake answer <slug> --cluster <file> --decided <label> --decided <label>
 
 The verb writes `ok, as decided in drive-log finding <nn>` into each slot. It refuses the whole call as `undecided` when a label's pointer reaches no decision, so on that refusal put the named items singly through Step 3.
 
-The verb refuses the whole batch when any item in it already carries an answer other than a pending pick, since a filled slot is a decision already made. On that refusal, drop the named item and send the rest.
+The verb refuses the whole batch on two kinds of item, and the rest goes out again once the named ones are dropped.
+
+- One already carrying an answer other than a pending pick, since a filled slot is a decision already made
+- One refused as `undrawn`, which stays unread and is named in the close as waiting on a drawing
 
 ## Step 5: offer to close declined issues
 
@@ -160,6 +166,6 @@ Close the run with the path so the reader can open what changed:
 
 ```plaintext
 ✅ <N> answered across <N> cluster(s) in <slug>
-<M> item(s) left unread, <P> waiting on a pick
+<M> item(s) left unread, <D> waiting on a drawing, <P> waiting on a pick
 .canon/intake/<slug>/
 ```

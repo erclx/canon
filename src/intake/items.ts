@@ -50,6 +50,8 @@ export interface IntakeItem {
   readonly worth: string | undefined
   /** The `Decided:` pointer as written, absent when the item carries none. */
   readonly decided: string | undefined
+  /** The `Drawn:` value as written, its paths in code spans, absent when empty. */
+  readonly drawn: string | undefined
 }
 
 /** Where a `Decided:` pointer sends a reader, as `<path>, finding <nn>`. */
@@ -70,6 +72,7 @@ interface Draft {
   suggested: string | undefined
   worth: string | undefined
   decided: string | undefined
+  drawn: string | undefined
 }
 
 function seal(draft: Draft): IntakeItem {
@@ -104,6 +107,7 @@ export function readItems(text: string): IntakeItem[] {
         suggested: undefined,
         worth: undefined,
         decided: undefined,
+        drawn: undefined,
       }
       continue
     }
@@ -143,6 +147,9 @@ export function readItems(text: string): IntakeItem[] {
         break
       case 'decided':
         draft.decided = value === '' ? undefined : value
+        break
+      case 'drawn':
+        draft.drawn = value === '' ? undefined : value
         break
     }
   }
@@ -186,9 +193,14 @@ export function isUnread(item: IntakeItem): boolean {
   return item.answerLine !== undefined && item.answer === undefined
 }
 
+/** An answer that opens a pick rather than deciding, read off its first word. */
+export function opensPick(answer: string): boolean {
+  return PENDING.test(answer)
+}
+
 /** An item whose answer waits on a pick, so it holds no decision yet. */
 export function isPendingPick(item: IntakeItem): boolean {
-  return item.answer !== undefined && PENDING.test(item.answer)
+  return item.answer !== undefined && opensPick(item.answer)
 }
 
 /**

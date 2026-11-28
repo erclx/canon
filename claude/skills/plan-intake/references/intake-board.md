@@ -9,10 +9,13 @@ Read before the first frame an intake pass draws. Most passes measure and never 
 
 ## When a pass draws
 
-Draw only when an item's fix is a choice the operator settles by looking, such as a choice between visible options. A measurement never draws, since a frame of a number settles nothing a table does not.
+Draw when an item's fix is a choice the operator settles by looking, such as a choice between visible options. Draw every item whose `Fix:` or `Worth it:` line names a rendered-surface file too, since `canon intake answer` refuses it until its `Drawn:` line cites a frame.
+
+A measurement never draws, since a frame of a number settles nothing a table does not.
 
 - The pass needs no ask from the operator to draw, and says in its output which items it drew for
-- Write the item's problem and its suggested pick first, then draw the options the suggestion weighs
+- Write the item's problem and its suggested pick first, then draw the options the suggestion weighs, or the fix as shipped beside the fix applied when nothing is weighed
+- Copy each item's capture into `evidence/` and cite it on the item's `Drawn:` line
 - A `design-pick` round on one of the pass's items draws in the pass's project too, on that item's page, per `from-finding.md` beside `board.md`
 
 ## Where it draws

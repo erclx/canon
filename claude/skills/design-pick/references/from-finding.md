@@ -18,7 +18,7 @@ A drive tests a built app and records what it finds. A pick settles how somethin
 | A drive finding nobody could decide         | `design-pick` on that finding |
 | A concept whose behavior has to be measured | `plan-groundwork`             |
 
-A drive draws and decides a finding inside its own project while its copy runs. A taste finding left undecided is logged undrawn, and its item takes `sketch` as its answer.
+A drive draws every visible finding inside its own project while its copy runs, decided or not, with one frame set per option on an undecided one. The operator answers that item from the drawing, or answers `sketch` when the options drawn are not the ones to pick from, which sends it here.
 
 ## Where the pick draws
 
