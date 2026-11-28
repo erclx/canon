@@ -14,16 +14,17 @@ Read `${CLAUDE_SKILL_DIR}/references/walk-file.md` before Step 1, for the step t
 ## Steps
 
 1. Write the walk file before saying any step.
-   - Take the steps from the plan the session runs under, gathering every one its sections leave to the operator, or from the ask when no plan names them
-   - Write the file at `.canon/tmp/<slug>/walk.md` at the main worktree root, with a kebab slug naming the walk, so it outlives the worktree and stays out of every records push
-   - Resolve the main root and route the write the way `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, since a worktree's `Write` lands in a copy nobody reads
+   - Find the file at `.canon/tmp/<slug>/walk.md` at the main worktree root first, taking `<slug>` from the plan's filename, or a kebab slug naming the walk when no plan names the steps
+   - When it exists, read it and open on the first step neither `done` nor `skipped`, writing nothing, since a fresh write erases every mark
+   - Otherwise take the steps from the plan the session runs under, gathering every one its sections leave to the operator, or from the ask
+   - Write it at that path, which outlives the worktree and stays out of every records push, routed as `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states
    - Give the operator the file's path and the step count, then go to Step 2
-   - When the file already exists, read it rather than writing a second one, and open on the first step neither `done` nor `skipped`
 2. Walk one step per turn.
    - Set the step to `next` in the file, then say it in the shape the file holds it, with each command in its own fenced block
    - Wait for the operator's reply before the next step
    - Run the step's read-only check on the reply, and mark it `done` only when the check passes. Mark `done, by the operator's word` where the step has no check.
    - Follow the step's `If it differs` path when the check fails or the operator reports something else, and mark it `blocked` with what it waits on when that path does not clear it
+   - Go past a `blocked` step only to a later step that needs nothing it produces, and go to Step 3 when none is left
    - Mark a step `skipped` with its reason only on the operator's word
 3. Close the walk.
    - Say which steps are `blocked` or unreached, with what each waits on, and the file's path
