@@ -150,6 +150,32 @@ Ask one finding or one round per question, never several picks batched into one 
 
 `show` returns the page's address, and no Frameboard verb returns one opening on the marked frames alone. Name the page and the frames until Frameboard ships that address, then put it in the question instead.
 
+A launch naming no judge asks every round this way, so a pick or a drive launched without one runs as it always has.
+
+### With a judge named
+
+A launch naming a judge by sessionId sends each round to that judge before the operator sees it, per `${CLAUDE_SKILL_DIR}/../role-judge/SKILL.md`. Send the finding the round settles, its frames by name, and the options capture's path, through `canon:session-relay`.
+
+| Judge's reply | Route                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| A correction  | Redraw the round as it names, then send it to the judge again, asking the operator nothing    |
+| `close call`  | Ask the operator as the steps above state, naming the judge's pick and reason in the question |
+| `clear`       | Hold the pick for the batch review and draw the next round                                    |
+
+Send the judge each decision the operator makes, so its next verdict reads it as precedent.
+
+- Write no `Decision (operator)` line and apply no pick for a held round, since a pick the operator has not reviewed lands as nothing
+- Hold a round when the judge goes silent or its session ends, and ask the operator it as the steps above state
+
+### The batch review
+
+End the run on one review of every held pick, ahead of the close.
+
+1. Run `frameboard show` on each held round's picked frames, and list each round with the judge's pick and reason.
+2. Ask the operator to accept the list or name the rounds they overrule, through the structured question surface.
+3. Write each round's `Decision (operator)` line as the operator's word, being the judge's arm where they accepted it and their own arm where they overruled it.
+4. Fill the `Operator` column of the judge's verdict table with `agreed` or the arm they took instead.
+
 ## The live prototype
 
 A board frame is one section fitted to its content, so it cannot show how an element behaves across the page. Decide a finding about behavior across sections on a served prototype of the whole page instead.
