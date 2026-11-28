@@ -60,7 +60,7 @@ The film suite is ten files, one per describe block, so vitest runs them in para
 ## Gotchas
 
 - The frame ticks start at the load event's monotonic stamp and rise to the page clock at the pause, since a tick on Bun's clock freezes animation and ticks lagging the page film every later fade dead
-- Send an input, step a frame, then await the input, and begin a frame only once the last settles, since awaiting first deadlocks and Chromium refuses a second frame as pending
+- Send an input, step a frame, then await the input under the stall limit, since awaiting first deadlocks and an input acks once its handler returns. Begin one frame at a time, as Chromium refuses two.
 - A JPEG frame is full range and H.264 is TV range, so the encoder scales between them. From FFmpeg 7.1 a conversion keeps the source range, so every call reading or writing a still names `out_range`.
 - Virtual time advances plainly, since pausing on a fetch held it into a stall, and a loop timed on `performance.now()` never ends under it. Stepped tests stall at 8 s, past a loaded settle frame.
 - A moved Playwright cache reads as `browser-missing`, and a reworded `No usable sandbox!` or `Chromium sandboxing failed!` reads as `take-failed`, not `sandbox-blocked`
