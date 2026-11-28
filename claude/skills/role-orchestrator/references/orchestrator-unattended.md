@@ -175,7 +175,7 @@ The run launches nothing past the holds below, each a read the loop already make
 - A plan question marked as needing the operator's call, or a `deferred` entry, which `plan-answers` reports
 - A row whose origin leaves a call open, such as a reel width the operator has not chosen
 
-An open release pull request holds nothing, per `orchestrator-release.md`. Dispatch carries on past it, and the run neither merges it nor asks the operator to unless a merge grant covers it.
+Handle an open release pull request per `orchestrator-release.md`.
 
 ### A question from a session
 

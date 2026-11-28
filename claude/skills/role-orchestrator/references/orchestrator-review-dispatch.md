@@ -46,7 +46,7 @@ An uncaptured path is a judgment the code reviewer makes rather than proof the w
 
 ## Every pull request takes a reviewer
 
-Dispatch every pull request's review to a reviewer under `role-reviewer`, first pass included, whatever its size or its paths. A release pull request is the one exception, since its sweep carries no findings and owes no pass, per `orchestrator-release.md`.
+Dispatch every pull request's review to a reviewer under `role-reviewer`, first pass included, whatever its size or its paths. A release pull request is the one exception, per `orchestrator-release.md`.
 
 - This session reviews nothing in place, since a warm pass reads the whole diff into the wave's one context and thins every later pull request's attention
 - A cold session pays for its own context instead
