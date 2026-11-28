@@ -63,7 +63,7 @@ Send the whole batch in one turn. When the session runs on a surface carrying a 
 
 ### An item settled by looking
 
-An item carrying `drawn` names its frames by path in the lead-in, so the operator opens the drawing before picking. Leave one reading `undrawn: true` out of every batch, unread, since the verb refuses its answer until the drive draws it.
+An item carrying `drawn` names its frames by path in the lead-in, so the operator opens the drawing before picking. Put an item reading `undrawn: true` with `sketch` as its one option, since the verb refuses every other answer until a drawing lands, and leave it unread when the operator declines.
 
 Offer `sketch` as one more option on an item settled by looking, meaning it waits on a `design-pick` pass. It lands as a pending pick, which the answer contract states, so nothing promotes the item until the pick fills its slot.
 
@@ -101,7 +101,7 @@ The verb writes `ok, as decided in drive-log finding <nn>` into each slot. It re
 The verb refuses the whole batch on two kinds of item, and the rest goes out again once the named ones are dropped.
 
 - One already carrying an answer other than a pending pick, since a filled slot is a decision already made
-- One refused as `undrawn`, which stays unread for the drive to draw and is named in the close as waiting on a drawing
+- One refused as `undrawn`, which stays unread and is named in the close as waiting on a drawing
 
 ## Step 5: offer to close declined issues
 

@@ -202,10 +202,11 @@ An item carrying `Decided:` restates a decision the operator made during a drive
 
 An item whose `Fix:` or `Worth it:` line names a rendered-surface file in a code span, such as a `.tsx` or `.css` path, changes what a person sees. Nobody answers it from text, so it carries `Drawn:` citing the frames it is answered from, each a path under `evidence/`.
 
-- `canon intake list --json` reports such an item as `undrawn` while its `Drawn:` cites no path, a `skipped` value included
+- `canon intake list --json` reports such an item as `undrawn` while no path it cites holds a file under `evidence/`, a `skipped` value included
+- A `Decided:` item also counts the paths its finding's `Drawn` cites in the drive log, so a drive item needs no copy to be answered
 - `canon intake answer` refuses an answer on it as `undrawn`, with no slot written
 - An answer opening a pending pick lands anyway, and so does one filling a pending pick, since the pick is where its drawing happens
-- A drive item copies its finding's `Drawn` paths, and any other pass draws the item before it is asked
+- An intake pass draws the item per `intake-board.md` beside this file, and on a project with no board the item takes `sketch` alone
 
 ## Retrieval
 
