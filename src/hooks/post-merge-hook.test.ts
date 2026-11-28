@@ -68,7 +68,15 @@ function runHook(hook: string): number {
 }
 
 function git(...args: string[]): string {
-  return execaSync('git', ['-C', root, ...args], {
+  const identity = [
+    '-c',
+    'user.name=canon-test',
+    '-c',
+    'user.email=canon-test@example.com',
+    '-c',
+    'commit.gpgsign=false',
+  ]
+  return execaSync('git', ['-C', root, ...identity, ...args], {
     env: gitEnv(),
     extendEnv: false,
   }).stdout
