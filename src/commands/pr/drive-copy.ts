@@ -151,7 +151,9 @@ export function registerDriveCopy(pr: Command): void {
         "record. The worker's own server is never started, stopped, or read.",
         '',
         'The copy lives at `.canon/tmp/pr/review-ui/<slug>/board/` at the main',
-        'worktree root, where `<slug>` is the branch with a leading type',
+        'worktree root, or under `pass/` beside it for a --serve run so the',
+        "worker's copy is never rebuilt under its server. `<slug>` is the branch",
+        'with a leading type',
         'segment dropped and each `/` made `-`. With a number the branch is the',
         "pull request's head, and without one it is the checkout's, so the",
         'worker starting its server before a pull request exists and the',
@@ -355,7 +357,11 @@ async function runDriveCopy(
   }
 
   const scratch = join(target.main, REVIEW_UI_SCRATCH)
-  const copyRoot = join(scratch, branchSlug(target.branch), 'board')
+  const copyRoot = join(
+    scratch,
+    branchSlug(target.branch),
+    serve ? 'pass' : 'board',
+  )
   const baselinePath =
     target.number === undefined
       ? undefined

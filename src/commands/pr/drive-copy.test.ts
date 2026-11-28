@@ -335,7 +335,27 @@ describe('canon pr drive-copy', () => {
     }
 
     afterEach(async () => {
-      await stopPassPreview(join(repoRoot, '.canon/tmp/pr/review-ui/x/board'))
+      await stopPassPreview(join(repoRoot, '.canon/tmp/pr/review-ui/x/pass'))
+    })
+
+    it('should build a --serve pass under its own copy and leave the worker copy alone', async () => {
+      writeServe()
+      const worker = await runDriveCopy(['7', '--baseline'])
+      const workerRoot = String(worker.record.copyRoot)
+      writeFileSync(join(workerRoot, 'board/held-open.db'), 'worker')
+
+      const served = await runDriveCopy(['7', '--baseline', '--serve'])
+
+      expect(String(served.record.copyRoot)).toMatch(
+        /\.canon\/tmp\/pr\/review-ui\/x\/pass$/,
+      )
+      expect(workerRoot).toMatch(/\.canon\/tmp\/pr\/review-ui\/x\/board$/)
+      expect(readFileSync(join(workerRoot, 'board/held-open.db'), 'utf8')).toBe(
+        'worker',
+      )
+      expect(
+        existsSync(join(String(served.record.copyRoot), 'board/frames.json')),
+      ).toBe(true)
     })
 
     it('should start a server on the rebuilt copy under --serve and end it under --stop', async () => {
