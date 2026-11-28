@@ -153,8 +153,35 @@ describe.each(HOOKS)('post-merge hook ($name copy)', ({ path }) => {
     expect({ code, canon: calls('canon') }).toEqual({ code: 0, canon: '' })
   })
 
-  it('should name the frozen install when a merge changes bun.lock', () => {
-    mergeSpan({ 'bun.lock': 'a' }, { 'bun.lock': 'b' })
+  it.each([
+    ['bun.lock', 'bun install --frozen-lockfile'],
+    ['bun.lockb', 'bun install --frozen-lockfile'],
+    ['package-lock.json', 'npm ci'],
+    ['pnpm-lock.yaml', 'pnpm install --frozen-lockfile'],
+    ['yarn.lock', 'yarn install --frozen-lockfile'],
+    ['uv.lock', 'uv sync --frozen'],
+  ])('should name the install for a changed %s', (lock, command) => {
+    mergeSpan({ [lock]: 'a' }, { [lock]: 'b' })
+
+    expect(runHookStdout(path)).toBe(
+      `${lock} changed in this merge. Run ${command}.`,
+    )
+  })
+
+  it('should name the immutable yarn install for a modern yarn project', () => {
+    writeFileSync(join(root, '.yarnrc.yml'), '')
+    mergeSpan({ 'yarn.lock': 'a' }, { 'yarn.lock': 'b' })
+
+    expect(runHookStdout(path)).toBe(
+      'yarn.lock changed in this merge. Run yarn install --immutable.',
+    )
+  })
+
+  it('should print a shared install command once', () => {
+    mergeSpan(
+      { 'bun.lock': 'a', 'bun.lockb': 'a' },
+      { 'bun.lock': 'b', 'bun.lockb': 'b' },
+    )
 
     expect(runHookStdout(path)).toBe(
       'bun.lock changed in this merge. Run bun install --frozen-lockfile.',

@@ -113,9 +113,9 @@ Hooks live in `.husky/` and seeded context docs in `canon/context/`. That locati
 - `commit-msg` runs `bunx commitlint --edit "$1"`.
 - `pre-push` runs `bun run check:changed`.
 - `post-rewrite` delegates to `post-merge` on `rebase`, so a `pull.rebase=true` machine still gets the check.
-- `post-merge` prints the frozen install a changed lockfile calls for, then runs `canon hooks post-merge`, which archives the closed task, reclaims merged worktrees, and updates the CLI and plugin.
+- `post-merge` runs `canon hooks post-merge`, which archives the task a merged pull request closed, pushes the records, reclaims merged worktrees, reinstalls the CLI, and updates the plugin.
 
-The hook does nothing when the board is absent. `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three steps that act on the machine, and `canon hooks post-merge --help` states the contract.
+A changed lockfile prints its frozen install line with or without a board, and the steps above do nothing without one. `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three steps that act on the machine, and `canon hooks post-merge --help` states the contract.
 
 ## lint-staged
 

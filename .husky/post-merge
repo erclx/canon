@@ -25,16 +25,25 @@ root=$(git worktree list --porcelain 2>/dev/null | grep -m 1 '^worktree ' | cut 
 # board and `canon` checks so a checkout with neither still gets it. A missing
 # ORIG_HEAD gives nothing to compare and prints nothing.
 if git rev-parse --verify -q ORIG_HEAD >/dev/null 2>&1; then
+  seen=
   for lock in bun.lock bun.lockb package-lock.json pnpm-lock.yaml yarn.lock uv.lock; do
     case "$lock" in
       bun.lock | bun.lockb) install='bun install --frozen-lockfile' ;;
       package-lock.json) install='npm ci' ;;
       pnpm-lock.yaml) install='pnpm install --frozen-lockfile' ;;
-      yarn.lock) install='yarn install --frozen-lockfile' ;;
+      yarn.lock)
+        if [ -f .yarnrc.yml ]; then install='yarn install --immutable'; else install='yarn install --frozen-lockfile'; fi
+        ;;
       uv.lock) install='uv sync --frozen' ;;
     esac
     if ! git diff --quiet ORIG_HEAD HEAD -- "$lock" 2>/dev/null; then
-      echo "$lock changed in this merge. Run $install."
+      case "$seen" in
+        *"|$install|"*) ;;
+        *)
+          echo "$lock changed in this merge. Run $install."
+          seen="$seen|$install|"
+          ;;
+      esac
     fi
   done
 fi
