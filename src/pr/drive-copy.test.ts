@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process'
 import {
   existsSync,
   mkdirSync,
@@ -19,6 +20,7 @@ import {
   PASS_OFFSET_SHIFT,
   readWorktreeOffset,
   runSeed,
+  type StartReaders,
   startPassPreview,
   stopPassPreview,
 } from '@/pr/drive-copy'
@@ -655,8 +657,12 @@ describe('the pass preview', () => {
     })
   }
 
+  /** The readers a test started with, so its server stops under the same reading. */
+  let readers: StartReaders | undefined
+
   afterEach(async () => {
-    await stopPassPreview(copyRoot)
+    await stopPassPreview(copyRoot, readers)
+    readers = undefined
   })
 
   it('should start the server on the copy at the pass offset and record it beside the copy root', async () => {
@@ -743,5 +749,169 @@ describe('the pass preview', () => {
     const url = started.kind === 'started' ? started.server.url : ''
 
     expect(await checkPassPage(url, [])).toBeUndefined()
+  })
+
+  it('should record the leader start ticks where /proc reads', async () => {
+    mkdirSync(copyRoot, { recursive: true })
+    readers = {
+      stat: (pid) => ({ kind: 'line', line: statLine(pid, 'bun', '4242') }),
+      lstart: async () => 'Sat Nov 28 10:00:00 2026',
+    }
+
+    await startPassPreview({
+      worktree,
+      copyRoot,
+      serve: stubServe(),
+      env: 'CANON_PREVIEW_ROOT',
+      basePort: base,
+      worktreeOffset: 0,
+      readers,
+    })
+
+    expect(
+      JSON.parse(readFileSync(join(dirname(copyRoot), 'server.json'), 'utf8')),
+    ).toMatchObject({ started: '4242' })
+  })
+
+  it('should record the time ps prints where /proc is absent', async () => {
+    mkdirSync(copyRoot, { recursive: true })
+    readers = {
+      stat: () => ({ kind: 'absent' }),
+      lstart: async () => 'Sat Nov 28 10:00:00 2026',
+    }
+
+    await startPassPreview({
+      worktree,
+      copyRoot,
+      serve: stubServe(),
+      env: 'CANON_PREVIEW_ROOT',
+      basePort: base,
+      worktreeOffset: 0,
+      readers,
+    })
+
+    expect(
+      JSON.parse(readFileSync(join(dirname(copyRoot), 'server.json'), 'utf8')),
+    ).toMatchObject({ started: 'Sat Nov 28 10:00:00 2026' })
+  })
+})
+
+/** A `/proc/<pid>/stat` line naming `comm`, with `ticks` at field 22. */
+function statLine(pid: number, comm: string, ticks: string): string {
+  const toField21 = ['S', ...Array.from({ length: 18 }, () => '0')]
+  return `${pid} (${comm}) ${toField21.join(' ')} ${ticks} 3354624 384\n`
+}
+
+describe('the pass stop reading the leader start', () => {
+  let leader: number
+
+  function record(started: string): void {
+    mkdirSync(dirname(copyRoot), { recursive: true })
+    writeFileSync(
+      join(dirname(copyRoot), 'server.json'),
+      JSON.stringify({ pid: leader, port: 1, url: 'u', log: 'l', started }),
+    )
+  }
+
+  beforeEach(() => {
+    const child = spawn(
+      process.execPath,
+      ['-e', 'setInterval(() => {}, 1000)'],
+      { detached: true, stdio: 'ignore' },
+    )
+    child.unref()
+    leader = child.pid ?? -1
+  })
+
+  afterEach(() => {
+    try {
+      process.kill(-leader, 'SIGKILL')
+    } catch {
+      // The stop under test already ended the group.
+    }
+  })
+
+  it('should stop a ticks record whose leader reads the same ticks even when ps prints another time', async () => {
+    record('3201967')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: (pid) => ({ kind: 'line', line: statLine(pid, 'bun', '3201967') }),
+      lstart: async () => 'Sat Nov 28 10:00:07 2026',
+    })
+
+    expect(stopped).toEqual({ kind: 'stopped', pid: leader, port: 1 })
+    expect(isGroupAlive(leader)).toBe(false)
+  })
+
+  it('should read the ticks past a command name holding a space and a closing parenthesis', async () => {
+    record('3201967')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: (pid) => ({
+        kind: 'line',
+        line: statLine(pid, 'vite dev) 7 8', '3201967'),
+      }),
+      lstart: async () => undefined,
+    })
+
+    expect(stopped).toMatchObject({ kind: 'stopped' })
+  })
+
+  it('should never signal a ticks record whose pid now leads a process started at other ticks', async () => {
+    record('3201967')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: (pid) => ({ kind: 'line', line: statLine(pid, 'bun', '9900000') }),
+      lstart: async () => undefined,
+    })
+
+    expect(stopped).toEqual({ kind: 'not-running' })
+    expect(isGroupAlive(leader)).toBe(true)
+  })
+
+  it('should never signal a ticks record on a machine with no /proc', async () => {
+    record('3201967')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: () => ({ kind: 'absent' }),
+      lstart: async () => 'Sat Nov 28 10:00:00 2026',
+    })
+
+    expect(stopped).toEqual({ kind: 'not-running' })
+    expect(isGroupAlive(leader)).toBe(true)
+  })
+
+  it('should stop a ticks record whose leader exited while its group lives on', async () => {
+    record('3201967')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: () => ({ kind: 'gone' }),
+      lstart: async () => undefined,
+    })
+
+    expect(stopped).toMatchObject({ kind: 'stopped' })
+  })
+
+  it('should stop a record written before the ticks when ps prints the same time', async () => {
+    record('Sat Nov 28 10:00:00 2026')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: (pid) => ({ kind: 'line', line: statLine(pid, 'bun', '3201967') }),
+      lstart: async () => 'Sat Nov 28 10:00:00 2026',
+    })
+
+    expect(stopped).toMatchObject({ kind: 'stopped' })
+  })
+
+  it('should never signal a record written before the ticks when ps prints another time', async () => {
+    record('Sat Nov 28 10:00:00 2026')
+
+    const stopped = await stopPassPreview(copyRoot, {
+      stat: (pid) => ({ kind: 'line', line: statLine(pid, 'bun', '3201967') }),
+      lstart: async () => 'Sat Nov 28 11:30:00 2026',
+    })
+
+    expect(stopped).toEqual({ kind: 'not-running' })
+    expect(isGroupAlive(leader)).toBe(true)
   })
 })
