@@ -16,12 +16,13 @@ The third trigger reaches a window the first two cannot. A session with three wo
 
 ## The after-merge checklist
 
-A merge trigger runs four things in order, whoever ran the merge, since the refill reads a tree only a pull makes current and the `post-merge` hook archives nothing until one lands.
+A merge trigger runs five things in order, whoever ran the merge, since the refill reads a tree only a pull makes current and the `post-merge` hook archives nothing until one lands.
 
 1. Confirm the pull landed, per step 1 below, and pull by hand on `skipped` or `refused`.
 2. Read what the hook archived under `.canon/tasks/archive/` and `.canon/plans/archive/`.
 3. Run the rest of the refill below.
 4. Re-check each queued plan against the new head, per `### 3. Verify the plan against the tree` in the skill body.
+5. When the merge was a release pull request, run the after-merge checks in `orchestrator-release.md`, and its upgrade where the repository publishes its own tooling, before generating any output.
 
 ## Running the refill
 
