@@ -1,9 +1,11 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { type BehaviorRow, readBehaviorRows } from '@/design/behavior'
 import { checkBundles, type BundleReport } from '@/intake/bundles'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { linesOutsideFences } from '@/markdown/scan'
+import { checkBehaviorRows } from '@/records/behavior'
 import {
   checkCeiling,
   documentReader,
@@ -89,6 +91,7 @@ export const FINDING_KINDS = [
   'callers-unstated',
   'callers-malformed',
   'deferral-unfiled',
+  'behavior-unstated',
   'ceiling-unstated',
   'bundle-unshared',
   'evidence-missing',
@@ -271,6 +274,7 @@ const PLAN_SECTIONS = [
   'Callers',
   'Deferred',
   'Design references',
+  'Behavior rows',
   'Reference images',
   'Verification',
   'Risks',
@@ -656,9 +660,9 @@ function checkDesignReferences(
 }
 
 /**
- * `counterpart`, `callers`, and `deferrals` are the roots each section's check
- * reads. Left out, as in a project with no stack, no shipped skills, or no
- * board, the plan owes that section nothing.
+ * `counterpart`, `callers`, `deferrals`, and `behaviorRows` are the roots each
+ * section's check reads. Left out, as in a project with no stack, no shipped
+ * skills, no board, or no design record, the plan owes that section nothing.
  */
 export function checkPlan(
   name: string,
@@ -667,6 +671,7 @@ export function checkPlan(
   readDocument?: ReadDocument,
   callers?: CallersRoot,
   deferrals?: DeferralRoot,
+  behaviorRows?: readonly BehaviorRow[],
 ): Finding[] {
   const findings: Finding[] = []
 
@@ -760,6 +765,16 @@ export function checkPlan(
       ...checkDeferrals(sections.get('Deferred'), deferrals).map((found) =>
         finding(found.kind, name, found.subject, found.message),
       ),
+    )
+  }
+
+  if (behaviorRows) {
+    findings.push(
+      ...checkBehaviorRows(
+        sections.get('Design references') ?? [],
+        sections.get('Behavior rows'),
+        behaviorRows,
+      ).map((found) => finding(found.kind, name, found.subject, found.message)),
     )
   }
 
@@ -1244,6 +1259,7 @@ export async function validateRecords(
     const counterpart = await readCounterpartRoot(root)
     const callers = readCallersRoot(root)
     const deferrals = await readDeferralRoot(root)
+    const behaviorRows = readBehaviorRows(root)
     return validateFiles(
       dir,
       kind,
@@ -1256,6 +1272,7 @@ export async function validateRecords(
           documentReader(root),
           callers,
           deferrals,
+          behaviorRows,
         ),
       planStructure,
       (name, text) =>

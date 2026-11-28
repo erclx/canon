@@ -62,7 +62,7 @@ Every `- Suggested:` line takes senior judgment, picking the best option in one 
 - Write `## Verification` as one bullet per outcome naming the test or command that proves it, with a grep bullet per `## Verbatim` block of settled wording
 - Write `## Review focus` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
 
-A plan citing a `canon/design/` group under `## Design references` lists each row of that group in the design record's `## Behavior` table as a `## Verification` outcome, or names why the row is out of scope.
+A plan citing a `canon/design/` group under `## Design references` names each row of that group in the design record's `## Behavior` table under `## Behavior rows`, as built here with its check or out with its reason.
 
 Cite on each question's `- Evidence:` line the Step 2 command or file its claim came from, never one carried in from the task file, which records what someone once read rather than what the tree holds.
 

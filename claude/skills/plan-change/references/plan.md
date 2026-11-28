@@ -91,6 +91,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Verbatim`          | settled wording that lands unchanged in a file, one H3 per block            | When wording is settled                           |
 | `## Deferred`          | each piece of scope left for a later row, under its filed task's stem       | When the plan leaves scope for a later row        |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
+| `## Behavior rows`     | each Behavior row of a cited design group, built here or ruled out          | When a cited group has rows in the design record  |
 | `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                     |
 | `## Verification`      | the test or command that proves each outcome                                | Always                                            |
 | `## Risks`             | conflicts, coupling, and the tricky spots                                   | Always                                            |
@@ -265,6 +266,17 @@ A worker redraws a board frame its build makes untrue when the diff decides the 
 
 - Hold the folder in `## Constraints`, naming the row that owns its redraw, and cite it `built against` if the build still reads it
 - Name every reference the change makes untrue that the planner can see, since the worker's own check is the backstop rather than the list
+
+### Behavior rows
+
+A design group's settled interactions live in the design record's `## Behavior` table, where no frame shows them. A plan citing that group under `## Design references` names each of its rows here, so a row reaches the build or is ruled out on the page.
+
+- Write a row the change builds as `<row text>: here, <the check that proves it>`
+- Write a row the change leaves as `<row text>: out, <why>`
+- Copy the row text from the record's Behavior cell. A bold label and a trailing period are dropped before the two are compared.
+- Leave the section out when no cited group has rows
+
+`canon records validate plans` reports `behavior-unstated` for a row of a cited group no bullet names, and for one marked with nothing after its mark. It skips the check in a project with no design record.
 
 ### Reference images
 
@@ -463,6 +475,11 @@ Add as <where> in `<path/to/file>`, after <anchor>.
 
 - `canon/design/<surface>/`: built against, <the surface it governs and what stays true>
 - `canon/design/<surface>/`: redrawn, <the surface it governs and what changes>
+
+## Behavior rows
+
+- <row text>: here, <the check that proves it>
+- <row text>: out, <why this row stays out>
 
 ## Reference images
 

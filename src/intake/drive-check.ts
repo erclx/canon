@@ -27,8 +27,13 @@ import {
   readAppTable,
 } from '@/config/app'
 import { requirementsRel } from '@/context/requirements'
-import { parseSectionTables } from '@/design/parse'
-import { DESIGN_DOCUMENT } from '@/design/regen'
+import {
+  type BehaviorRow,
+  normalizeBehaviorText,
+  normalizeEntryText as normalizeGoal,
+  normalizeSurface,
+  readBehaviorRows,
+} from '@/design/behavior'
 import { bodyLines } from '@/markdown/scan'
 
 /** The record a drive leaves in its intake folder, which this check reads. */
@@ -133,12 +138,6 @@ interface DriveBehavior {
   readonly reason?: string
 }
 
-/** One row of the design record's `## Behavior` table. */
-export interface BehaviorRow {
-  readonly surface: string
-  readonly behavior: string
-}
-
 interface DriveScript {
   readonly script: string
   readonly persona: string
@@ -164,20 +163,6 @@ function refuse(
   detail: readonly string[] = [],
 ): DriveRefused {
   return { ok: false, reason, message, detail }
-}
-
-/**
- * A goal as both sides compare it: a leading bold label and a trailing period
- * dropped, and whitespace collapsed. The text is the identity, since requirements
- * records carry no goal ids.
- */
-function normalizeGoal(text: string): string {
-  return text
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^\*\*[^*]+\*\*\s*/, '')
-    .replace(/\.$/, '')
-    .trim()
 }
 
 /**
@@ -362,29 +347,8 @@ function parseScripts(scripts: unknown): DriveScript[] | string {
   return runs
 }
 
-function normalizeSurface(text: string): string {
-  return text.replace(/`/g, '').trim()
-}
-
-/**
- * Every row of every table under the design record's `## Behavior`, with the
- * Surface cell's code span dropped and the Behavior cell normalized the way a
- * goal is. A project with no record, or a record with no section, has no rows.
- */
-export function readBehaviorRows(root: string): BehaviorRow[] {
-  const path = join(root, DESIGN_DOCUMENT)
-  if (!existsSync(path)) return []
-  return parseSectionTables(path, 'Behavior')
-    .flat()
-    .map((row) => ({
-      surface: normalizeSurface(row.Surface?.value ?? ''),
-      behavior: normalizeGoal(row.Behavior?.value ?? ''),
-    }))
-    .filter((row) => row.surface !== '' && row.behavior !== '')
-}
-
 function behaviorKey(surface: string, behavior: string): string {
-  return `${normalizeSurface(surface)}: ${normalizeGoal(behavior)}`
+  return `${normalizeSurface(surface)}: ${normalizeBehaviorText(behavior)}`
 }
 
 /** Each Behavior row or entry that fails, read the three ways a goal fails. */
