@@ -84,10 +84,11 @@ A page set on `00-current` or `00-next` is one group at x 0, in a drive and a st
 
 ### A row that outgrows the page
 
-A composite capture accepts 16,384px across, so a row of groups wraps before it can pass that.
+A composite capture accepts 16,384px on both axes, so a row of groups wraps before it can pass that across, and a page continues before it can pass it down.
 
 - Wrap the row once the next group's right edge would pass 16,000px, measured from the page's draw widths, so a project drawing wider than the fallbacks wraps sooner than a fixed count would
-- Start the wrapped row 400px below the lowest bottom edge of the row above, at the first group's x, keeping the round's arm order left to right then down
+- Start the wrapped row 400px below the lowest bottom edge of the row above, at the x the row above started, so on a topic page at the first arm's x and not the current set's, in the round's arm order
+- Continue a lone round that wraps past 16,000px tall on `<page>-2` at a row boundary, per `### A drive's topic page`
 - Stop at 16,000px rather than 16,384px, since a device body draws past its frame and the margin absorbs it without a per-device sum
 
 ### A pick round
