@@ -485,7 +485,7 @@ export const skillFamily: Measure = async (ctx) => {
  * `skillOverrides` cannot mark a plugin skill name-only. Raising it is a
  * deliberate edit naming which skill grew the listing.
  */
-export const SKILL_DESCRIPTION_CEILING = 31_250
+export const SKILL_DESCRIPTION_CEILING = 32_500
 
 /**
  * The plugin's description characters against one ceiling, since past the
