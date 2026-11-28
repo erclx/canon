@@ -77,6 +77,7 @@ A Wrangler config declaring `env.staging` deploys staging first in the same run.
 - Staging runs steps 2 through 7 with `--env staging` against `STAGING_HEALTH_URL`, and production runs them only after staging's smoke check passes.
 - A failed staging smoke check rolls staging back to its own recorded version and leaves production undeployed.
 - A config without `env.staging` runs no staging step and never reads `STAGING_HEALTH_URL`.
+- A JSON config the script cannot parse fails the read with an error in both workflows, since a guess would migrate a database against the wrong environment.
 
 ### Dry run
 
@@ -138,7 +139,7 @@ A Worker project fills its values in `deploy-worker.yml` and sets its token's sc
 
 - Set `HEALTH_URL` to the full URL of a route answering 2xx only when the Worker is healthy.
 - Set `STAGING_HEALTH_URL` the same way for staging when the config declares `env.staging`, and leave the placeholder otherwise.
-- Widen the `paths:` filter the same way as the Pages one, keeping `migrations/**` and `wrangler.*`.
+- Widen both `paths:` filters, under `push` and `pull_request`, the same way as the Pages one, keeping `migrations/**` and `wrangler.*` in each.
 
 ## Re-sync
 

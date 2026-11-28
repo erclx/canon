@@ -1,13 +1,14 @@
 name: Deploy Worker
 # canon-no-seed: a stack-specific deploy workflow with no root counterpart by design, parameterized per project on sync rather than mirrored from one.
 
+# Fill in this project's own deploy inputs in both `paths:` lists below. Keep the
+# migrations folder and the Wrangler config in each, so a schema or binding change
+# deploys on a push and compiles on a pull request too.
 on:
   push:
     branches:
       - main
     paths:
-      # Fill in this project's own deploy inputs. Keep the migrations folder
-      # and the Wrangler config, so a schema or binding change deploys too.
       - 'src/**'
       - 'migrations/**'
       - 'wrangler.*'
