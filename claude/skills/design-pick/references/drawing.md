@@ -88,7 +88,17 @@ A composite capture accepts 16,384px on both axes, so a row of groups wraps befo
 
 - Wrap the row once the next group's right edge would pass 16,000px, measured from the page's draw widths, so a project drawing wider than the fallbacks wraps sooner than a fixed count would
 - Start the wrapped row 400px below the lowest bottom edge of the row above, at the x the row above started, so on a topic page at the first arm's x and not the current set's, in the round's arm order
-- Continue a lone round that wraps past 16,000px tall on `<page>-2` at a row boundary, per `### A drive's topic page
+- Continue a lone round that wraps past 16,000px tall on `<page>-2` at a row boundary, per `### A drive's topic page`
+- Stop at 16,000px rather than 16,384px, since a device body draws past its frame and the margin absorbs it without a per-device sum
+
+### A pick round
+
+A round draws each arm as one group, in arm order from the left, so the operator reads across for the comparison and down for the page.
+
+- Start every arm's group at the same y, so a section reads across all the arms on one line
+- Give a later round its own page, as `## Pages` states, rather than a row on this one
+
+### A drive's topic page
 
 A topic page opens with the section as shipped and puts each round of options to its right. An intake item's page takes the same layout, whether the pass or a later pick draws on it.
 
@@ -117,12 +127,13 @@ A frame's name carries its width in pixels, so a reader finds the phone frame by
 | A drive's option          | `<section>-<arm>-<px>`   |
 | A drive's round caption   | `<section>-caption-<nn>` |
 | An intake item's option   | `<topic>-<arm>-<px>`     |
+| An intake item's caption  | `<topic>-caption-<nn>`   |
 
 The parts of a drive's names come from the drive itself.
 
 - `<section>` is the kebab name of the page section, the same one the drive's `evidence/<section>/` and `evidence/mocks/<section>/` take
-- `<arm>` is a short kebab name for what the option does, such as `pill-row`, unique on its page across every round
-- `<nn>` on a caption is the number of the finding its round asks, with `-<k>` added from the second round on one finding, so every caption on a page keeps a name of its own
+- `<arm>` is a short kebab name for what the option does, such as `pill-row`, unique on its page across every round, and never `caption`, which a caption frame takes
+- `<nn>` on a caption is the number of the finding or item its round asks, with `-<k>` added from the second round on one finding, so every caption on a page keeps a name of its own
 - Write the label drawn inside a frame from the frame's name when the frame is written, and rewrite it in the same step as any `frame rename`, since the label is content the rename leaves alone
 
 `design-pick` reads its selection on `arm-<id>-<px>`, so a pick round keeps that form on every page but a joined one, where it takes the option's name above.

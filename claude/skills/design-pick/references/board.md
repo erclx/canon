@@ -75,6 +75,7 @@ Read `frameboard selection --root <board> --json` when the operator's answer poi
 | An `element` inside a picked frame                                | A correction the loop carries by its `index` and `hash`  |
 | Several entries in `frames`                                       | Ask which one rather than taking the first               |
 | Empty `frames`, another project, or a page the run never used     | No answer, so ask again rather than guess                |
+| A frame whose name carries `-caption-`                            | No answer, since a caption holds no option to pick       |
 | `tabs: 0`, or a `server-not-running` refusal                      | No board is open, so hand the address over and ask again |
 
 A joined page, being a drive's topic page or an intake item's, counts as one the run used. Every round shares it, so read a frame's `<arm>` as the arm, and one in an earlier round's row as a revert.
