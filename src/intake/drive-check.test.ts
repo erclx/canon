@@ -202,7 +202,7 @@ describe('readDrawn', () => {
     expect(readDrawn(log).undrawn).toEqual([])
   })
 
-  it('should ignore a reference shot and a finding with no decision', () => {
+  it('should ignore a reference shot and a passed goal', () => {
     const log = [
       '## ref-01. The operator Figma panel',
       '',
@@ -216,6 +216,51 @@ describe('readDrawn', () => {
     ].join('\n')
 
     expect(readDrawn(log).undrawn).toEqual([])
+  })
+
+  it('should list an undecided finding that carries no Drawn field', () => {
+    const log = [
+      '## 06. Export button sits below the fold',
+      '',
+      '`minor` · goal · designer',
+      '',
+      '- **Saw:** the button starts at y 912 on a 900px viewport',
+    ].join('\n')
+
+    expect(readDrawn(log).undrawn).toEqual([
+      '06. Export button sits below the fold',
+    ])
+  })
+
+  it('should pass an undecided finding whose drawing cites a path', () => {
+    const log = [
+      '## 06. Export button sits below the fold',
+      '',
+      '`minor` · goal · designer',
+      '',
+      '- **Drawn:** `evidence/export/06-options.png`',
+    ].join('\n')
+
+    expect(readDrawn(log)).toMatchObject({
+      undrawn: [],
+      paths: ['evidence/export/06-options.png'],
+    })
+  })
+
+  it('should list an undecided finding skipped with a reason as skipped', () => {
+    const log = [
+      '## 07. Export prints no record',
+      '',
+      '`minor` · script · developer',
+      '',
+      '- **Drawn:** skipped, the fix changes only the `--json` record',
+    ].join('\n')
+
+    expect(readDrawn(log)).toMatchObject({
+      undrawn: [],
+      paths: [],
+      skipped: [{ finding: 7, heading: '07. Export prints no record' }],
+    })
   })
 })
 

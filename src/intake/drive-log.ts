@@ -8,11 +8,11 @@ export const EVIDENCE_DIR = 'evidence'
 export const DRIVE_LOG = join(EVIDENCE_DIR, 'drive-log.md')
 
 export interface DrawnReading {
-  /** Each decided finding's heading, as `<nn>. <title>`, with nothing drawn. */
+  /** Each finding's heading, as `<nn>. <title>`, with nothing drawn, decided or not. */
   readonly undrawn: readonly string[]
   /** Every path a `Drawn` field cites, for the evidence tests. */
   readonly paths: readonly string[]
-  /** Each decided finding whose `Drawn` field skips with a reason. */
+  /** Each finding whose `Drawn` field skips with a reason. */
   readonly skipped: readonly SkippedFinding[]
   /** Whether the `Board` setup row holds a value, which a drive that drew a board always writes. */
   readonly board: boolean
@@ -30,11 +30,23 @@ const DECISION_LABEL = 'Decision (operator)'
 const DRAWN_LABEL = 'Drawn'
 const BOARD_ROW = /^\|\s*Board\s*\|(.*?)\|?\s*$/
 const SEE = /^see\s+(\d+)/i
+/** The meta line of a passed goal, script, or Behavior row, which owes no drawing. */
+const PASS_META = /^`pass`/
 
 /**
- * Reads the drive log's numbered findings for a decision with nothing drawn. A
- * `Drawn` field passes when it cites a path in a code span or reads `skipped,
- * <reason>`, and `see <nn>` was drawn under the finding it names.
+ * The paths a `Drawn` value cites in code spans. A skip cites none, since its
+ * reason may backtick a term that is no path.
+ */
+export function citedDrawings(value: string): string[] {
+  if (/^skipped\b/i.test(value.trim())) return []
+  return [...value.matchAll(/`([^`]+)`/g)].map((match) => match[1])
+}
+
+/**
+ * Reads the drive log's numbered findings, decided or not, for one with nothing
+ * drawn. A `Drawn` field passes when it cites a path in a code span or reads
+ * `skipped, <reason>`, a decision reading `see <nn>` was drawn under the finding
+ * it names, and a passed entry owes nothing.
  */
 export function readDrawn(source: string): DrawnReading {
   const undrawn: string[] = []
@@ -44,9 +56,10 @@ export function readDrawn(source: string): DrawnReading {
   let finding: string | undefined
   let decision: string | undefined
   let drawn: string | undefined
+  let passed = false
 
   const close = () => {
-    if (finding !== undefined && decision && !SEE.test(decision)) {
+    if (finding !== undefined && !passed && !SEE.test(decision ?? '')) {
       const field = drawn ?? ''
       if (/^skipped\b/i.test(field)) {
         if (/^skipped\s*,\s*\S/i.test(field)) {
@@ -58,12 +71,13 @@ export function readDrawn(source: string): DrawnReading {
           undrawn.push(finding)
         }
       } else {
-        const cited = [...field.matchAll(/`([^`]+)`/g)].map((match) => match[1])
+        const cited = citedDrawings(field)
         paths.push(...cited)
         if (cited.length === 0) undrawn.push(finding)
       }
     }
     finding = decision = drawn = undefined
+    passed = false
   }
 
   for (const line of bodyLines(source)) {
@@ -75,6 +89,7 @@ export function readDrawn(source: string): DrawnReading {
     }
     const row = BOARD_ROW.exec(line.text)
     if (row && row[1].trim() !== '') board = true
+    if (finding !== undefined && PASS_META.test(line.text)) passed = true
     const field = LOG_FIELD.exec(line.text)
     if (finding === undefined || !field) continue
     if (field[1] === DECISION_LABEL) decision = field[2].trim()
