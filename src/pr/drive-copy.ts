@@ -416,8 +416,25 @@ export interface PassServer {
 }
 
 interface ServerRecord extends PassServer {
-  /** The leader's start time as `ps` prints it, so a recycled pid is never signalled. */
+  /**
+   * The leader's start, so a recycled pid is never signalled: its start ticks
+   * from `/proc` as digits alone, or the time `ps` prints where `/proc` is
+   * absent and in a record written before the ticks.
+   */
   readonly started?: string
+}
+
+export type StatRead =
+  | { readonly kind: 'line'; readonly line: string }
+  /** `/proc` is mounted and the pid has no entry, so its leader has exited. */
+  | { readonly kind: 'gone' }
+  /** No `/proc` on this machine, as on macOS. */
+  | { readonly kind: 'absent' }
+
+/** How a pass server's leader start is read, passed in so a test fixes each reading. */
+export interface StartReaders {
+  readonly stat: (pid: number) => StatRead
+  readonly lstart: (pid: number) => Promise<string | undefined>
 }
 
 export type PassStart =
@@ -449,6 +466,7 @@ export interface PassStartInput {
   readonly basePort: number
   readonly worktreeOffset: number
   readonly timeoutMs?: number
+  readonly readers?: StartReaders
 }
 
 function recordPath(copyRoot: string): string {
@@ -472,13 +490,67 @@ function signalGroup(pid: number, signal: NodeJS.Signals): void {
   }
 }
 
-async function leaderStart(pid: number): Promise<string | undefined> {
+function readStat(pid: number): StatRead {
+  if (!existsSync('/proc/self/stat')) return { kind: 'absent' }
+  try {
+    return { kind: 'line', line: readFileSync(`/proc/${pid}/stat`, 'utf8') }
+  } catch {
+    return { kind: 'gone' }
+  }
+}
+
+async function readLstart(pid: number): Promise<string | undefined> {
   const result = await execa('ps', ['-o', 'lstart=', '-p', String(pid)], {
     stdin: 'ignore',
     reject: false,
   })
   const text = result.stdout.trim()
   return result.exitCode === 0 && text !== '' ? text : undefined
+}
+
+const SYSTEM_READERS: StartReaders = { stat: readStat, lstart: readLstart }
+
+const TICKS = /^\d+$/
+
+/**
+ * Field 22 of a stat line, the start in clock ticks since boot. Field 2 is the
+ * command name in parentheses and may hold spaces or a `)`, so the read starts
+ * after the last `)`, where field 3 is the first.
+ */
+function startTicks(line: string): string | undefined {
+  const ticks = line
+    .slice(line.lastIndexOf(')') + 1)
+    .trim()
+    .split(/\s+/)[19]
+  return ticks !== undefined && TICKS.test(ticks) ? ticks : undefined
+}
+
+async function leaderStart(
+  pid: number,
+  readers: StartReaders,
+): Promise<string | undefined> {
+  const stat = readers.stat(pid)
+  if (stat.kind === 'line') return startTicks(stat.line)
+  return stat.kind === 'absent' ? readers.lstart(pid) : undefined
+}
+
+/**
+ * An exited leader reads as ours, since the kernel reuses no pid a live group
+ * holds. A ticks record where `/proc` is absent has nothing to match, so not.
+ */
+async function isRecordedLeader(
+  pid: number,
+  started: string | undefined,
+  readers: StartReaders,
+): Promise<boolean> {
+  if (started === undefined) return true
+  if (!TICKS.test(started)) {
+    const leader = await readers.lstart(pid)
+    return leader === undefined || leader === started
+  }
+  const stat = readers.stat(pid)
+  if (stat.kind === 'absent') return false
+  return stat.kind === 'gone' || startTicks(stat.line) === started
 }
 
 /** Ends every process in the group, TERM first and KILL after the grace, and reports whether none is left. */
@@ -609,7 +681,7 @@ export async function startPassPreview(
     }
   }
   const server: PassServer = { pid, port, url, log }
-  const started = await leaderStart(pid)
+  const started = await leaderStart(pid, input.readers ?? SYSTEM_READERS)
   writeFileSync(
     record,
     `${JSON.stringify({ ...server, ...(started === undefined ? {} : { started }) })}\n`,
@@ -651,18 +723,17 @@ export async function startPassPreview(
  * process group, and forgets it. A record whose group is gone, or whose pid now
  * leads another process, reads as not running and is never signalled.
  */
-export async function stopPassPreview(copyRoot: string): Promise<PassStop> {
+export async function stopPassPreview(
+  copyRoot: string,
+  readers: StartReaders = SYSTEM_READERS,
+): Promise<PassStop> {
   const path = recordPath(copyRoot)
   if (!existsSync(path)) return { kind: 'not-running' }
   const record = readServerRecord(path)
-  const leader =
-    record === undefined ? undefined : await leaderStart(record.pid)
   const ours =
     record !== undefined &&
     isGroupAlive(record.pid) &&
-    (record.started === undefined ||
-      leader === undefined ||
-      leader === record.started)
+    (await isRecordedLeader(record.pid, record.started, readers))
   if (!ours) {
     rmSync(path, { force: true })
     return { kind: 'not-running' }
