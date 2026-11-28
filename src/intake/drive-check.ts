@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
-import { basename, isAbsolute, join, normalize } from 'node:path'
+import { basename, join, normalize } from 'node:path'
 import {
   changedSince,
   readWorktreeStatus,
@@ -10,6 +10,7 @@ import {
   DRIVE_LOG,
   type DrawnReading,
   EVIDENCE_DIR,
+  isEvidencePath,
   readDrawn,
 } from '@/intake/drive-log'
 import {
@@ -481,16 +482,6 @@ function unscriptedPairs(
           ),
       )
       .map((persona) => `${script} (${persona})`),
-  )
-}
-
-function isEvidencePath(path: string): boolean {
-  if (isAbsolute(path)) return false
-  const segments = normalize(path).split(/[\\/]/)
-  return (
-    segments[0] === EVIDENCE_DIR &&
-    segments.length > 1 &&
-    !segments.includes('..')
   )
 }
 

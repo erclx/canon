@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { isAbsolute, join, normalize } from 'node:path'
 import { bodyLines } from '@/markdown/scan'
 
 /** The one folder inside an intake folder that evidence may live in. */
@@ -6,6 +6,17 @@ export const EVIDENCE_DIR = 'evidence'
 
 /** The log a person reads, which the `undrawn` axis parses by its labels. */
 export const DRIVE_LOG = join(EVIDENCE_DIR, 'drive-log.md')
+
+/** A relative path inside the folder's `evidence/`, never one climbing out of it. */
+export function isEvidencePath(path: string): boolean {
+  if (isAbsolute(path)) return false
+  const segments = normalize(path).split(/[\\/]/)
+  return (
+    segments[0] === EVIDENCE_DIR &&
+    segments.length > 1 &&
+    !segments.includes('..')
+  )
+}
 
 export interface DrawnReading {
   /** Each finding's heading, as `<nn>. <title>`, with nothing drawn, decided or not. */
